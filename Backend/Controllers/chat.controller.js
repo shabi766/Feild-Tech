@@ -109,3 +109,37 @@ export const searchChats = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 };
+
+
+export const deleteMessage = async (req, res) => {
+    try {
+        const { messageId } = req.params;
+
+        // Find the chat that contains this message
+        const chat = await Chat.findOne({ "messages._id": messageId });
+        if (!chat) return res.status(404).json({ success: false, message: "Message not found" });
+
+        // Remove the message from the chat
+        chat.messages = chat.messages.filter(msg => msg._id.toString() !== messageId);
+        await chat.save();
+
+        res.json({ success: true, message: "Message deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting message:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+export const deleteChat = async (req, res) => {
+    try {
+        const { chatId } = req.params;
+        const chat = await Chat.findById(chatId);
+        if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
+
+        await Chat.findByIdAndDelete(chatId);
+
+        res.json({ success: true, message: "Chat deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting chat:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};

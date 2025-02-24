@@ -6,11 +6,12 @@ import socket from "../components/shared/socket";
 export const ChatContext = createContext();
 
 export const ChatProvider = ({ children }) => {
-    const [chats, setChats] = useState([]); 
-    const [selectedChat, setSelectedChat] = useState(null);
-    const [messages, setMessages] = useState([]); 
-    const [currentUser, setCurrentUser] = useState(null);
-    const [isTyping, setIsTyping] = useState(false);
+    const [chats, setChats] = useState([]); // Store user chats
+    const [selectedChat, setSelectedChat] = useState(null); // Store selected chat
+    const [messages, setMessages] = useState([]); // Store messages of selected chat
+    const [currentUser, setCurrentUser] = useState(null); // Store logged-in user
+    const [isTyping, setIsTyping] = useState(false); // Track typing status
+    const [searchResults, setSearchResults] = useState([]); // Store searched users
 
     /** ✅ Fetch Logged-in User */
     useEffect(() => {
@@ -53,74 +54,115 @@ export const ChatProvider = ({ children }) => {
         };
         fetchMessages();
 
+        // Join chat room with socket
         socket.emit("join_chat", selectedChat._id);
 
         socket.on("new_message", (message) => {
-            if (message.chatId === selectedChat?._id) {
+            if (message.chatId === selectedChat._id) {
                 setMessages((prev) => [...prev, message]);
             }
         });
 
-        socket.on("typing", () => setIsTyping(true));
-        socket.on("stop_typing", () => setIsTyping(false));
-
         return () => {
             socket.off("new_message");
-            socket.off("typing");
-            socket.off("stop_typing");
         };
     }, [selectedChat]);
 
-    /** ✅ Handle Sending Message */
-    const sendMessage = async (content) => {
-        if (!selectedChat || !content.trim()) return;
-
+    /** ✅ Handle Searching Users */
+    const searchUsers = async (query) => {
         try {
-            const { data } = await axios.post(`${CHAT_API_END_POINT}/send`, {
-                chatId: selectedChat._id,
-                message: content,
-                type: "text",
-                fileUrl: null,
-            }, { withCredentials: true });
-
-            setMessages((prev) => [...prev, data.message]); // Show message immediately
-            socket.emit("send_message", data.message);
+            const { data } = await axios.get(`${USER_API_END_POINT}/search-users?query=${query}`, { withCredentials: true });
+            setSearchResults(data || []);
         } catch (error) {
-            console.error("Error sending message:", error);
+            console.error("Error searching users:", error);
         }
     };
 
-    /** ✅ Start Chat with a New User */
+    /** ✅ Handle Starting a New Chat */
     const startChatWithUser = async (userId) => {
         try {
             const { data } = await axios.post(`${CHAT_API_END_POINT}/create`, { userId }, { withCredentials: true });
 
-            if (!chats.some(chat => chat._id === data.chat._id)) {
-                setChats((prev) => [...prev, data.chat]);
-            }
+            setChats((prev) => {
+                const chatExists = prev.some(chat => chat._id === data.chat._id);
+                return chatExists ? prev : [...prev, data.chat];
+            });
 
             setSelectedChat(data.chat);
         } catch (error) {
             console.error("Error starting chat:", error);
         }
     };
+    const sendMessage = async (content, type = "text", fileUrl = null) => {
+        if (!selectedChat) {
+            console.error("❌ Cannot send message: No chat selected.");
+            return;
+        }
+    
+        try {
+            const { data } = await axios.post(`${CHAT_API_END_POINT}/send`, {
+                chatId: selectedChat._id,
+                message: content,
+                type,
+                fileUrl,
+            }, { withCredentials: true });
+    
+            // ✅ Update state with new message
+            setMessages((prev) => [...prev, data.message]);
+    
+            // ✅ Emit event for real-time updates
+            socket.emit("send_message", data.message);
+        } catch (error) {
+            console.error("❌ Error sending message:", error);
+        }
+    };
+    const deleteMessage = async (messageId) => {
+        try {
+            await axios.delete(`${CHAT_API_END_POINT}/message/${messageId}`, { withCredentials: true });
+
+            // Remove the deleted message from state
+            setMessages(prevMessages => prevMessages.filter(msg => msg._id !== messageId));
+        } catch (error) {
+            console.error("Error deleting message:", error);
+        }
+    };
+
+    /** ✅ Delete an Entire Chat */
+    const deleteChat = async (chatId) => {
+        try {
+            await axios.delete(`${CHAT_API_END_POINT}/chat/${chatId}`, { withCredentials: true });
+
+            // Remove the deleted chat from state
+            setChats(prevChats => prevChats.filter(chat => chat._id !== chatId));
+
+            // Reset selected chat if it was deleted
+            if (selectedChat?._id === chatId) {
+                setSelectedChat(null);
+                setMessages([]);
+            }
+        } catch (error) {
+            console.error("Error deleting chat:", error);
+        }
+    };
 
     return (
         <ChatContext.Provider value={{
             chats,
-            setChats, 
+            fetchChats,
             selectedChat,
             setSelectedChat,
             messages,
-            setMessages,
-            currentUser,
-            isTyping,
             sendMessage,
+            currentUser,
+            searchResults,
+            searchUsers,
             startChatWithUser,
+            deleteMessage,
+            deleteChat
         }}>
             {children}
         </ChatContext.Provider>
     );
 };
 
-export default ChatProvider;
+export default ChatContext;

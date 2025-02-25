@@ -89,7 +89,7 @@ export const sendMessage = async (req, res) => {
 export const getChats = async (req, res) => {
     try {
         const chats = await Chat.find({ participants: req.user._id })
-            .populate("participants", "fullname profile.profilePhoto")
+            .populate("participants", "fullname profile.profilePhoto status lastSeen")
             .sort({ updatedAt: -1 });
 
         res.json({ chats });
@@ -100,7 +100,7 @@ export const getChats = async (req, res) => {
 
 export const getMessages = async (req, res) => {
     try {
-        const chat = await Chat.findById(req.params.chatId).populate("messages.sender", "fullname profilePhoto");
+        const chat = await Chat.findById(req.params.chatId).populate("messages.sender", "fullname profilePhoto status lastSeen");
         if (!chat) return res.status(404).json({ message: "Chat not found" });
 
         res.json({ messages: chat.messages });
@@ -161,25 +161,31 @@ export const deleteChat = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error" });
     }
 };
-export const markMessagesAsSeen = async (req, res) => {
+export const markMessagesAsRead = async (req, res) => {
     try {
-        const { chatId } = req.params;
-        const userId = req.user._id;
+        const { chatId } = req.body;
+        const userId = req.user?._id;
+
+        if (!chatId) {
+            return res.status(400).json({ message: "Chat ID is required", success: false });
+        }
 
         const chat = await Chat.findById(chatId);
-        if (!chat) return res.status(404).json({ message: "Chat not found" });
+        if (!chat) {
+            return res.status(404).json({ message: "Chat not found", success: false });
+        }
 
-        chat.messages.forEach((msg) => {
-            if (!msg.seenBy.includes(userId)) msg.seenBy.push(userId);
+        chat.messages.forEach((message) => {
+            if (message.sender.toString() !== userId.toString()) {
+                message.isRead = true;
+            }
         });
 
         await chat.save();
-
-        req.io.to(chatId).emit("messages_seen", { chatId, userId });
-
-        res.status(200).json({ success: true, message: "Messages marked as seen" });
+        
+        res.status(200).json({ success: true, message: "Messages marked as read" });
     } catch (error) {
-        console.error("Error marking messages as seen:", error);
-        res.status(500).json({ success: false, error: error.message });
+        console.error("Error marking messages as read:", error);
+        res.status(500).json({ success: false, message: "Server error" });
     }
 };

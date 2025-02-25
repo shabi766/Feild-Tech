@@ -126,7 +126,10 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
     try {
-        return res.status(200).clearCookie("token").json({ // Use clearCookie for better clarity
+        const userId = req.user._id;
+        await User.findByIdAndUpdate(userId, { status: "offline", lastSeen: new Date() }); // ✅ Set lastSeen when logging out
+
+        return res.status(200).clearCookie("token").json({
             message: "Logged out successfully.",
             success: true,
         });
@@ -135,7 +138,7 @@ export const logout = async (req, res) => {
         return res.status(500).json({
             message: "An error occurred during logout.",
             success: false,
-            error: error.message, // Send the error message to the client
+            error: error.message,
         });
     }
 };

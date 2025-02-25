@@ -1,6 +1,7 @@
 import { Chat } from "../Models/chat.model.js";
 import { User } from "../Models/user.model.js";
 import mongoose from "mongoose";
+import {io} from "../index.js"
 
 export const createChat = async (req, res) => {
     try {
@@ -42,11 +43,12 @@ export const sendMessage = async (req, res) => {
 
         console.log("📩 Received message:", { chatId, message, type, fileUrl });
 
-        const chat = await Chat.findById(chatId);
+        const chat = await Chat.findById(chatId).populate("participants", "fullname profile.profilePhoto lastSeen");
         if (!chat) {
             return res.status(404).json({ message: "Chat not found", success: false });
         }
 
+        // ✅ Create new message object
         const newMessage = {
             sender: userId,
             content: message,
@@ -57,9 +59,25 @@ export const sendMessage = async (req, res) => {
         chat.messages.push(newMessage);
         await chat.save();
 
+        // ✅ Populate sender details
         const populatedChat = await Chat.findById(chatId).populate("messages.sender", "fullname profile.profilePhoto");
 
-        res.json({ message: populatedChat.messages.pop() }); // Return the last added message
+        const lastMessage = populatedChat.messages.pop();
+
+        // ✅ Mark as read if recipient is online
+        const recipient = chat.participants.find(user => user._id.toString() !== userId.toString());
+        if (recipient) {
+            const isRecipientOnline = io.sockets.adapter.rooms.has(recipient._id.toString());
+            if (isRecipientOnline) {
+                lastMessage.isRead = true;
+                await chat.save();
+            }
+        }
+
+        // ✅ Emit message to all participants
+        io.to(chatId).emit("new_message", lastMessage);
+
+        res.json({ message: lastMessage });
     } catch (error) {
         console.error("❌ Error in sendMessage:", error);
         res.status(500).json({ message: "Server error", success: false });
@@ -71,7 +89,7 @@ export const sendMessage = async (req, res) => {
 export const getChats = async (req, res) => {
     try {
         const chats = await Chat.find({ participants: req.user._id })
-            .populate("participants", "fullname profilePhoto")
+            .populate("participants", "fullname profile.profilePhoto")
             .sort({ updatedAt: -1 });
 
         res.json({ chats });
@@ -141,5 +159,27 @@ export const deleteChat = async (req, res) => {
     } catch (error) {
         console.error("Error deleting chat:", error);
         res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+export const markMessagesAsSeen = async (req, res) => {
+    try {
+        const { chatId } = req.params;
+        const userId = req.user._id;
+
+        const chat = await Chat.findById(chatId);
+        if (!chat) return res.status(404).json({ message: "Chat not found" });
+
+        chat.messages.forEach((msg) => {
+            if (!msg.seenBy.includes(userId)) msg.seenBy.push(userId);
+        });
+
+        await chat.save();
+
+        req.io.to(chatId).emit("messages_seen", { chatId, userId });
+
+        res.status(200).json({ success: true, message: "Messages marked as seen" });
+    } catch (error) {
+        console.error("Error marking messages as seen:", error);
+        res.status(500).json({ success: false, error: error.message });
     }
 };

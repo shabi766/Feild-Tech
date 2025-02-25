@@ -1,10 +1,10 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import useChatSearch from "@/components/Hooks/useChatSearch"; 
 import { ChatContext } from "@/context/ChatContext";
-import { Trash2 } from "lucide-react"; // Delete icon
+import { Trash2, Circle, Clock, UserCheck } from "lucide-react"; // Delete icon
 
 const ChatSidebar = () => {
-    const { chats, setSelectedChat, startChatWithUser, deleteChat, currentUser } = useContext(ChatContext);
+    const { chats, setSelectedChat, startChatWithUser, deleteChat, currentUser, userStatus } = useContext(ChatContext);
     const [searchQuery, setSearchQuery] = useState("");
     const { users, loading } = useChatSearch(searchQuery);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -72,12 +72,24 @@ const ChatSidebar = () => {
                     return (
                         <li key={chat._id} 
                             className="p-2 flex items-center gap-3 justify-between cursor-pointer hover:bg-gray-100 rounded-md">
-                            <div className="flex items-center">
+                                 {/* ✅ User Info & Status */}
+                            <div className="flex items-center" onClick={() => setSelectedChat(chat)}>
                                 <img src={recipient?.profile?.profilePhoto || "/default-avatar.png"} 
                                      alt={recipient?.fullname || "User"} 
-                                     className="w-8 h-8 rounded-full" />
-                                <span onClick={() => setSelectedChat(chat)} className="ml-2">{recipient?.fullname || "Unknown User"}</span>
+                                     className="w-8 h-8 rounded-full border border-gray-300" />
+                                
+                                <div className="ml-2">
+                                    <span className="font-semibold">{recipient?.fullname || "Unknown User"}</span>
+                                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                                        {userStatus[recipient?._id] === "online" ? 
+                                            <Circle className="text-green-500 w-2 h-2" /> : 
+                                            <Circle className="text-gray-400 w-2 h-2" />
+                                        }
+                                        {userStatus[recipient?._id] || "Offline"}
+                                    </p> 
+                                </div>
                             </div>
+                           
                             
                             {/* ✅ Delete Chat Button */}
                             <button 

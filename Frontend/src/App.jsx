@@ -88,7 +88,7 @@ const appRouter = createBrowserRouter([
   },
   {
     path : "/chat",
-    element : <ProtectedRoute><Chat/></ProtectedRoute>
+    element : <Chat/>
   },
   {
     path: "/admin/companies",

@@ -38,6 +38,8 @@ const userSchema = new mongoose.Schema({
             default:""
         }
     },
+    status: { type: String, enum: ["online", "away", "offline"], default: "offline" },
+    lastSeen: { type: Date, default: Date.now }, // ✅ Last Seen Timestamp
     chats: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 },{timestamps:true});
 export const User = mongoose.model('User', userSchema);

@@ -21,10 +21,20 @@ const ChatWindow = () => {
         <div className="w-3/4 p-4 flex flex-col bg-white shadow-md rounded-md">
             {/* ✅ Chat Header */}
             <div className="flex justify-between items-center p-3 bg-indigo-600 text-white rounded-md">
-                <h2 className="text-lg font-semibold">
-                    {selectedChat.participants.find(p => p._id !== currentUser?._id)?.fullname}
-                </h2>
-            </div>
+    <div className="flex items-center gap-3">
+        {/* ✅ Correctly Display the Profile Image */}
+        <img 
+            src={selectedChat?.participants?.find(p => p?._id !== currentUser?._id)?.profile?.profilePhoto || "/default-avatar.png"} 
+            alt="Recipient" 
+            className="w-10 h-10 rounded-full object-cover"
+        />
+        {/* ✅ Correctly Display the Recipient's Name */}
+        <h2 className="text-lg font-semibold">
+            {selectedChat?.participants?.find(p => p?._id !== currentUser?._id)?.fullname}
+        </h2>
+    </div>
+</div>
+
 
             {/* ✅ Messages List */}
             <div className="flex-grow overflow-y-auto p-2 space-y-2" ref={messageListRef}>

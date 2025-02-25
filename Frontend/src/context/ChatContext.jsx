@@ -12,6 +12,8 @@ export const ChatProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null); // Store logged-in user
     const [isTyping, setIsTyping] = useState(false); // Track typing status
     const [searchResults, setSearchResults] = useState([]); // Store searched users
+    const [userStatus, setUserStatus] = useState({}); // ✅ Stores user online status
+    
 
     /** ✅ Fetch Logged-in User */
     useEffect(() => {
@@ -48,6 +50,8 @@ export const ChatProvider = ({ children }) => {
             try {
                 const { data } = await axios.get(`${CHAT_API_END_POINT}/${selectedChat._id}`, { withCredentials: true });
                 setMessages(data?.messages || []);
+                await axios.post(`${CHAT_API_END_POINT}/mark-as-read`, { chatId: selectedChat._id }, { withCredentials: true });
+                socket.emit("read_messages", selectedChat._id);
             } catch (error) {
                 console.error("Error fetching messages:", error);
             }
@@ -93,6 +97,21 @@ export const ChatProvider = ({ children }) => {
             console.error("Error starting chat:", error);
         }
     };
+      /** ✅ Handle Online Status */
+      useEffect(() => {
+        socket.on("user_online", (userId) => {
+            setUserStatus((prev) => ({ ...prev, [userId]: "online" }));
+        });
+
+        socket.on("user_offline", ({ userId, lastSeen }) => {
+            setUserStatus((prev) => ({ ...prev, [userId]: `Last seen ${lastSeen}` }));
+        });
+
+        return () => {
+            socket.off("user_online");
+            socket.off("user_offline");
+        };
+    }, []);
     const sendMessage = async (content, type = "text", fileUrl = null) => {
         if (!selectedChat) {
             console.error("❌ Cannot send message: No chat selected.");
@@ -158,7 +177,9 @@ export const ChatProvider = ({ children }) => {
             searchUsers,
             startChatWithUser,
             deleteMessage,
-            deleteChat
+            deleteChat, 
+            userStatus
+
         }}>
             {children}
         </ChatContext.Provider>

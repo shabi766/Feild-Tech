@@ -6,6 +6,7 @@ const messageSchema = new mongoose.Schema(
         content: { type: String, required: true },
         type: { type: String, enum: ["text", "image", "document"], default: "text" },
         fileUrl: { type: String, default: null },
+        seenBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
     },
     { timestamps: true }
 );

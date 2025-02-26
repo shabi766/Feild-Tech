@@ -36,13 +36,20 @@ const AllTechnicians = () => {
 
   const handleStartChat = async (technician) => {
     try {
-      const chat = await startChatWithUser(technician._id);
-      setSelectedChat(chat); // ✅ Set the selected chat
-      navigate('/chat'); // ✅ Redirect to the chat page
+        const chat = await startChatWithUser(technician._id);
+
+        if (chat) {
+            setSelectedChat(chat);  // ✅ Ensure the selected chat is set
+            navigate(`/chat?chatId=${chat._id}`); // ✅ Pass `chatId` in URL
+        } else {
+            console.error("Chat not created!");
+        }
     } catch (error) {
-      console.error("Error starting chat:", error);
+        console.error("Error starting chat:", error);
     }
-  };
+};
+
+
 
   const handleAddToTalentPool = (technician) => {
     const talentPool = JSON.parse(localStorage.getItem('talentPool') || '[]');

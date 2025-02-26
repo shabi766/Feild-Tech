@@ -1,16 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import Navbar from "../shared/Navbar";
+
 import Footer from "../shared/Footer";
 import ProviderRequests from "./Providercomps/ProviderRequests";
 import ProviderTalentpool from "./Providercomps/ProviderTalentpool";
 import ProviderTechnicians from "./Providercomps/ProviderTechnicians";
 import { CLIENT_API_END_POINT, JOB_API_END_POINT, PROJECT_API_END_POINT } from "../utils/constant";
 
+import { ChatContext } from "@/context/ChatContext";
+import { MessageCircle } from "lucide-react";
+
 const ViewJob = () => {
     const { id } = useParams();
     const [job, setJob] = useState(null);
+    const navigate = useNavigate();
+    const { startChatWithUser, setSelectedChat } = useContext(ChatContext);
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState("Draft");
     const [jobType, setJobType] = useState("part-time");
@@ -52,6 +57,15 @@ const ViewJob = () => {
         fetchJobDetails();
     }, [id]);
 
+    const handleStartChat = async (applicant) => {
+        try {
+            const chat = await startChatWithUser(applicant._id);
+            setSelectedChat(chat);
+            navigate(`/chat?chatId=${chat._id}`);
+        } catch (error) {
+            console.error("Error starting chat:", error);
+        }
+    };
     const renderStatusBar = () => (
         <div className="flex flex-col md:flex-row md:items-center md:justify-between bg-blue-100 p-4 mb-6 rounded-lg shadow-md">
             <div>
@@ -71,24 +85,36 @@ const ViewJob = () => {
 
         return (
             <div className="p-4 bg-green-100 border border-green-400 rounded-lg mb-6 shadow-md">
-                <h3 className="text-xl font-bold text-green-700">Assigned Provider</h3>
-                <div className="flex items-center space-x-4 mt-2">
-                    <img
-                        src={assignedApplicant.profilePhoto || "/default-profile.png"}
-                        alt="Profile"
-                        className="w-12 h-12 rounded-full border border-gray-300 object-cover"
-                    />
-                    <div>
-                        <p className="text-xs text-gray-500">ID: {assignedApplicant._id?.slice(0, 6) || "---"}</p>
-                        <h3 className="text-lg font-semibold text-gray-900">{assignedApplicant.fullname || "---"}</h3>
-                        <p className="text-sm text-gray-600">📞 {assignedApplicant.phoneNumber || "---"}</p>
-                        <p className="text-sm text-gray-600">✉️ {assignedApplicant.email || "---"}</p>
+                <div className="flex items-center justify-between">
+                    {/* ✅ Left Side - Profile & Info */}
+                    <div className="flex items-center space-x-4 cursor-pointer" onClick={() => navigate(`/technicians/${assignedApplicant._id}`)}>
+                        <img
+                            src={assignedApplicant.profilePhoto || "/default-profile.png"}
+                            alt="Profile"
+                            className="w-12 h-12 rounded-full border border-gray-300 object-cover"
+                        />
+                        <div>
+                            <p className="text-xs text-gray-500">ID: {assignedApplicant._id?.slice(0, 6) || "---"}</p>
+                            <h3 className="text-lg font-semibold text-gray-900">{assignedApplicant.fullname || "---"}</h3>
+                            <p className="text-sm text-gray-600">📞 {assignedApplicant.phoneNumber || "---"}</p>
+                            <p className="text-sm text-gray-600">✉️ {assignedApplicant.email || "---"}</p>
+                        </div>
+                    </div>
+
+                    {/* ✅ Right Side - "Assigned" Above Chat Icon */}
+                    <div className="flex flex-col items-center ml-auto">
+                        <h3 className="text-lg font-bold text-green-700 mb-1">Assigned</h3>
+                        <button
+                            onClick={() => handleStartChat(assignedApplicant)}
+                            className="p-2 rounded-full hover:bg-gray-200 transition"
+                        >
+                            <MessageCircle className="w-6 h-6 text-indigo-500 hover:text-indigo-700 transition" />
+                        </button>
                     </div>
                 </div>
             </div>
         );
     };
-
     const renderContent = () => {
         if (mainTab === "Job Details") {
             return (

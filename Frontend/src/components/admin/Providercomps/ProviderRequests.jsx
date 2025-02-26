@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
-import {
-  APPLICATION_API_END_POINT,
-  NOTIFICATION_API_END_POINT,
-} from "@/components/utils/constant";
+import { useParams, useNavigate } from "react-router-dom";
+import { APPLICATION_API_END_POINT, NOTIFICATION_API_END_POINT} from "@/components/utils/constant";
 import { toast } from "sonner";
+import { MessageCircle } from "lucide-react";
+import { ChatContext } from "@/context/ChatContext";
 
 const ProviderRequests = ({ onJobAssigned }) => {
   const { id: jobId } = useParams();
+  const navigate = useNavigate();
   const [applicants, setApplicants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [assignedApplicant, setAssignedApplicant] = useState(null);
+  const { startChatWithUser, setSelectedChat } = useContext(ChatContext);
 
   useEffect(() => {
     const fetchApplicants = async () => {
@@ -45,6 +46,17 @@ const ProviderRequests = ({ onJobAssigned }) => {
     };
     fetchApplicants();
   }, [jobId]);
+  const handleStartChat = async (applicant) => {
+    try {
+        const chat = await startChatWithUser(applicant._id);
+        setSelectedChat(chat); // ✅ Set the selected chat
+        
+        // ✅ Redirect with chatId as a query parameter
+        navigate(`/chat?chatId=${chat._id}`); 
+    } catch (error) {
+        console.error("Error starting chat:", error);
+    }
+};
 
   const updateStatus = async (applicationId, newStatus) => {
     try {
@@ -100,30 +112,44 @@ const ProviderRequests = ({ onJobAssigned }) => {
         <p>No applicants for this job.</p>
       ) : assignedApplicant ? (
         <div className="p-4 bg-green-100 border border-green-400 rounded-lg">
-          <h3 className="text-xl font-bold text-green-700">Assigned</h3>
-          <div className="flex items-center space-x-4 mt-2">
-            <img
-              src={assignedApplicant.applicant?.profilePhoto || "/default-profile.png"}
-              alt="Profile"
-              className="w-12 h-12 rounded-full border border-gray-300 object-cover"
-            />
-            <div>
-              <p className="text-xs text-gray-500">
-                ID: {assignedApplicant.applicant?._id?.slice(0, 6) || "---"}
-              </p>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {assignedApplicant.applicant?.fullname || "---"}
-              </h3>
-              <p className="text-sm text-gray-600">
-                📞 {assignedApplicant.applicant?.phoneNumber || "---"}
-              </p>
-              <p className="text-sm text-gray-600">
-                ✉️ {assignedApplicant.applicant?.email || "---"}
-              </p>
-              <p className="text-sm text-gray-600">Status: Assigned</p>
-            </div>
-          </div>
-        </div>
+  <div className="flex items-center justify-between">
+    {/* ✅ Profile Section */}
+    <div className="flex items-center space-x-4">
+      <img
+        src={assignedApplicant.applicant?.profilePhoto || "/default-profile.png"}
+        alt="Profile"
+        className="w-12 h-12 rounded-full border border-gray-300 object-cover cursor-pointer"
+        onClick={() => navigate(`/technicians/${assignedApplicant.applicant?._id}`)}
+      />
+      <div>
+        <p className="text-xs text-gray-500">
+          ID: {assignedApplicant.applicant?._id?.slice(0, 6) || "---"}
+        </p>
+        <h3 className="text-lg font-semibold text-gray-900">
+          {assignedApplicant.applicant?.fullname || "---"}
+        </h3>
+        <p className="text-sm text-gray-600">
+          📞 {assignedApplicant.applicant?.phoneNumber || "---"}
+        </p>
+        <p className="text-sm text-gray-600">
+          ✉️ {assignedApplicant.applicant?.email || "---"}
+        </p>
+      </div>
+    </div>
+
+    {/* ✅ "Assigned" Status & Chat Icon in the Middle-Right */}
+    <div className="flex flex-col items-center ml-auto">
+      <h3 className="text-lg font-bold text-green-700 mb-1">Assigned</h3> {/* ✅ Centered Above Icon */}
+      <button 
+        onClick={() => handleStartChat(assignedApplicant.applicant)} 
+        className="p-2 rounded-full hover:bg-gray-200 transition"
+      >
+        <MessageCircle className="w-6 h-6 text-indigo-500 hover:text-indigo-700 transition" />
+      </button>
+    </div>
+  </div>
+</div>
+
       ) : (
         <ul className="space-y-4">
           {applicants.map((applicant) => (
@@ -132,13 +158,16 @@ const ProviderRequests = ({ onJobAssigned }) => {
                 <img
                   src={applicant.applicant?.profilePhoto || "/default-profile.png"}
                   alt="Profile"
-                  className="w-12 h-12 rounded-full border border-gray-300 object-cover"
+                  className="w-12 h-12 rounded-full border border-gray-300 object-cover cursor-pointer"
+                  onClick={() => navigate(`/technicians/${applicant.applicant?._id}`)}
                 />
                 <div>
                   <p className="text-xs text-gray-500">
                     ID: {applicant.applicant?._id?.slice(0, 6) || "---"}
                   </p>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-gray-900 cursor-pointer hover:underline"
+                   onClick={() => navigate(`/technicians/${applicant.applicant?._id}`)} 
+                  >
                     {applicant.applicant?.fullname || "---"}
                   </h3>
                   <p className="text-sm text-gray-600">
@@ -151,7 +180,7 @@ const ProviderRequests = ({ onJobAssigned }) => {
                 </div>
               </div>
               {/* Show buttons only if no one is assigned */}
-              <div className="space-x-2">
+              <div className="flex items-center gap-3 ml-auto">
                 <button
                   onClick={() => updateStatus(applicant._id, "assigned")}
                   className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
@@ -164,6 +193,11 @@ const ProviderRequests = ({ onJobAssigned }) => {
                 >
                   Reject
                 </button>
+                
+                <button onClick={() => handleStartChat(applicant.applicant)}  className="p-2 rounded-full hover:bg-gray-200 transition ml-auto">
+                  <MessageCircle className="w-6 h-6 text-indigo-500 hover:text-indigo-700 transition" />
+                </button>
+                
               </div>
             </li>
           ))}

@@ -85,18 +85,30 @@ export const ChatProvider = ({ children }) => {
     /** ✅ Handle Starting a New Chat */
     const startChatWithUser = async (userId) => {
         try {
-            const { data } = await axios.post(`${CHAT_API_END_POINT}/create`, { userId }, { withCredentials: true });
-
+            const { data } = await axios.post(
+                `${CHAT_API_END_POINT}/create`,
+                { userId },
+                { withCredentials: true }
+            );
+    
+            if (!data.chat) {
+                console.error("❌ No chat returned from API response!");
+                return null;
+            }
+    
             setChats((prev) => {
                 const chatExists = prev.some(chat => chat._id === data.chat._id);
                 return chatExists ? prev : [...prev, data.chat];
             });
-
-            setSelectedChat(data.chat);
+    
+            setSelectedChat(data.chat);  // ✅ Set the selected chat
+            return data.chat;  // ✅ Return the created chat
         } catch (error) {
-            console.error("Error starting chat:", error);
+            console.error("❌ Error starting chat:", error.response?.data?.message || error.message);
+            return null;
         }
     };
+    
       /** ✅ Handle Online Status */
       useEffect(() => {
         socket.on("user_online", (userId) => {

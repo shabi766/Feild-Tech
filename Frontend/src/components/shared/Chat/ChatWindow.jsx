@@ -1,12 +1,23 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { ChatContext } from "@/context/ChatContext";
 import { Trash2, Eye, CheckCircle, Clock } from "lucide-react"; // Icon for delete button
+import { useSearchParams } from "react-router-dom";
 
 const ChatWindow = () => {
-    const { selectedChat, messages, sendMessage, deleteMessage, currentUser } = useContext(ChatContext);
+    const { selectedChat,setSelectedChat, chats, messages, sendMessage, deleteMessage, currentUser } = useContext(ChatContext);
+    const [searchParams] = useSearchParams();
+    const chatId = searchParams.get("chatId");
     const [newMessage, setNewMessage] = useState("");
     const [showSeen, setShowSeen] = useState(false);
     const messageListRef = useRef(null);
+    useEffect(() => {
+        if (chatId) {
+            const foundChat = chats.find(chat => chat._id === chatId);
+            if (foundChat) {
+                setSelectedChat(foundChat);
+            }
+        }
+    }, [chatId, chats]);
 
     useEffect(() => {
         if (messageListRef.current) {

@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react'; // ✅ Added useContext import
 import axios from 'axios';
 import { TECHNICIAN_API_END_POINT } from '../utils/constant';
 import { useNavigate } from 'react-router-dom';
 import Footer from '../shared/Footer';
 import Navbar from '../shared/Navbar';
+import { MessageCircle } from 'lucide-react';
+import { ChatContext } from '@/context/ChatContext'; // ✅ Chat Context
 
 const AllTechnicians = () => {
   const [technicians, setTechnicians] = useState([]);
@@ -11,6 +13,7 @@ const AllTechnicians = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { startChatWithUser, setSelectedChat } = useContext(ChatContext); // ✅ No more ReferenceError!
 
   useEffect(() => {
     const fetchTechnicians = async () => {
@@ -31,6 +34,16 @@ const AllTechnicians = () => {
     fetchTechnicians();
   }, []);
 
+  const handleStartChat = async (technician) => {
+    try {
+      const chat = await startChatWithUser(technician._id);
+      setSelectedChat(chat); // ✅ Set the selected chat
+      navigate('/chat'); // ✅ Redirect to the chat page
+    } catch (error) {
+      console.error("Error starting chat:", error);
+    }
+  };
+
   const handleAddToTalentPool = (technician) => {
     const talentPool = JSON.parse(localStorage.getItem('talentPool') || '[]');
     talentPool.push(technician);
@@ -50,9 +63,8 @@ const AllTechnicians = () => {
   );
 
   return (
-    
     <div className="flex flex-col min-h-screen">
-      <Navbar/>
+      
       <div className="container mx-auto p-4 flex-grow">
         <h1 className="text-2xl font-bold mb-4">Technicians</h1>
         <input
@@ -70,23 +82,34 @@ const AllTechnicians = () => {
         ) : filteredTechnicians.length > 0 ? (
           <ul className="list-disc list-inside">
             {filteredTechnicians.map((technician) => (
-              <li key={technician._id} className="mb-4 p-4 border rounded shadow">
-                <h2 className="text-xl font-semibold">{technician.fullname}</h2>
-                <p>Email: {technician.email}</p>
-                <p>Phone: {technician.phoneNumber}</p>
-                <p>Skills: {technician.profile?.skills.join(', ') || 'N/A'}</p>
-                <button 
-                  onClick={() => handleAddToTalentPool(technician)} 
-                  className="mr-2 bg-blue-500 text-white px-4 py-2 rounded"
-                >
-                  Add to Talent Pool
-                </button>
-                <button 
-                  onClick={() => handleShowProfile(technician)} 
-                  className="bg-green-500 text-white px-4 py-2 rounded"
-                >
-                  Show Profile
-                </button>
+              <li key={technician._id} className="mb-4 p-4 border rounded shadow flex justify-between items-center">
+                <div>
+                  <h2 className="text-xl font-semibold">{technician.fullname}</h2>
+                  <p>Email: {technician.email}</p>
+                  <p>Phone: {technician.phoneNumber}</p>
+                  <p>Skills: {technician.profile?.skills.join(', ') || 'N/A'}</p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => handleAddToTalentPool(technician)}
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                  >
+                    Add to Talent Pool
+                  </button>
+
+                  <button
+                    onClick={() => handleShowProfile(technician)}
+                    className="bg-green-500 text-white px-4 py-2 rounded"
+                  >
+                    Show Profile
+                  </button>
+
+                  {/* ✅ Message Icon - Open Chat */}
+                  <button onClick={() => handleStartChat(technician)}>
+                    <MessageCircle className="w-6 h-6 text-indigo-500 hover:text-indigo-700 transition" />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
@@ -96,10 +119,8 @@ const AllTechnicians = () => {
       </div>
 
       <div className='mt-60'>
-      <Footer  />
-
+        <Footer />
       </div>
-      
     </div>
   );
 };

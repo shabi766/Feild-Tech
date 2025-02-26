@@ -13,6 +13,7 @@ import NotificationComponent from './NotificationComponent';
 import Chat from './Chat/chat';
 
 const Navbar = () => {
+    
     const { user } = useSelector(store => store.auth);
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -155,7 +156,7 @@ const Navbar = () => {
                                 <PopoverContent className='w-48 bg-white shadow-lg rounded-lg border border-gray-300 z-10'>
                                     <ul>
                                         <li className='border-b border-gray-300'>
-                                            <Link to="/technicains/techs" className='block p-2 hover:bg-gray-100 focus:bg-gray-100'>All Technicians</Link>
+                                            <Link to="/technicians/techs" className='block p-2 hover:bg-gray-100 focus:bg-gray-100'>All Technicians</Link>
                                         </li>
                                         <li className='border-b border-gray-300'>
                                             <Link to="/admin/talentpool" className='block p-2 hover:bg-gray-100 focus:bg-gray-100'>Talentpool</Link>
@@ -222,24 +223,6 @@ const Navbar = () => {
                                 <NotificationComponent />
                             </PopoverContent>
                         </Popover>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="link" className="text-teal-600 hover:text-teal-800">
-                                    <MessageSquareCodeIcon size={24} />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className='w-80 bg-white shadow-lg rounded-lg border border-gray-300 z-10'>
-                                <Chat />
-                            </PopoverContent>
-                        </Popover>
-
-                  
-
-
-
-                       
-
-
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Avatar className='cursor-pointer'>

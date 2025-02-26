@@ -646,7 +646,7 @@ const PostJobs = () => {
 
     return (
         <div>
-            <Navbar />
+            
 
             <div className="flex justify-between items-center bg-gray-100 p-4 mb-6 shadow-md">
                 <div>

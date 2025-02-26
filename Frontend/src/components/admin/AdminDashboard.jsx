@@ -29,7 +29,7 @@ const AdminDashboard = () => {
 
     return (
         <div>
-        <Navbar/>
+        
         <div className="dashboard">
             <h1>Dashboard</h1>
             <div className="grid grid-cols-3 gap-4">

@@ -168,7 +168,7 @@ const ViewJob = () => {
 
     return (
         <div>
-            <Navbar />
+            
             <div className="bg-gray-50 min-h-screen p-8">
                 {renderStatusBar()}
                 {renderAssignedProvider()} {/* Assigned Provider Bar */}

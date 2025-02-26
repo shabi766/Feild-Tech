@@ -22,7 +22,7 @@ const Home = () => {
     
 
     <div>
-        <Navbar/>
+        
         <HeroSection/>
         <CategoryCarousel/>
         <LatestJobs/>

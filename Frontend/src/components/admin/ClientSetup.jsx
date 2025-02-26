@@ -83,7 +83,7 @@ const ClientSetup = () => {
 
     return (
         <div>
-            <Navbar />
+            
             <div className='max-w-xl mx-auto my-10'>
                 <form onSubmit={submitHandler}>
                     <div className='flex items-center gap-5 p-8'>

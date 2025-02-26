@@ -37,16 +37,16 @@ const ChatWindow = () => {
                     </h2>
                 </div>
                 <p className="text-xs text-gray-400 font-medium tracking-wide">
-    {recipientStatus === "online" ? (
-        <span className="text-green-500 font-semibold">● Online</span>
-    ) : recipient?.lastSeen ? (
-        <span className="text-[10px]  text-white font-serif">
-            last seen: {new Date(recipient.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </span>
-    ) : (
-        <span className="text-xs text-gray-400">Last seen: Unknown</span>
-    )}
-</p>
+                    {recipientStatus === "online" ? (
+                        <span className="text-green-500 font-semibold">● Online</span>
+                    ) : recipient?.lastSeen ? (
+                        <span className="text-[10px]  text-white font-thin">
+                            last seen: {new Date(recipient.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                    ) : (
+                        <span className="text-xs text-gray-400">Last seen: Unknown</span>
+                    )}
+                </p>
 
 
             </div>
@@ -61,8 +61,8 @@ const ChatWindow = () => {
                         <div
                             key={msg._id}
                             className={`flex items-center gap-2 p-3 rounded-md max-w-[75%] relative group ${msg.sender?._id === currentUser?._id
-                                    ? 'bg-blue-500 text-white ml-auto'
-                                    : 'bg-gray-200 text-black mr-auto'
+                                ? 'bg-blue-500 text-white ml-auto'
+                                : 'bg-gray-200 text-black mr-auto'
                                 }`}
                         >
                             <div>

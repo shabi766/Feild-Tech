@@ -91,7 +91,7 @@ const TechnicianProfile = () => {
     <p className="text-center mt-10">Technician not found</p>
   );
 };
-<Navbar/>;
+
 <div className='mt-60'><Footer/></div>
 
 export default TechnicianProfile;

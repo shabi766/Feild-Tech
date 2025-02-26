@@ -14,7 +14,7 @@ const ProjectDetail = () => {
 
     return (
         <div>
-            <Navbar />
+            
             <div className="container mx-auto my-10 bg-white p-8 shadow-lg rounded-lg">
                 <h1 className="text-4xl font-bold mb-8 text-gray-800">Project Details</h1>
 

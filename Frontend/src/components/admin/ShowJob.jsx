@@ -185,7 +185,7 @@ const ShowJob = () => {
     return (
 
         <div>
-            <Navbar/>
+           
             <Tooltip.Provider>
             <div className="max-w-3xl mx-auto bg-gray-100 p-8 rounded-lg shadow-md">
                 {renderStatusBar()}

@@ -1,7 +1,6 @@
 import { Chat } from "../Models/chat.model.js";
 import { User } from "../Models/user.model.js";
-import mongoose from "mongoose";
-import {io} from "../index.js"
+import { io } from "../index.js";
 
 export const createChat = async (req, res) => {
     try {
@@ -41,14 +40,11 @@ export const sendMessage = async (req, res) => {
             return res.status(400).json({ message: "Missing required fields", success: false });
         }
 
-        console.log("📩 Received message:", { chatId, message, type, fileUrl });
-
         const chat = await Chat.findById(chatId).populate("participants", "fullname profile.profilePhoto lastSeen");
         if (!chat) {
             return res.status(404).json({ message: "Chat not found", success: false });
         }
 
-        // ✅ Create new message object
         const newMessage = {
             sender: userId,
             content: message,
@@ -59,13 +55,11 @@ export const sendMessage = async (req, res) => {
         chat.messages.push(newMessage);
         await chat.save();
 
-        // ✅ Populate sender details
         const populatedChat = await Chat.findById(chatId).populate("messages.sender", "fullname profile.profilePhoto");
 
         const lastMessage = populatedChat.messages.pop();
 
-        // ✅ Mark as read if recipient is online
-        const recipient = chat.participants.find(user => user._id.toString() !== userId.toString());
+        const recipient = chat.participants.find((user) => user._id.toString() !== userId.toString());
         if (recipient) {
             const isRecipientOnline = io.sockets.adapter.rooms.has(recipient._id.toString());
             if (isRecipientOnline) {
@@ -74,17 +68,14 @@ export const sendMessage = async (req, res) => {
             }
         }
 
-        // ✅ Emit message to all participants
         io.to(chatId).emit("new_message", lastMessage);
 
         res.json({ message: lastMessage });
     } catch (error) {
-        console.error("❌ Error in sendMessage:", error);
+        console.error("Error in sendMessage:", error);
         res.status(500).json({ message: "Server error", success: false });
     }
 };
-
-
 
 export const getChats = async (req, res) => {
     try {
@@ -117,8 +108,8 @@ export const searchChats = async (req, res) => {
         const chats = await Chat.find({
             $or: [
                 { groupName: { $regex: query, $options: "i" } },
-                { "messages.content": { $regex: query, $options: "i" } }
-            ]
+                { "messages.content": { $regex: query, $options: "i" } },
+            ],
         }).populate("participants", "fullname profile.profilePhoto");
 
         res.json({ success: true, chats });
@@ -128,17 +119,14 @@ export const searchChats = async (req, res) => {
     }
 };
 
-
 export const deleteMessage = async (req, res) => {
     try {
         const { messageId } = req.params;
 
-        // Find the chat that contains this message
         const chat = await Chat.findOne({ "messages._id": messageId });
         if (!chat) return res.status(404).json({ success: false, message: "Message not found" });
 
-        // Remove the message from the chat
-        chat.messages = chat.messages.filter(msg => msg._id.toString() !== messageId);
+        chat.messages = chat.messages.filter((msg) => msg._id.toString() !== messageId);
         await chat.save();
 
         res.json({ success: true, message: "Message deleted successfully" });
@@ -147,6 +135,7 @@ export const deleteMessage = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error" });
     }
 };
+
 export const deleteChat = async (req, res) => {
     try {
         const { chatId } = req.params;
@@ -161,31 +150,63 @@ export const deleteChat = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error" });
     }
 };
+
 export const markMessagesAsRead = async (req, res) => {
     try {
         const { chatId } = req.body;
-        const userId = req.user?._id;
+        const userId = req.user._id;
 
         if (!chatId) {
-            return res.status(400).json({ message: "Chat ID is required", success: false });
+            return res.status(400).json({ success: false, message: "Chat ID is required" });
         }
 
         const chat = await Chat.findById(chatId);
         if (!chat) {
-            return res.status(404).json({ message: "Chat not found", success: false });
+            return res.status(404).json({ success: false, message: "Chat not found" });
         }
 
         chat.messages.forEach((message) => {
-            if (message.sender.toString() !== userId.toString()) {
+            if (!message.isRead && message.sender.toString() !== userId.toString()) {
                 message.isRead = true;
             }
         });
 
         await chat.save();
-        
+
         res.status(200).json({ success: true, message: "Messages marked as read" });
     } catch (error) {
-        console.error("Error marking messages as read:", error);
-        res.status(500).json({ success: false, message: "Server error" });
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+};
+
+export const getUnreadMessages = async (req, res) => {
+    try {
+        if (!req.user || !req.user._id) {
+            return res.status(401).json({ success: false, message: "Unauthorized: User ID missing" });
+        }
+
+        const userId = req.user._id;
+
+        const chats = await Chat.find({ participants: userId }).populate("messages.sender", "fullname profilePhoto");
+
+        if (!chats || chats.length === 0) {
+            return res.status(200).json({ success: true, unreadMessages: [] });
+        }
+
+        let unreadMessages = [];
+        chats.forEach((chat) => {
+            const unread = chat.messages.filter((msg) => !msg.isRead && msg.sender._id.toString() !== userId.toString());
+            if (unread.length > 0) {
+                unreadMessages.push({
+                    chatId: chat._id,
+                    messages: unread,
+                });
+            }
+        });
+
+        res.status(200).json({ success: true, unreadMessages });
+    } catch (error) {
+        console.error("Error fetching unread messages:", error);
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 };

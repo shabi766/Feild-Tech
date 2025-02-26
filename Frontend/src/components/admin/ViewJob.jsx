@@ -69,7 +69,7 @@ const ViewJob = () => {
     const renderStatusBar = () => (
         <div className="flex flex-col md:flex-row md:items-center md:justify-between bg-blue-100 p-4 mb-6 rounded-lg shadow-md">
             <div>
-                <h2 className="text-lg font-semibold">Job ID: {job?._id?.slice(-4) || "---"}</h2>
+                <h2 className="text-lg font-semibold">Job ID: {job?._id?.slice(-6) || "---"}</h2>
                 <p>Status: <span className="font-bold">{status}</span></p>
             </div>
             <div className="md:text-right mt-2 md:mt-0">

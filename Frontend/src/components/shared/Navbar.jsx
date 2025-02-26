@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
 import { Calendar, LogOut, User2, Plus, Search, Bell, MessageSquareCodeIcon } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -6,14 +6,16 @@ import { Avatar, AvatarImage } from '../ui/avatar';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'sonner';
-import { SEARCH_API_END_POINT, USER_API_END_POINT } from '../utils/constant';
+import { SEARCH_API_END_POINT, USER_API_END_POINT, CHAT_API_END_POINT } from '../utils/constant';
 import { setuser } from '@/redux/authSlice';
 import axios from 'axios';
 import NotificationComponent from './NotificationComponent';
 import Chat from './Chat/chat';
+import { ChatContext } from "@/context/ChatContext";
+import socket from "@/components/shared/socket";
 
 const Navbar = () => {
-    
+
     const { user } = useSelector(store => store.auth);
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -22,6 +24,62 @@ const Navbar = () => {
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const searchRef = useRef(null);
+    const { unreadMessages, setUnreadMessages, chats, setSelectedChat } = useContext(ChatContext);
+
+    useEffect(() => {
+        const fetchUnreadMessages = async () => {
+            try {
+                const { data } = await axios.get(`${CHAT_API_END_POINT}/unread-messages`, { withCredentials: true });
+                if (data.success) {
+                    setUnreadMessages(data.unreadMessages);
+                }
+            } catch (error) {
+                console.error("Error fetching unread messages:", error);
+            }
+        };
+
+        fetchUnreadMessages();
+
+        socket.on("new_message", (message) => {
+            // ✅ Only add the new message if it's from someone else & it's unread
+            if (message.sender !== user._id) {
+                setUnreadMessages((prev) => {
+                    const existingChat = prev.find((chat) => chat.chatId === message.chatId);
+                    if (existingChat) {
+                        return prev.map((chat) =>
+                            chat.chatId === message.chatId
+                                ? { ...chat, messages: [...chat.messages, message] }
+                                : chat
+                        );
+                    } else {
+                        return [...prev, { chatId: message.chatId, messages: [message] }];
+                    }
+                });
+            }
+        });
+
+        return () => {
+            socket.off("new_message");
+        };
+    }, [user]);
+
+    const handleUnreadMessagesClick = async (chatId) => {
+        try {
+            // ✅ Mark the chat as read in the backend
+            await axios.post(`${CHAT_API_END_POINT}/mark-as-read`, { chatId }, { withCredentials: true });
+
+            // ✅ Update unread messages state by removing only this chat
+            setUnreadMessages((prev) => prev.filter((chat) => chat.chatId !== chatId));
+
+            // ✅ Select the chat and navigate to it
+            const selectedChat = chats.find((chat) => chat._id === chatId);
+            setSelectedChat(selectedChat);
+            navigate(`/chat?chatId=${chatId}`);
+        } catch (error) {
+            console.error("Error marking messages as read:", error);
+        }
+    };
+
 
     const LogoutHandler = async () => {
         setLoading(true);
@@ -201,59 +259,107 @@ const Navbar = () => {
                 <div className='flex items-center gap-4'>
 
 
-                {!user ? (
-                    <div className='flex items-center gap-2'>
-                        <Link to="/Login">
-                            <Button variant="outline">Login</Button>
-                        </Link>
-                        <Link to="/Signup">
-                            <Button className='bg-teal-600 hover:bg-teal-700'>Signup</Button>
-                        </Link>
-                    </div>
-                ) : (
-                    <>
-                    
-                    <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="link" className="text-teal-600 hover:text-teal-800">
-                                    <Bell size={24} />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className='w-80 bg-white shadow-lg rounded-lg border border-gray-300 z-10'>
-                                <NotificationComponent />
-                            </PopoverContent>
-                        </Popover>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Avatar className='cursor-pointer'>
-                                    <AvatarImage src={user?.profile?.profilePhoto || '/path/to/default-avatar.png'} alt={user.fullname} />
-                                </Avatar>
-                            </PopoverTrigger>
-                            <PopoverContent className='w-48 bg-slate-100 shadow-lg rounded-lg border border-gray-300 z-10 '>
-                                <div className='flex gap-2 space-y-2 forced-color-adjust-auto'>
+                    {!user ? (
+                        <div className='flex items-center gap-2'>
+                            <Link to="/Login">
+                                <Button variant="outline">Login</Button>
+                            </Link>
+                            <Link to="/Signup">
+                                <Button className='bg-teal-600 hover:bg-teal-700'>Signup</Button>
+                            </Link>
+                        </div>
+                    ) : (
+                        <>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <div className="relative cursor-pointer">
+                                        <MessageSquareCodeIcon size={24} className="text-teal-600 hover:text-teal-800" />
+                                        {unreadMessages.length > 0 && (
+                                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                                                {unreadMessages.length}
+                                            </span>
+                                        )}
+                                    </div>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80 bg-white shadow-lg rounded-lg border border-gray-300 z-10 p-4">
+                                    <h3 className="font-semibold text-gray-700 mb-2">Unread Messages</h3>
+                                    {unreadMessages.length === 0 ? (
+                                        <p className="text-gray-500 text-sm">No new messages</p>
+                                    ) : (
+                                        <ul className="space-y-2">
+                                            {chats
+                                                .filter((chat) => unreadMessages.some((msg) => msg.chatId === chat._id))
+                                                .map((chat) => (
+                                                    <li
+                                                        key={chat._id}
+                                                        onClick={() => handleUnreadMessagesClick(chat._id)}  // ✅ Use fixed function
+                                                        className="p-2 border rounded-md hover:bg-gray-100 cursor-pointer flex items-center gap-3"
+                                                    >
+                                                        <Avatar>
+                                                            <AvatarImage
+                                                                src={
+                                                                    chat.participants.find((p) => p._id !== user._id)?.profilePhoto ||
+                                                                    "/default-avatar.png"
+                                                                }
+                                                                alt="User"
+                                                            />
+                                                        </Avatar>
+                                                        <div>
+                                                            <p className="font-semibold text-gray-800">
+                                                                {chat.participants.find((p) => p._id !== user._id)?.fullname}
+                                                            </p>
+                                                            <p className="text-sm text-gray-600 truncate w-48">
+                                                                {chat.lastMessage?.content || "New message..."}
+                                                            </p>
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                        </ul>
+                                    )}
+                                </PopoverContent>
+                            </Popover>
+
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="link" className="text-teal-600 hover:text-teal-800">
+                                        <Bell size={24} />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className='w-80 bg-white shadow-lg rounded-lg border border-gray-300 z-10'>
+                                    <NotificationComponent />
+                                </PopoverContent>
+                            </Popover>
+                            <Popover>
+                                <PopoverTrigger asChild>
                                     <Avatar className='cursor-pointer'>
                                         <AvatarImage src={user?.profile?.profilePhoto || '/path/to/default-avatar.png'} alt={user.fullname} />
                                     </Avatar>
-                                    <div>
-                                        <h4 className='font-medium'>{user.fullname}</h4>
-                                        <p className='text-xs text-gray-500'>{user.email}</p>
+                                </PopoverTrigger>
+                                <PopoverContent className='w-48 bg-slate-100 shadow-lg rounded-lg border border-gray-300 z-10 '>
+                                    <div className='flex gap-2 space-y-2 forced-color-adjust-auto'>
+                                        <Avatar className='cursor-pointer'>
+                                            <AvatarImage src={user?.profile?.profilePhoto || '/path/to/default-avatar.png'} alt={user.fullname} />
+                                        </Avatar>
+                                        <div>
+                                            <h4 className='font-medium'>{user.fullname}</h4>
+                                            <p className='text-xs text-gray-500'>{user.email}</p>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className='py-2'>
-                                    <Link to="/profile" className='flex items-center gap-2 py-2'>
-                                        <User2 size={16} /> Profile
-                                    </Link>
-                                    <Link to="/calender" className='flex items-center gap-2 py-2'>
-                                        <Calendar size={16} /> Calendar
-                                    </Link>
-                                    <button onClick={LogoutHandler} disabled={loading} className='flex items-center gap-2 py-2 w-full'>
-                                        <LogOut size={16} /> Logout
-                                    </button>
-                                </div>
-                            </PopoverContent>
-                        </Popover>
-                    </>
-                )}
+                                    <div className='py-2'>
+                                        <Link to="/profile" className='flex items-center gap-2 py-2'>
+                                            <User2 size={16} /> Profile
+                                        </Link>
+                                        <Link to="/calender" className='flex items-center gap-2 py-2'>
+                                            <Calendar size={16} /> Calendar
+                                        </Link>
+                                        <button onClick={LogoutHandler} disabled={loading} className='flex items-center gap-2 py-2 w-full'>
+                                            <LogOut size={16} /> Logout
+                                        </button>
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

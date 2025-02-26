@@ -49,13 +49,12 @@ function App() {
           <Route path="/browse" element={<Browse />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/calender" element={<JobCalendar />} />
+          <Route path="/chat" element={<Chat/>}/>
 
           {/* ✅ Fixed Route for Technicians */}
           <Route path="/technicians/techs" element={<ProtectedRoute><AllTechnicians /></ProtectedRoute>} />
-
           <Route path="/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/technicians/:id" element={<ProtectedRoute><TechnicianProfile /></ProtectedRoute>} />
-          <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
           <Route path="/admin/companies" element={<ProtectedRoute><Companies /></ProtectedRoute>} />
           <Route path="/admin/companies/:id" element={<ProtectedRoute><CompanySetup /></ProtectedRoute>} />
           <Route path="/admin/project/detail/:projectId" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>} />

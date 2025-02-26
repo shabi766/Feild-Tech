@@ -13,6 +13,7 @@ export const ChatProvider = ({ children }) => {
     const [isTyping, setIsTyping] = useState(false); // Track typing status
     const [searchResults, setSearchResults] = useState([]); // Store searched users
     const [userStatus, setUserStatus] = useState({}); // ✅ Stores user online status
+    const [unreadMessages, setUnreadMessages] = useState([]);
     
 
     /** ✅ Fetch Logged-in User */
@@ -27,6 +28,7 @@ export const ChatProvider = ({ children }) => {
         };
         fetchUser();
     }, []);
+    
 
     /** ✅ Fetch User Chats */
     const fetchChats = useCallback(async () => {
@@ -72,6 +74,33 @@ export const ChatProvider = ({ children }) => {
         };
     }, [selectedChat]);
 
+    useEffect(() => {
+        const fetchUnreadMessages = async () => {
+            try {
+                const { data } = await axios.get(`${CHAT_API_END_POINT}/unread-messages`, { withCredentials: true });
+                setUnreadMessages(data.unreadMessages || []);
+            } catch (error) {
+                console.error("Error fetching unread messages:", error);
+            }
+        };
+    
+        fetchUnreadMessages();
+    
+        socket.on("new_message", (message) => {
+            setUnreadMessages((prev) => {
+                // Avoid duplicates & only add new unread messages
+                if (!prev.find((m) => m.chatId === message.chatId)) {
+                    return [...prev, { chatId: message.chatId, messages: [message] }];
+                }
+                return prev;
+            });
+        });
+    
+        return () => {
+            socket.off("new_message");
+        };
+    }, []);
+    
     /** ✅ Handle Searching Users */
     const searchUsers = async (query) => {
         try {
@@ -190,7 +219,9 @@ export const ChatProvider = ({ children }) => {
             startChatWithUser,
             deleteMessage,
             deleteChat, 
-            userStatus
+            userStatus,
+            unreadMessages,
+            setUnreadMessages
 
         }}>
             {children}

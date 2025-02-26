@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.route("/register").post(singleUpload,register);
 router.route("/login").post(login);
-router.route("/logout").get(logout);
+router.route("/logout").get(isAuthenticated, logout);
 router.route("/profile/update").post(singleUpload,isAuthenticated,updateProfile);
 router.route("/users").get(isAuthenticated, getUsersForChat);
 router.route("/chat-users").get(isAuthenticated, getChatUsers);

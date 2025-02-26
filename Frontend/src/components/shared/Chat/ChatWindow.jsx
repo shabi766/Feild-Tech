@@ -2,9 +2,10 @@ import React, { useState, useContext, useEffect, useRef } from "react";
 import { ChatContext } from "@/context/ChatContext";
 import { Trash2, Eye, CheckCircle, Clock } from "lucide-react"; // Icon for delete button
 import { useSearchParams } from "react-router-dom";
-
+import axios from "axios";
+import { CHAT_API_END_POINT } from "@/components/utils/constant";
 const ChatWindow = () => {
-    const { selectedChat,setSelectedChat, chats, messages, sendMessage, deleteMessage, currentUser } = useContext(ChatContext);
+    const { selectedChat,setSelectedChat, chats, messages, sendMessage, deleteMessage, currentUser, unreadMessages, setUnreadMessages } = useContext(ChatContext);
     const [searchParams] = useSearchParams();
     const chatId = searchParams.get("chatId");
     const [newMessage, setNewMessage] = useState("");
@@ -18,6 +19,15 @@ const ChatWindow = () => {
             }
         }
     }, [chatId, chats]);
+
+    useEffect(() => {
+        if (selectedChat) {
+            axios.post(`${CHAT_API_END_POINT}/mark-as-read`, { chatId: selectedChat._id }, { withCredentials: true });
+
+            // ✅ Remove chat from unread messages
+            setUnreadMessages((prev) => prev.filter((msg) => msg.chatId !== selectedChat._id));
+        }
+    }, [selectedChat]);
 
     useEffect(() => {
         if (messageListRef.current) {

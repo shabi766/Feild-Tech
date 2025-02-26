@@ -24,4 +24,6 @@ router.route("/Job-create").post(isAuthenticated, sendJobCreatedNotification);
 router.route("/send").post(isAuthenticated, sendJobNotifications);
 
 router.route("/job-assigned").post(isAuthenticated, sendJobAssignedNotification);
+
+
 export default router;

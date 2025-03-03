@@ -126,8 +126,16 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
     try {
+        if (!req.user) {  // Check if req.user is defined
+            console.error("User not found in request");
+            return res.status(401).json({ 
+                message: "Unauthorized: User not logged in", 
+                success: false 
+            });
+        }
+
         const userId = req.user._id;
-        await User.findByIdAndUpdate(userId, { status: "offline", lastSeen: new Date() }); // ✅ Set lastSeen when logging out
+        await User.findByIdAndUpdate(userId, { status: "offline", lastSeen: new Date() });
 
         return res.status(200).clearCookie("token").json({
             message: "Logged out successfully.",

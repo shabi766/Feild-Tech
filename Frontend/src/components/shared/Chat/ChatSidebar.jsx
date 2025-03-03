@@ -46,7 +46,7 @@ const ChatSidebar = () => {
 
                 {/* ✅ Show Suggestions */}
                 {showSuggestions && users.length > 0 && (
-                    <ul className="absolute w-full bg-white border rounded-md shadow-lg mt-1 z-10 max-h-48 overflow-y-auto">
+                    <ul className="absolute w-full bg-indigo-300 border rounded-md shadow-lg mt-1 z-10 max-h-48 overflow-y-auto">
                         {users.map((user) => (
                             <li
                                 key={user._id}
@@ -64,14 +64,14 @@ const ChatSidebar = () => {
             </div>
 
             {/* ✅ Existing Chats */}
-            <h3 className="mt-4 font-semibold text-gray-700">Chats</h3>
+            <h3 className="mt-4 font-semibold text-indigo-300">Chats</h3>
             <ul>
                 {chats.map((chat) => {
                     if (!currentUser) return null;
                     const recipient = chat.participants.find(p => p._id !== currentUser?._id);
                     return (
                         <li key={chat._id} 
-                            className="p-2 flex items-center gap-3 justify-between cursor-pointer hover:bg-gray-100 rounded-md">
+                            className="p-2 flex items-center gap-3 justify-between cursor-pointer hover:bg-indigo-300 rounded-md">
                                  {/* ✅ User Info & Status */}
                             <div className="flex items-center" onClick={() => setSelectedChat(chat)}>
                                 <img src={recipient?.profile?.profilePhoto || "/default-avatar.png"} 

@@ -5,6 +5,7 @@ import useAuthCheck from './src/components/Hooks/useAuthCheck';
 import Sidebar from './src/components/shared/Sidebar';
 import Navbar from './src/components/shared/Navbar';
 import { Loader2 } from 'lucide-react'; // If you're using lucide-react
+import Footer from '@/components/shared/Footer';
 
 const Layout = () => {
   const { isLoading, checkAuth } = useAuthCheck();
@@ -25,7 +26,9 @@ const Layout = () => {
     <>
       <Sidebar />
       <Navbar />
+      
       <Outlet />
+      <Footer/>
     </>
   );
 };

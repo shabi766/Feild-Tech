@@ -205,7 +205,7 @@ const ProjectSetup = () => {
                     }
                 </form>
             </div>
-            <div className='mt-60'><Footer/></div>
+           
             
         </div>
     );

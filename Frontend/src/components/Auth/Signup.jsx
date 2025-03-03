@@ -190,7 +190,7 @@ const Signup = () => {
                     <span className='text-sm'>Already have an account? <Link to="/Login" className='text-blue-500'>Login</Link></span>
                 </form>
             </div>
-            <div className='mt-60'><Footer/></div>
+           
         </div>
 
     )

@@ -32,7 +32,7 @@ const Applicants = () => {
                 <h1 className='font-bold text-xl my-5'>Applicants {applicants?.application?.length}</h1>
                 <ApplicantsTable />
             </div>
-            <div className='mt-60'><Footer/></div>
+           
             
         </div>
     )

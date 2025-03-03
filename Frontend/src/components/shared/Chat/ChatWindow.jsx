@@ -36,7 +36,7 @@ const ChatWindow = () => {
     }, [messages]);
 
     if (!selectedChat) {
-        return <p className="text-center text-gray-500">Select a chat to start messaging.</p>;
+        return <p className="text-center text-gray-5000">Select a chat to start messaging.</p>;
     }
     const recipient = selectedChat.participants.find((p) => p._id !== currentUser?._id);
     const recipientStatus = recipient?.status;
@@ -44,7 +44,7 @@ const ChatWindow = () => {
     return (
         <div className="w-3/4 p-4 flex flex-col bg-white shadow-md rounded-md">
             {/* ✅ Chat Header */}
-            <div className="flex justify-between items-center p-3 bg-indigo-600 text-white rounded-md">
+            <div className="flex justify-between items-center p-3 bg-indigo-500 text-white rounded-md">
                 <div className="flex items-center gap-3">
                     {/* ✅ Correctly Display the Profile Image */}
                     <img

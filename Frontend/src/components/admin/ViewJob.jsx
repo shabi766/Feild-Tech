@@ -210,7 +210,7 @@ const ViewJob = () => {
                     {renderContent()}
                 </div>
             </div>
-            <Footer />
+          
         </div>
     );
 };

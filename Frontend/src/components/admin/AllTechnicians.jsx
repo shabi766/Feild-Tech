@@ -125,9 +125,7 @@ const AllTechnicians = () => {
         )}
       </div>
 
-      <div className='mt-60'>
-        <Footer />
-      </div>
+      
     </div>
   );
 };

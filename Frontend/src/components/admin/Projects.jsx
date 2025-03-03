@@ -37,7 +37,7 @@ dispatch(setSearchProjectsByText(input));
 
 
       </div>
-      <div className='mt-60'><Footer/></div>
+      
       
     </div>
   )

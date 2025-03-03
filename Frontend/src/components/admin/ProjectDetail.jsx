@@ -65,7 +65,7 @@ const ProjectDetail = () => {
                     <p className="text-center text-red-500 text-xl">Project not found.</p>
                 )}
             </div>
-            <div className='mt-60'><Footer/></div>
+           
             
         </div>
     );

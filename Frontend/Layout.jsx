@@ -1,11 +1,11 @@
-// Layout.jsx
 import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import useAuthCheck from './src/components/Hooks/useAuthCheck';
 import Sidebar from './src/components/shared/Sidebar';
-import Navbar from './src/components/shared/Navbar';
-import { Loader2 } from 'lucide-react'; // If you're using lucide-react
+
+import { Loader2 } from 'lucide-react';
 import Footer from '@/components/shared/Footer';
+import Navbar from '@/components/shared/Navbar/Navbars';
 
 const Layout = () => {
   const { isLoading, checkAuth } = useAuthCheck();
@@ -23,13 +23,18 @@ const Layout = () => {
   }
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Sidebar />
       <Navbar />
-      
-      <Outlet />
-      <Footer/>
-    </>
+
+      {/* ✅ Ensures content pushes the footer down */}
+      <div className="flex-grow">
+        <Outlet />
+      </div>
+
+      {/* ✅ Adds proper spacing before the footer */}
+      <Footer className="mt-10" />
+    </div>
   );
 };
 

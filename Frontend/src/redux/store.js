@@ -16,6 +16,7 @@ import companySlice from "./companySlice";
 import applicationSlice from "./applicationSlice";
 import clientSlice from "./clientSlice";
 import projectSlice from "./projectSlice";
+import userSlice from "./userSlice";
 const persistConfig = {
     key: 'root',
     version: 1,
@@ -27,7 +28,8 @@ const rootReducer = combineReducers({
     company:companySlice,
     application:applicationSlice,
     client:clientSlice,
-    project:projectSlice
+    project:projectSlice,
+    user:userSlice
 
 })
 

@@ -34,6 +34,7 @@ import { ChatProvider } from "./context/ChatContext";
 import TechnicianProfile from "./components/admin/TechnicainProfile";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 import Layout from "../Layout"; // Import Layout
+import Settings from "./components/shared/Settings";
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
             <Route path="profile" element={<Profile />} />
             <Route path="calender" element={<JobCalendar />} />
             <Route path="chat" element={<Chat />} />
+            <Route path="/settings" element={<Settings/>} />
             <Route path="technicians/techs" element={<ProtectedRoute><AllTechnicians /></ProtectedRoute>} />
             <Route path="dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             <Route path="technicians/:id" element={<ProtectedRoute><TechnicianProfile /></ProtectedRoute>} />

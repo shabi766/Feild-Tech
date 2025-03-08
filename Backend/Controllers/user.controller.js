@@ -271,3 +271,47 @@ export const searchUsers = async (req, res) => {
     }
 };
 
+
+export const updateUserSettings = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const { fullname, email, password, notifications, darkMode, profilePhoto } = req.body;
+
+        let updateFields = { fullname, email, notifications, darkMode, profilePhoto };
+
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            updateFields.password = hashedPassword;
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(userId, updateFields, { new: true });
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ success: true, user: updatedUser });
+    } catch (error) {
+        console.error("Error updating user settings:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+export const deleteAccount = async (req, res) => {
+    try {
+      const userId = req.params.id; 
+  
+     
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      
+      await User.findByIdAndDelete(userId);
+  
+      res.status(200).json({ message: 'Account deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+  };

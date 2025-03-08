@@ -46,20 +46,15 @@ const Sidebar = () => {
 
       {/* 🔹 Button to toggle sidebar */}
 
-      <button
-
-        onClick={toggleSidebar}
-
-        className="fixed top-1/2 left-2 -translate-y-1/2 bg-indigo-600 text-white p-1 rounded-md z-50 transition-all duration-300"
-
-      >
-
-        {isOpen ? '❮' : '❯'}
-
-      </button>
-
-
-
+      <div className="fixed top-0 left-0 h-full w-4 hover:w-10 transition-all duration-300 group">
+  <button
+    onClick={toggleSidebar}
+    className="fixed top-1/2 left-2 -translate-y-1/2 bg-indigo-600 text-white p-1 rounded-md z-50
+    opacity-0 group-hover:opacity-100 transition-all duration-300"
+  >
+    {isOpen ? '❮' : '❯'}
+  </button>
+</div>
       {/* 🔹 Sidebar */}
 
       <div
@@ -111,6 +106,24 @@ const Sidebar = () => {
               </Link>
 
             </li>
+            <li>
+
+              <Link
+
+                to="/calender"
+
+                className="block p-2 rounded-md hover:bg-gray-700 transition"
+
+                onClick={closeSidebar} // ✅ Closes sidebar when clicked
+
+              >
+
+                📅 Calendar
+
+              </Link>
+
+            </li>
+
 
           </ul>
 

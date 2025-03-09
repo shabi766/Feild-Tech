@@ -95,26 +95,23 @@ export const applyJob = async (req, res) => {
 export const getAppliedJobs = async (req, res) => {
     try {
         const userId = req.user._id;
-        const application = await Application.find({ applicant: userId })
+
+        const applications = await Application.find({ applicant: userId })
             .sort({ createdAt: -1 })
             .populate({
-                path: 'Workorder',
-                options: { sort: { createdAt: -1 } },
-                populate: [ // Populate both Company and applicant within Workorder
-                    { path: 'Company', options: { sort: { createdAt: -1 } } },
-                    { path: 'Application', populate: { path: 'applicant' } } // Populate applicant here!
-                ]
+                path: 'Workorder', // Populate job details
+                populate: { path: 'created_by', select: 'fullname email' } // Populate job creator details
             });
 
-        if (!application) {
+        if (!applications || applications.length === 0) {
             return res.status(404).json({
-                message: "No Applications",
+                message: "No applied jobs found.",
                 success: false
             });
         }
 
         return res.status(200).json({
-            application,
+            applications,
             success: true
         });
     } catch (error) {
@@ -122,6 +119,7 @@ export const getAppliedJobs = async (req, res) => {
         return res.status(500).json({ message: "Internal server error", success: false, error: error.message });
     }
 };
+
 // admin dekhega kitna user ne apply kiya hai
 export const getApplicants = async (req,res) => {
     try {
@@ -228,7 +226,7 @@ export const updateStatus = async (req, res) => {
 export const getApplicationsForCalendar = async (req, res) => {
     try {
         const applications = await Application.find()
-            .populate('Workorder')
+            .populate('Workorder') // Use 'Workorder' (uppercase W)
             .populate('applicant');
         return res.status(200).json({ application: applications });
     } catch (error) {

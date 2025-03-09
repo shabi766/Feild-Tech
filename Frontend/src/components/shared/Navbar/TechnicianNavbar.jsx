@@ -76,6 +76,7 @@ const TechnicianNavbar = ({ user }) => {
                 
                 
                 <li><Link to="/browse">Latest Jobs</Link></li>
+                <li><Link to="/Myjobs">MyJobs</Link></li>
                 
                 {/* Add more Technician-specific links here */}
             </div>

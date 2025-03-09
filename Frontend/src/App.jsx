@@ -35,6 +35,7 @@ import TechnicianProfile from "./components/admin/TechnicainProfile";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 import Layout from "../Layout"; // Import Layout
 import Settings from "./components/shared/Settings";
+import JobTable from "./components/user/JobTable";
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
             <Route path="calender" element={<JobCalendar />} />
             <Route path="chat" element={<Chat />} />
             <Route path="/settings" element={<Settings/>} />
+            <Route path="/Myjobs" element={<JobTable/>} />
             <Route path="technicians/techs" element={<ProtectedRoute><AllTechnicians /></ProtectedRoute>} />
             <Route path="dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             <Route path="technicians/:id" element={<ProtectedRoute><TechnicianProfile /></ProtectedRoute>} />

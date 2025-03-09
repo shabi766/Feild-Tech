@@ -1,6 +1,7 @@
 import { Workorder } from "../Models/workorder.model.js";
 import { Client } from "../Models/client.model.js";
 import { Project } from "../Models/project.model.js";
+import {Application} from "../Models/application.model.js"
 import mongoose from 'mongoose';
 
 // Constants for job statuses (no change)
@@ -269,3 +270,43 @@ export const getJobsByProject = async (req, res) => {
       }
 };
 
+export const getTechnicianJobs = async (req, res) => {
+    try {
+        const userId = req.user._id; // Logged-in technician ID
+
+        // Fetch jobs technician applied for
+        const appliedJobs = await Application.find({ applicant: userId })
+            .populate({
+                path: "Workorder",
+                populate: { path: "created_by", select: "fullname email" }
+            })
+            .sort({ createdAt: -1 });
+
+        // Fetch jobs assigned to technician
+        const assignedJobs = await Workorder.find({ assignedApplicant: userId, status: "Assigned" })
+            .populate({
+                path: "created_by",
+                select: "fullname email"
+            })
+            .sort({ createdAt: -1 });
+
+        // Fetch completed jobs by technician
+        const completedJobs = await Workorder.find({ assignedApplicant: userId, status: "Completed" })
+            .populate({
+                path: "created_by",
+                select: "fullname email"
+            })
+            .sort({ createdAt: -1 });
+
+        return res.status(200).json({
+            success: true,
+            appliedJobs,
+            assignedJobs,
+            completedJobs,
+        });
+
+    } catch (error) {
+        console.error("Error fetching technician jobs:", error);
+        return res.status(500).json({ message: "Internal server error", success: false, error: error.message });
+    }
+};

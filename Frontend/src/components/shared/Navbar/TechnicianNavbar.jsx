@@ -67,12 +67,18 @@ const TechnicianNavbar = ({ user }) => {
     },);
 
     return (
+
         <NavbarBase user={user}>
-            <div className='flex items-center gap-4'>
-                <li><Link to="/technician/dashboard">Dashboard</Link></li>
-                <li><Link to="/technician/jobs">My Jobs</Link></li>
-                <li><Link to="/technician/profile">My Profile</Link></li>
+            <div className="flex items-center w-full">
+                <div className="flex items-center">
+                    <div className="border-l-2 border-gray-300 h-10 mx-2 ml-3" />
+            <div className='flex items-center gap-4 mx-4 text-white text-bold'>
+                
+                
+                <li><Link to="/browse">Latest Jobs</Link></li>
+                
                 {/* Add more Technician-specific links here */}
+            </div>
             </div>
 
             {/* Search Bar */}
@@ -98,6 +104,7 @@ const TechnicianNavbar = ({ user }) => {
                         ))}
                     </ul>
                 )}
+            </div>
             </div>
         </NavbarBase>
     );

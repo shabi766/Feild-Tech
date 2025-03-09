@@ -4,7 +4,7 @@ import { Edit2, Check, X } from 'lucide-react';
 import axios from 'axios';
 import { JOB_API_END_POINT } from '../utils/constant';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import Navbar from '../shared/Navbar';
+import { toast } from 'sonner';
 
 const ShowJob = () => {
     const { id } = useParams();

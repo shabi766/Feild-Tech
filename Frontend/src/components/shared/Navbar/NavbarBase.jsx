@@ -12,6 +12,7 @@ import axios from 'axios';
 import NotificationComponent from '@/components/shared/NotificationComponent';
 import { ChatContext } from "@/context/ChatContext";
 import socket from "@/components/shared/socket";
+import logo from "@/assets/logo.png"
 
 const NavbarBase = ({ children, user }) => {
     const dispatch = useDispatch();
@@ -86,10 +87,10 @@ const NavbarBase = ({ children, user }) => {
     };
 
     return (
-        <div className='bg-indigo-950'>
+        <div className='bg-blue-400'>
             <div className='flex items-center mx-auto max-w-7xl h-16 w-full px-4'>
                 <div className="flex items-center gap-4">
-                    <h1 className='text-2xl font-bold'>Feild<span className='text-[#f94550]'>Tech</span></h1>
+                    <img src={logo} alt="ShiftsMate Logo" className="h-14" />
                     {children}
                 </div>
 

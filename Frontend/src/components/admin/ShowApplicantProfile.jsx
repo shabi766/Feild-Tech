@@ -4,8 +4,7 @@ import { TECHNICIAN_API_END_POINT } from '../utils/constant';
 import { useParams } from 'react-router-dom';
 import { FiLoader } from 'react-icons/fi'; // For loading spinner
 import { MdEmail, MdPhone, MdLocationOn } from 'react-icons/md'; // Icons for better UX
-import Navbar from '../shared/Navbar';
-import Footer from '../shared/Footer';
+
 
 const ShowApplicantProfile = () => {
     

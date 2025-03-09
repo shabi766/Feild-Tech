@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom'; // Import useNavigate
 import { CLIENT_API_END_POINT, PROJECT_API_END_POINT } from '../utils/constant';
 import axios from 'axios';
-import Navbar from '../shared/Navbar';
+
 import Footer from '../shared/Footer';
 
 const ClientDetail = () => {

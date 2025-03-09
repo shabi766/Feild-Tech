@@ -4,8 +4,8 @@ import { TECHNICIAN_API_END_POINT } from '../utils/constant';
 import { useParams } from 'react-router-dom';
 import { FiLoader } from 'react-icons/fi';
 import { MdEmail, MdPhone, MdLocationOn, MdStar, MdComment, MdCheckCircle } from 'react-icons/md';
-import Navbar from '../shared/Navbar';
-import Footer from '../shared/Footer';
+
+
 import Calendar from 'react-calendar'; // You'll need to install this: npm install react-calendar
 import 'react-calendar/dist/Calendar.css';
 

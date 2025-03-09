@@ -3,7 +3,7 @@ import axios from 'axios';
 import { TECHNICIAN_API_END_POINT } from '../utils/constant';
 import { useNavigate } from 'react-router-dom';
 import Footer from '../shared/Footer';
-import Navbar from '../shared/Navbar';
+
 import { MessageCircle } from 'lucide-react';
 import { ChatContext } from '@/context/ChatContext'; // ✅ Chat Context
 

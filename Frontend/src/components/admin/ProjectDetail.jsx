@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useProjectDetails from '../Hooks/useGetJobbyProject';
-import Navbar from '../shared/Navbar';
+
 import Footer from '../shared/Footer';
 
 const ProjectDetail = () => {

@@ -1,7 +1,7 @@
 // TalentPool.jsx
 import React, { useState, useEffect } from 'react';
 import Footer from '../shared/Footer';
-import Navbar from '../shared/Navbar';
+
 
 const TalentPool = () => {
   const [talentPool, setTalentPool] = useState([]);

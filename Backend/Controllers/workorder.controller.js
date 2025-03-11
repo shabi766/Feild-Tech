@@ -5,7 +5,7 @@ import {Application} from "../Models/application.model.js"
 import mongoose from 'mongoose';
 
 // Constants for job statuses (no change)
-const JOB_STATUSES = ['Draft', 'Published', 'Assigned', 'OnHold', 'Pending Review', 'Completed', 'Incomplete'];
+const JOB_STATUSES = ['Draft', 'Active', 'Assigned', 'Checkin', 'Checkout', 'Done', 'Review', 'Complete', 'Cancel', 'Paid'];
 
 // Function to validate required fields (no change)
 const validateJobFields = (fields) => {
@@ -233,12 +233,20 @@ export const updateJobStatus = async (req, res) => {
     const { status } = req.body;
 
     try {
-        const validStatuses = ['Draft', 'Published', 'Assigned', 'OnHold', 'Pending Review', 'Completed', 'Incomplete'];
+        const validStatuses = ['Draft', 'Active', 'Assigned', 'Checkin', 'Checkout', 'Done', 'Complete', 'Review', 'Cancel', 'Paid'];
         if (!validStatuses.includes(status)) {
             return res.status(400).json({ message: 'Invalid status', success: false });
         }
 
-        const job = await Workorder.findByIdAndUpdate(id, { status }, { new: true });
+        let updateData = { status };
+        if (status === 'Complete') {
+            updateData.completeTime = new Date();
+        }
+        if (status === 'Paid') {
+            updateData.paidTime = new Date();
+        }
+
+        const job = await Workorder.findByIdAndUpdate(id, updateData, { new: true });
 
         if (!job) {
             return res.status(404).json({ message: 'Job not found', success: false });
@@ -247,9 +255,83 @@ export const updateJobStatus = async (req, res) => {
         return res.status(200).json({ message: 'Job status updated successfully', job, success: true });
     } catch (error) {
         console.error('Error updating job status:', error);
-        return res.status(500).json({ message: 'Server error', success: false });
+        return res.status(500).json({ message: 'Server error', success: false, error: error.message });
     }
 };
+
+export const checkinJob = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const job = await Workorder.findByIdAndUpdate(id, { status: 'Checkin', checkinTime: new Date() }, { new: true });
+        if (!job) return res.status(404).json({ message: 'Job not found', success: false });
+        return res.status(200).json({ message: 'Job checked in successfully', job, success: true });
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error', success: false, error: error.message });
+    }
+};
+
+export const checkoutJob = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const job = await Workorder.findByIdAndUpdate(id, { status: 'Checkout', checkoutTime: new Date() }, { new: true });
+        if (!job) return res.status(404).json({ message: 'Job not found', success: false });
+        return res.status(200).json({ message: 'Job checked out successfully', job, success: true });
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error', success: false, error: error.message });
+    }
+};
+
+export const doneJob = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const job = await Workorder.findByIdAndUpdate(id, { status: 'Done', doneTime: new Date() }, { new: true });
+        if (!job) return res.status(404).json({ message: 'Job not found', success: false });
+        return res.status(200).json({ message: 'Job marked done successfully', job, success: true });
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error', success: false, error: error.message });
+    }
+};
+export const completeJob = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const job = await Workorder.findByIdAndUpdate(id, { status: 'Complete', doneTime: new Date() }, { new: true });
+        if (!job) return res.status(404).json({ message: 'Job not found', success: false });
+        return res.status(200).json({ message: 'Job marked Complete successfully', job, success: true });
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error', success: false, error: error.message });
+    }
+};
+export const ReviewJob = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const job = await Workorder.findByIdAndUpdate(id, { status: 'Review', doneTime: new Date() }, { new: true });
+        if (!job) return res.status(404).json({ message: 'Job not found', success: false });
+        return res.status(200).json({ message: 'Job marked Review successfully', job, success: true });
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error', success: false, error: error.message });
+    }
+};
+export const cancelJob = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const job = await Workorder.findByIdAndUpdate(id, { status: 'Cancel', doneTime: new Date() }, { new: true });
+        if (!job) return res.status(404).json({ message: 'Job not found', success: false });
+        return res.status(200).json({ message: 'Job marked Cancel successfully', job, success: true });
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error', success: false, error: error.message });
+    }
+};
+export const PaidJob = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const job = await Workorder.findByIdAndUpdate(id, { status: 'Paid', doneTime: new Date() }, { new: true });
+        if (!job) return res.status(404).json({ message: 'Job not found', success: false });
+        return res.status(200).json({ message: 'Job marked Paid successfully', job, success: true });
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error', success: false, error: error.message });
+    }
+};
+
 export const getJobsByProject = async (req, res) => {
     const { projectId } = req.params;
 
@@ -308,5 +390,49 @@ export const getTechnicianJobs = async (req, res) => {
     } catch (error) {
         console.error("Error fetching technician jobs:", error);
         return res.status(500).json({ message: "Internal server error", success: false, error: error.message });
+    }
+};
+export const getDraftJobById = async (req, res) => {
+    try {
+        const jobId = req.params.id;
+
+        if (!mongoose.Types.ObjectId.isValid(jobId)) {
+            return res.status(400).json({
+                message: "Invalid job ID.",
+                success: false,
+            });
+        }
+
+        const job = await Workorder.findById(jobId)
+            .populate("clientName")
+            .populate("projectName")
+            .populate({
+                path: "Application",
+                populate: { path: "applicant" },
+            })
+            .populate("assignedApplicant");
+
+        if (!job) {
+            return res.status(404).json({
+                message: "Job not found.",
+                success: false,
+            });
+        }
+
+        if (job.status !== 'Draft') {
+            return res.status(400).json({
+                message: "Job is not a draft",
+                success: false,
+            })
+        }
+
+        return res.status(200).json({ job, success: true });
+    } catch (error) {
+        console.error("Error getting draft job by ID:", error);
+        return res.status(500).json({
+            message: "Server error.",
+            success: false,
+            error: error.message,
+        });
     }
 };

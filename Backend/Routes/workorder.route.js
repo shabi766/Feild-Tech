@@ -1,6 +1,6 @@
 import express from "express";
 
-import { getAdminJobs, getAllJobs, getJobById, postJob, getUserJobs, updateJob, updateJobStatus, getJobsByProject, getTechnicianJobs} from "../Controllers/workorder.controller.js";
+import { getAdminJobs, getAllJobs, getJobById, postJob,  updateJob, updateJobStatus, getJobsByProject, getTechnicianJobs, checkinJob, checkoutJob, doneJob,  ReviewJob, PaidJob,  cancelJob, completeJob, getDraftJobById} from "../Controllers/workorder.controller.js";
 import isAuthenticated from "../middleware/isAuthenticated.js";
 
 const router = express.Router();
@@ -16,6 +16,14 @@ router.route("/status/:id").put(isAuthenticated, updateJobStatus);
 
 router.route("/get-by-project/:projectId").get(isAuthenticated, getJobsByProject);
 router.route("/technician-jobs").get(isAuthenticated, getTechnicianJobs);
+router.route("/checkin/:id").put(isAuthenticated, checkinJob);
+router.route("/checkout/:id").put(isAuthenticated, checkoutJob);
+router.route("/done/:id").put(isAuthenticated, doneJob);
+router.route("/complete/:id").put(isAuthenticated, completeJob);
+router.route("/review/:id").put(isAuthenticated, ReviewJob);
+router.route("/paid/:id").put(isAuthenticated, PaidJob);
+router.route("/Cancel/:id").put(isAuthenticated, cancelJob);
+router.route("/workorders/draft/:id").get(isAuthenticated, getDraftJobById);
 
 
 

@@ -11,7 +11,7 @@ import Companies from "./components/admin/companies";
 import CompanyCreate from "./components/admin/CompanyCreate";
 import CompanySetup from "./components/admin/CompanySetup";
 import AdminJobs from "./components/admin/AdminJobs";
-import PostJobs from "./components/admin/PostJobs";
+
 import Applicants from "./components/admin/Applicants";
 import JobCalendar from "./components/Schedueler/JobCalender";
 import ClientSetup from "./components/admin/ClientSetup";
@@ -36,6 +36,7 @@ import ProtectedRoute from "./components/admin/ProtectedRoute";
 import Layout from "../Layout"; // Import Layout
 import Settings from "./components/shared/Settings";
 import JobTable from "./components/user/JobTable";
+import PostJobs from "./components/admin/PostJobcomps/PostJob";
 
 function App() {
   return (

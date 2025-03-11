@@ -76,7 +76,7 @@ const JobTable = () => {
     }
 
     const handleJobClick = (jobId) => {
-        navigate(`/viewjob/${jobId}`);
+        navigate(`/description/${jobId}`);
     };
 
     return (
@@ -123,14 +123,14 @@ const JobTable = () => {
                                     </PopoverTrigger>
                                     <PopoverContent className="w-32 p-2 border border-gray-300 rounded-lg shadow-lg">
                                         <div
-                                            onClick={() => navigate(`/job/${job._id}/edit`)}
+                                            onClick={() => navigate(`/description/${job._id}/edit`)}
                                             className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-200 rounded"
                                         >
                                             <Edit2 className="w-4 text-blue-500" />
                                             <span>Edit</span>
                                         </div>
                                         <div
-                                            onClick={() => navigate(`/job/${job._id}`)}
+                                            onClick={() => navigate(`/description/${job._id}`)}
                                             className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-200 rounded mt-1"
                                         >
                                             <Eye className="w-4 text-green-500" />

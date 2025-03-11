@@ -79,10 +79,17 @@ const workorderSchema = new mongoose.Schema({
     // Status field
     status: {
         type: String,
-        enum: ['Draft', 'Active', 'Published', 'Assigned', 'OnHold', 'Pending Review', 'Completed', 'Incomplete'],
-        default: 'Draft', // Default status
+        enum: ['Draft', 'Active', 'Assigned', 'Checkin', 'Checkout', 'Done', 'Complete', 'Review', 'Cancel', 'Paid'],
+        default: 'Draft',
         required: true
-    }
+    },
+    checkinRequired: {type: Boolean, default: false},
+    checkoutRequired: {type: Boolean, default: false},
+    checkinTime: {type: Date, default: null},
+    checkoutTime: {type: Date, default: null},
+    doneTime: {type: Date, default: null},
+    completeTime: {type: Date, default: null},
+    paidTime: {type: Date, default: null},
 }, { timestamps: true });
 
 export const Workorder = mongoose.model("Workorder", workorderSchema);

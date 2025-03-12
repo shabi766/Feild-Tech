@@ -5,7 +5,6 @@ import { Edit2, Eye, MoreHorizontal } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
-import Footer from '../shared/Footer';
 
 const AdminJobsTable = () => {
     const { allAdminJobs, searchJobByText } = useSelector(store => store.job);
@@ -13,7 +12,7 @@ const AdminJobsTable = () => {
     const [activeTab, setActiveTab] = useState('All');
     const navigate = useNavigate();
 
-    const jobStatuses = ['All', 'Active', 'Draft','Assigned', 'Pending', 'In Progress', 'Completed', 'Cancelled'];
+    const jobStatuses = ['All', 'Active', 'Draft', 'Assigned', 'Pending', 'In Progress', 'Completed', 'Cancelled'];
 
     useEffect(() => {
         const filteredJobs = allAdminJobs.filter((job) => {
@@ -29,13 +28,16 @@ const AdminJobsTable = () => {
         setFilterJobs(filteredJobs);
     }, [allAdminJobs, searchJobByText, activeTab]);
 
-    const handleJobClick = (jobId) => {
-        navigate(`/viewjob/${jobId}`);
+    const handleJobClick = (jobId, status) => {
+        if (status === 'Draft') {
+            navigate(`/admin/jobs/create?jobId=${jobId}`); // Navigate to create with jobId as query
+        } else {
+            navigate(`/viewjob/${jobId}`);
+        }
     };
 
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
-            {/* Job Status Tabs */}
             <div className="flex flex-wrap gap-3 mb-6">
                 {jobStatuses.map((status) => (
                     <Button
@@ -51,7 +53,6 @@ const AdminJobsTable = () => {
                 ))}
             </div>
 
-            {/* Job Table */}
             <Table className="bg-white shadow-md rounded-lg overflow-hidden">
                 <TableCaption className="text-lg font-semibold text-gray-700">
                     A list of your recent posted jobs
@@ -66,17 +67,19 @@ const AdminJobsTable = () => {
                 </TableHeader>
                 <TableBody>
                     {filterJobs?.map((job) => (
-                        <TableRow 
-                            key={job._id} 
-                            className="hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
+                        <TableRow
+                            key={job._id}
+                            className={`hover:bg-gray-100 transition-colors duration-200 cursor-pointer ${
+                                job.status === 'Draft' ? 'bg-yellow-100' : ''
+                            }`}
                         >
-                            <TableCell onClick={() => handleJobClick(job._id)} className="cursor-pointer">
+                            <TableCell onClick={() => handleJobClick(job._id, job.status)} className="cursor-pointer">
                                 {job?.Company?.name}
                             </TableCell>
-                            <TableCell onClick={() => handleJobClick(job._id)} className="cursor-pointer">
+                            <TableCell onClick={() => handleJobClick(job._id, job.status)} className="cursor-pointer">
                                 {job?.title}
                             </TableCell>
-                            <TableCell onClick={() => handleJobClick(job._id)} className="cursor-pointer">
+                            <TableCell onClick={() => handleJobClick(job._id, job.status)} className="cursor-pointer">
                                 {job?.createdAt.split("T")[0]}
                             </TableCell>
                             <TableCell className="text-right">
@@ -85,15 +88,15 @@ const AdminJobsTable = () => {
                                         <MoreHorizontal className="cursor-pointer text-gray-600 hover:text-blue-600" />
                                     </PopoverTrigger>
                                     <PopoverContent className="w-32 p-2 border border-gray-300 rounded-lg shadow-lg">
-                                        <div 
-                                            onClick={() => navigate(`/admin/jobs/${job._id}`)} 
+                                        <div
+                                            onClick={() => navigate(`/admin/jobs/${job._id}`)}
                                             className='flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-200 rounded'
                                         >
                                             <Edit2 className='w-4 text-blue-500' />
                                             <span>Edit</span>
                                         </div>
-                                        <div 
-                                            onClick={() => navigate(`/admin/jobs/${job._id}/applicants`)} 
+                                        <div
+                                            onClick={() => navigate(`/admin/jobs/${job._id}/applicants`)}
                                             className='flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-200 rounded mt-1'
                                         >
                                             <Eye className='w-4 text-green-500' />
@@ -106,8 +109,6 @@ const AdminJobsTable = () => {
                     ))}
                 </TableBody>
             </Table>
-
-            
         </div>
     );
 };

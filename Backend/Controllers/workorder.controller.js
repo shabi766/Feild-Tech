@@ -1,22 +1,24 @@
 import { Workorder } from "../Models/workorder.model.js";
 import { Client } from "../Models/client.model.js";
 import { Project } from "../Models/project.model.js";
-import {Application} from "../Models/application.model.js"
+import { Application } from "../Models/application.model.js";
 import mongoose from 'mongoose';
 
-// Constants for job statuses (no change)
+// Constants for job statuses
 const JOB_STATUSES = ['Draft', 'Active', 'Assigned', 'Checkin', 'Checkout', 'Done', 'Review', 'Complete', 'Cancel', 'Paid'];
 
-// Function to validate required fields (no change)
-const validateJobFields = (fields) => {
+// Function to validate required fields
+const validateJobFields = (fields, status) => {
     const requiredFields = ['title', 'description', 'totalSalary', 'skills', 'street', 'city', 'state', 'postalCode', 'country', 'jobType', 'startTime', 'endTime'];
     const errors = {};
 
-    requiredFields.forEach(field => {
-        if (!fields[field]) {
-            errors[field] = `${field} is required.`;
-        }
-    });
+    if (status !== 'Draft') {
+        requiredFields.forEach(field => {
+            if (!fields[field]) {
+                errors[field] = `${field} is required.`;
+            }
+        });
+    }
 
     return errors;
 };
@@ -24,6 +26,10 @@ const validateJobFields = (fields) => {
 const findClientAndProject = async (clientId, projectId) => {
     const client = await Client.findById(clientId);
     if (!client) throw new Error(`Client with ID '${clientId}' not found in the database`);
+
+    if (!projectId || projectId === "") {
+        return { client, project: null }; // Return null project if projectId is empty
+    }
 
     const project = await Project.findById(projectId);
     if (!project) throw new Error(`Project with ID '${projectId}' not found in the database`);
@@ -33,7 +39,7 @@ const findClientAndProject = async (clientId, projectId) => {
 
 export const postJob = async (req, res) => {
     try {
-        const {
+        let {
             title, template, clientName, projectName,
             description, requiredTools, skills,
             jobType, partTimeOptions, fullTimeOptions,
@@ -41,55 +47,71 @@ export const postJob = async (req, res) => {
             startTime, endTime, status, totalJobTime, totalJobDuration
         } = req.body;
 
-        const userId = req.user._id; // Use req.user._id (consistent)
+        const userId = req.user._id;
 
-        const errors = validateJobFields(req.body);
+        const errors = validateJobFields(req.body, status);
         if (Object.keys(errors).length > 0) {
-            return res.status(400).json({ message: "Validation failed", errors, success: false });
+            return res.status(400).json({ message: "Please Fill All Feilds", errors, success: false });
         }
 
-        const { client, project } = await findClientAndProject(clientName, projectName);
+        // Check if clientName is empty for non-draft jobs
+        if (status !== 'Draft' && (!clientName || clientName === "")) {
+            return res.status(400).json({ message: "Client name is required for active jobs", success: false });
+        }
+
+        let client = null;
+        let project = null;
+
+        if (clientName && clientName !== "") {
+            const result = await findClientAndProject(clientName, projectName);
+            client = result.client;
+            project = result.project;
+        }
+
+        // Data transformation and validation
+        template = template || null; // Handle empty template
+        totalJobTime = totalJobTime || null; // Handle empty totalJobTime
+        projectName = project ? project._id : null; // Handle null project
+        jobType = jobType || null; // Handle empty jobType
+        requiredTools = requiredTools ? requiredTools.split(",").map(tool => tool.trim()) : [];
+        skills = skills ? skills.split(",").map(skill => skill.trim()) : [];
 
         const jobData = {
             title,
             template,
             description,
-            requiredTools: requiredTools ? requiredTools.split(",").map(tool => tool.trim()) : [],
-            skills: skills.split(",").map(skill => skill.trim()),
+            requiredTools,
+            skills,
             jobType,
             partTimeOptions: jobType === 'part-time' ? partTimeOptions : undefined,
             fullTimeOptions: jobType === 'full-time' ? fullTimeOptions : undefined,
             totalSalary,
             location: { street, city, state, postalCode, country },
             created_by: userId,
-            startTime: new Date(startTime),
-            endTime: new Date(endTime),
+            startTime: startTime ? new Date(startTime) : null,
+            endTime: endTime ? new Date(endTime) : null,
             totalJobTime,
             totalJobDuration,
             status: status || 'Draft',
-            clientName: client._id, // Store client _id
-            projectName: project ? project._id : null, // Store project _id
+            clientName: client ? client._id : null, // Handle null client
+            projectName: projectName,
             isIndividual: !projectName
         };
 
         const job = await Workorder.create(jobData);
         return res.status(201).json({ message: "New job created successfully", job, success: true });
     } catch (error) {
-        console.error('Error creating job:', error); // Log the full error object
-        return res.status(500).json({ message: error.message, success: false, error: error.message }); // Send error message
+        console.error('Error creating job:', error);
+        return res.status(500).json({ message: error.message, success: false, error: error.message });
     }
 };
-
-
-// ... Other functions remain unchanged
-
-// New API to fetch jobs created by the logged-in user (for calendar)
+// API to fetch jobs created by the logged-in user (for calendar)
 export const getUserJobs = async (req, res) => {
     try {
-        const userId = req.user._id; // Use req.user._id (consistent)
-        const jobs = await Workorder.find({ created_by: userId }).populate('clientName').populate('projectName'); // Populate both client and project
+        const userId = req.user._id;
+        const jobs = await Workorder.find({ created_by: userId }).populate('clientName').populate('projectName');
 
-        if (!jobs || jobs.length === 0) { // Check for both null and empty array
+        if (!jobs || jobs.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: 'No jobs found for this user',
@@ -105,7 +127,7 @@ export const getUserJobs = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: 'Server error while fetching jobs',
-            error: error.message, // Include error message
+            error: error.message,
         });
     }
 };
@@ -120,9 +142,9 @@ export const getAllJobs = async (req, res) => {
                 { description: { $regex: keyword, $options: "i" } },
             ]
         };
-        const jobs = await Workorder.find(query).populate('clientName').sort({ createdAt: -1 }); // Populate client
+        const jobs = await Workorder.find(query).populate('clientName').sort({ createdAt: -1 });
 
-        if (!jobs || jobs.length === 0) { // Check for both null and empty array
+        if (!jobs || jobs.length === 0) {
             return res.status(404).json({
                 message: "Jobs not found.",
                 success: false
@@ -138,7 +160,7 @@ export const getAllJobs = async (req, res) => {
         return res.status(500).json({
             message: "Server error.",
             success: false,
-            error: error.message // Include error message
+            error: error.message
         });
     }
 };
@@ -162,7 +184,7 @@ export const getJobById = async (req, res) => {
                 path: "Application",
                 populate: { path: "applicant" },
             })
-            .populate("assignedApplicant"); // Populate assigned user
+            .populate("assignedApplicant");
 
         if (!job) {
             return res.status(404).json({
@@ -185,10 +207,10 @@ export const getJobById = async (req, res) => {
 // Existing functionality to get admin-created jobs
 export const getAdminJobs = async (req, res) => {
     try {
-        const adminId = req.user._id; // Use req.user._id (consistent)
-        const jobs = await Workorder.find({ created_by: adminId }).populate('clientName').sort({ createdAt: -1 }); // Populate client
+        const adminId = req.user._id;
+        const jobs = await Workorder.find({ created_by: adminId }).populate('clientName').sort({ createdAt: -1 });
 
-        if (!jobs || jobs.length === 0) { // Check for both null and empty array
+        if (!jobs || jobs.length === 0) {
             return res.status(404).json({
                 message: "Jobs not found.",
                 success: false
@@ -203,7 +225,7 @@ export const getAdminJobs = async (req, res) => {
         return res.status(500).json({
             message: "Server error.",
             success: false,
-            error: error.message // Include error message
+            error: error.message
         });
     }
 };
@@ -223,7 +245,7 @@ export const updateJob = async (req, res) => {
         return res.status(200).json({ message: 'Job updated successfully', job: updatedJob, success: true });
     } catch (error) {
         console.error('Error updating job:', error);
-        return res.status(500).json({ message: 'Server error while updating job', success: false, error: error.message }); // Include error message
+        return res.status(500).json({ message: 'Server error while updating job', success: false, error: error.message });
     }
 };
 
@@ -335,28 +357,23 @@ export const PaidJob = async (req, res) => {
 export const getJobsByProject = async (req, res) => {
     const { projectId } = req.params;
 
-    
-
     try {
-        const jobs = await Workorder.find({ projectName: projectId }) // Use projectId here
-          .populate([ 'clientName', 'projectName' ]); // Populate both client and project
-    
+        const jobs = await Workorder.find({ projectName: projectId })
+            .populate(['clientName', 'projectName']);
         if (!jobs || jobs.length === 0) {
-          return res.status(404).json({ success: false, message: 'No jobs found for this project' });
+            return res.status(404).json({ success: false, message: 'No jobs found for this project' });
         }
-    
         return res.status(200).json({ success: true, jobs });
-      } catch (error) {
+    } catch (error) {
         console.error('Error fetching jobs by project:', error);
         return res.status(500).json({ success: false, message: 'Server error' });
-      }
+    }
 };
 
 export const getTechnicianJobs = async (req, res) => {
     try {
-        const userId = req.user._id; // Logged-in technician ID
+        const userId = req.user._id;
 
-        // Fetch jobs technician applied for
         const appliedJobs = await Application.find({ applicant: userId })
             .populate({
                 path: "Workorder",
@@ -364,7 +381,6 @@ export const getTechnicianJobs = async (req, res) => {
             })
             .sort({ createdAt: -1 });
 
-        // Fetch jobs assigned to technician
         const assignedJobs = await Workorder.find({ assignedApplicant: userId, status: "Assigned" })
             .populate({
                 path: "created_by",
@@ -372,7 +388,6 @@ export const getTechnicianJobs = async (req, res) => {
             })
             .sort({ createdAt: -1 });
 
-        // Fetch completed jobs by technician
         const completedJobs = await Workorder.find({ assignedApplicant: userId, status: "Completed" })
             .populate({
                 path: "created_by",

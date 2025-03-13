@@ -13,7 +13,7 @@ const addressSchema = new mongoose.Schema({
 const workorderSchema = new mongoose.Schema({
     // Title section
     title: { type: String },
-    template: { type: String},
+    template: { type: String },
     clientName: { type: mongoose.Schema.Types.ObjectId, ref: 'Client' },
     projectName: { type: mongoose.Schema.Types.ObjectId, ref: 'Project' },
 
@@ -77,7 +77,7 @@ const workorderSchema = new mongoose.Schema({
     // Status field
     status: {
         type: String,
-        enum: ['Draft', 'Active', 'Assigned', 'Checkin', 'Checkout', 'Done', 'Complete', 'Review', 'Cancel', 'Paid'],
+        enum: ['Draft', 'Active', 'Assigned', 'In Progress', 'Done', 'Complete', 'Review', 'Cancel', 'Paid'],
         default: 'Draft'
     },
     checkinRequired: { type: Boolean, default: false },
@@ -87,6 +87,7 @@ const workorderSchema = new mongoose.Schema({
     doneTime: { type: Date, default: null },
     completeTime: { type: Date, default: null },
     paidTime: { type: Date, default: null },
+    timeSpent: { type: Number, default: null },
 }, { timestamps: true });
 
 export const Workorder = mongoose.model("Workorder", workorderSchema);

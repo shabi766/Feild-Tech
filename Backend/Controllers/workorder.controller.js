@@ -5,7 +5,7 @@ import { Application } from "../Models/application.model.js";
 import mongoose from 'mongoose';
 
 // Constants for job statuses
-const JOB_STATUSES = ['Draft', 'Active', 'Assigned', 'Checkin', 'Checkout', 'Done', 'Review', 'Complete', 'Cancel', 'Paid'];
+const JOB_STATUSES = ['Draft', 'Active', 'Assigned', 'In Progress', 'Done', 'Review', 'Complete', 'Cancel', 'Paid'];
 
 // Function to validate required fields
 const validateJobFields = (fields, status) => {
@@ -255,7 +255,7 @@ export const updateJobStatus = async (req, res) => {
     const { status } = req.body;
 
     try {
-        const validStatuses = ['Draft', 'Active', 'Assigned', 'Checkin', 'Checkout', 'Done', 'Complete', 'Review', 'Cancel', 'Paid'];
+        const validStatuses = ['Draft', 'Active', 'Assigned', 'In Progress', 'Done', 'Complete', 'Review', 'Cancel', 'Paid'];
         if (!validStatuses.includes(status)) {
             return res.status(400).json({ message: 'Invalid status', success: false });
         }
@@ -284,7 +284,7 @@ export const updateJobStatus = async (req, res) => {
 export const checkinJob = async (req, res) => {
     const { id } = req.params;
     try {
-        const job = await Workorder.findByIdAndUpdate(id, { status: 'Checkin', checkinTime: new Date() }, { new: true });
+        const job = await Workorder.findByIdAndUpdate(id, { status: 'In Progress', checkinTime: new Date() }, { new: true });
         if (!job) return res.status(404).json({ message: 'Job not found', success: false });
         return res.status(200).json({ message: 'Job checked in successfully', job, success: true });
     } catch (error) {
@@ -295,13 +295,36 @@ export const checkinJob = async (req, res) => {
 export const checkoutJob = async (req, res) => {
     const { id } = req.params;
     try {
-        const job = await Workorder.findByIdAndUpdate(id, { status: 'Checkout', checkoutTime: new Date() }, { new: true });
-        if (!job) return res.status(404).json({ message: 'Job not found', success: false });
-        return res.status(200).json({ message: 'Job checked out successfully', job, success: true });
+        const job = await Workorder.findById(id);
+
+        if (!job) {
+            return res.status(404).json({ message: 'Job not found', success: false });
+        }
+
+        if (!job.checkinTime) {
+            return res.status(400).json({ message: 'Job has not been checked in', success: false });
+        }
+
+        const checkoutTime = new Date();
+        const timeSpent = checkoutTime - job.checkinTime; // Time in milliseconds
+
+        const updatedJob = await Workorder.findByIdAndUpdate(
+            id,
+            {
+                
+                checkoutTime: checkoutTime,
+                timeSpent: timeSpent,
+            },
+            { new: true }
+        );
+
+        return res.status(200).json({ message: 'Job checked out successfully', job: updatedJob, success: true });
     } catch (error) {
+        console.error('Error checking out job:', error);
         return res.status(500).json({ message: 'Server error', success: false, error: error.message });
     }
 };
+
 
 export const doneJob = async (req, res) => {
     const { id } = req.params;
@@ -374,37 +397,35 @@ export const getTechnicianJobs = async (req, res) => {
     try {
         const userId = req.user._id;
 
-        const appliedJobs = await Application.find({ applicant: userId })
-            .populate({
-                path: "Workorder",
-                populate: { path: "created_by", select: "fullname email" }
-            })
-            .sort({ createdAt: -1 });
+        // Fetch all jobs
+        const jobs = await Workorder.find({
+            $or: [
+                { Application: { $elemMatch: { applicant: userId } } }, // Applied jobs
+                { assignedApplicant: userId } // Assigned jobs
+            ]
+        }).populate('Application');
 
-        const assignedJobs = await Workorder.find({ assignedApplicant: userId, status: "Assigned" })
-            .populate({
-                path: "created_by",
-                select: "fullname email"
-            })
-            .sort({ createdAt: -1 });
+        // Categorize jobs
+        const appliedJobs = jobs.filter(job =>
+            job.Application.some(app => app.applicant && app.applicant.toString() === userId.toString()) && job.assignedApplicant == null
+        );
 
-        const completedJobs = await Workorder.find({ assignedApplicant: userId, status: "Completed" })
-            .populate({
-                path: "created_by",
-                select: "fullname email"
-            })
-            .sort({ createdAt: -1 });
+        const assignedJobs = jobs.filter(job => job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() && job.status === 'Assigned');
 
-        return res.status(200).json({
-            success: true,
+        const inProgressJobs = jobs.filter(job => job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() && job.status === 'In Progress');
+
+        const completedJobs = jobs.filter(job => job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() && job.status === 'Complete');
+
+        res.status(200).json({
             appliedJobs,
             assignedJobs,
+            inProgressJobs,
             completedJobs,
+            success: true
         });
-
     } catch (error) {
         console.error("Error fetching technician jobs:", error);
-        return res.status(500).json({ message: "Internal server error", success: false, error: error.message });
+        res.status(500).json({ message: "Server error", success: false });
     }
 };
 export const getDraftJobById = async (req, res) => {

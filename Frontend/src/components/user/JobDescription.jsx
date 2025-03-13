@@ -65,6 +65,48 @@ const JobDescription = () => {
         }
     };
 
+    const handleCheckin = async () => {
+        try {
+            const res = await axios.put(`${JOB_API_END_POINT}/checkin/${jobId}`, {}, { withCredentials: true });
+            if (res.data.success) {
+                toast.success(res.data.message);
+                dispatch(setSingleJob(res.data.job)); // Update job data
+            } else {
+                toast.error(res.data.message);
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || "An unexpected error occurred.");
+        }
+    };
+
+    const handleCheckout = async () => {
+        try {
+            const res = await axios.put(`${JOB_API_END_POINT}/checkout/${jobId}`, {}, { withCredentials: true });
+            if (res.data.success) {
+                toast.success(res.data.message);
+                dispatch(setSingleJob(res.data.job)); // Update job data
+            } else {
+                toast.error(res.data.message);
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || "An unexpected error occurred.");
+        }
+    };
+
+    const handleMarkDone = async () => {
+        try {
+            const res = await axios.put(`${JOB_API_END_POINT}/done/${jobId}`, {}, { withCredentials: true });
+            if (res.data.success) {
+                toast.success(res.data.message);
+                dispatch(setSingleJob(res.data.job)); // Update job data
+            } else {
+                toast.error(res.data.message);
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || "An unexpected error occurred.");
+        }
+    };
+
     if (loading) {
         return <div className="flex justify-center items-center h-screen"><p>Loading job details...</p></div>;
     }
@@ -76,6 +118,27 @@ const JobDescription = () => {
     return (
         <div className="min-h-screen bg-gray-100 py-10">
             <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-lg p-8 border border-gray-300">
+                {/* Status Bar */}
+                <div className="mb-6 p-4 bg-gray-100 border border-gray-300 rounded-lg flex justify-between items-center">
+                    {singleJob.assignedApplicant?._id === user?._id ? (
+                        <div>
+                            <p>Status: {singleJob.status}</p>
+                            {singleJob.status === 'Assigned' && <Button onClick={handleCheckin}>Check In</Button>}
+                            {singleJob.checkinTime && !singleJob.checkoutTime && <Button onClick={handleCheckout}>Check Out</Button>}
+                            {singleJob.checkoutTime && singleJob.status !== 'Done' && <Button onClick={handleMarkDone}>Mark Done</Button>}
+                            {singleJob.checkinTime && <p>Checked in at: {new Date(singleJob.checkinTime).toLocaleString()}</p>}
+                            {singleJob.timeSpent && <p>Time spent: {singleJob.timeSpent} ms</p>}
+                        </div>
+                    ) : (
+                        <Button
+                            onClick={isApplied ? null : applyJobHandler}
+                            disabled={isApplied}
+                            className={`px-6 py-2 text-white rounded-lg ${isApplied ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}`}
+                        >
+                            {isApplied ? "Already Applied" : "Apply Now"}
+                        </Button>
+                    )}
+                </div>
                 {/* 🔹 Job Title (Top Priority Section) */}
             <div className="mb-6 p-6 bg-white border border-gray-300 rounded-lg shadow-sm">
                     <h1 className="text-3xl font-semibold text-gray-900">{singleJob?.title}</h1>
@@ -106,14 +169,7 @@ const JobDescription = () => {
                         )}
                     </div>
 
-                    {/* Apply Button */}
-                    <Button
-                        onClick={isApplied ? null : applyJobHandler}
-                        disabled={isApplied}
-                        className={`px-6 py-2 text-white rounded-lg ${isApplied ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}`}
-                    >
-                        {isApplied ? "Already Applied" : "Apply Now"}
-                    </Button>
+                    
                 </div>
 
                

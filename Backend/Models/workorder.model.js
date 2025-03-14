@@ -22,20 +22,7 @@ const workorderSchema = new mongoose.Schema({
 
     // Description section
     description: { type: String },
-    totalSalary: { type: Number },
-
-    // Updated salary structure
-    salary: {
-        // New field for total salary
-        partTime: {
-            hourlyRate: { type: Number },
-            dailyRate: { type: Number },
-            contractRate: { type: Number }
-        },
-        fullTime: {
-            monthlySalary: { type: Number }
-        }
-    },
+    totalSalary: { type: Number }, // Simplified to just totalSalary
 
     requiredTools: { type: [String] },
     skills: { type: [String] },
@@ -44,10 +31,11 @@ const workorderSchema = new mongoose.Schema({
     jobType: { type: String, enum: ['part-time', 'full-time'] },
     partTimeOptions: {
         type: {
-            base: { type: String, enum: ['hourly', 'daily', 'contract'] },
+            base: { type: String, enum: ['hourly', 'daily', 'contract', 'weekly'] }, //Added weekly base
             hourlyHours: { type: Number },
             dailyDays: { type: Number },
-            contractMonths: { type: Number }
+            contractMonths: { type: Number },
+            weeklyDays: { type: Number }
         }
     },
     fullTimeOptions: {
@@ -88,6 +76,18 @@ const workorderSchema = new mongoose.Schema({
     completeTime: { type: Date, default: null },
     paidTime: { type: Date, default: null },
     timeSpent: { type: Number, default: null },
+    // New salary field
+    salary: {
+        type: {
+            partTime: {
+                hourlyRate: { type: Number },
+                dailyRate: {type: Number},
+                contractRate: {type: Number},
+                weeklyRate: {type: Number},
+            },
+            fixed: { type: Number }
+        }
+    },
 }, { timestamps: true });
 
 export const Workorder = mongoose.model("Workorder", workorderSchema);

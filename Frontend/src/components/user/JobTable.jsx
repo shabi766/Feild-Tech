@@ -24,7 +24,7 @@ const JobTable = () => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    const jobStatuses = ["All", "Applied", "Assigned", "In Progress", "Completed"];
+    const jobStatuses = ["All", "Applied", "Assigned",'Done', "In Progress", "Completed"];
 
     useEffect(() => {
         const fetchJobs = async () => {

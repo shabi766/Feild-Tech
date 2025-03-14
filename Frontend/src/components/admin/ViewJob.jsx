@@ -1,16 +1,12 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-
-import Footer from "../shared/Footer";
 import ProviderRequests from "./Providercomps/ProviderRequests";
 import ProviderTalentpool from "./Providercomps/ProviderTalentpool";
 import ProviderTechnicians from "./Providercomps/ProviderTechnicians";
 import { JOB_API_END_POINT } from "../utils/constant";
-
 import { ChatContext } from "@/context/ChatContext";
 import { MessageCircle } from "lucide-react";
-import { parseISO, format } from 'date-fns';
 
 const ViewJob = () => {
     const { id } = useParams();
@@ -26,12 +22,14 @@ const ViewJob = () => {
     const [providerTab, setProviderTab] = useState("Requests");
     const [assignedApplicant, setAssignedApplicant] = useState(null);
     const [showLogsDialog, setShowLogsDialog] = useState(false);
+    const [payableHours, setPayableHours] = useState(0);
+    const [payableSalary, setPayableSalary] = useState(0);
 
     useEffect(() => {
         const fetchJobDetails = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(`${JOB_API_END_POINT}/get/${id}`, { withCredentials: true });
+                const response = await axios.get(`<span class="math-inline">\{JOB\_API\_END\_POINT\}/get/</span>{id}`, { withCredentials: true });
 
                 if (response.data.success && response.data.job) {
                     const jobData = response.data.job;
@@ -44,6 +42,21 @@ const ViewJob = () => {
                     if (jobData.assignedApplicant) {
                         setAssignedApplicant(jobData.assignedApplicant);
                     }
+
+                    if (jobData.status === "Done" && jobData.jobType === "part-time" && jobData.partTimeOptions?.base === "hourly") {
+                        try {
+                            const payableRes = await axios.get(`<span class="math-inline">\{JOB\_API\_END\_POINT\}/calculate\-payble/</span>{id}`, { withCredentials: true });
+                            if (payableRes.data.success) {
+                                setPayableHours(payableRes.data.payableHours);
+                                setPayableSalary(payableRes.data.payableSalary);
+                            } else {
+                                console.error("Calculate payable failed:", payableRes.data?.message || "Unknown error");
+                            }
+                        } catch (payableError) {
+                            console.error("Error calculating payable:", payableError);
+                        }
+                    }
+
                 } else {
                     console.error("Job data not found or unsuccessful response:", response.data?.message || "Unknown error");
                 }
@@ -67,25 +80,42 @@ const ViewJob = () => {
         }
     };
 
-   
-    const renderStatusBar = () => {
-        console.log("Rendering status bar. Job data:", job);
+    const formatDate = (dateString) => {
+        if (!dateString) return "N/A";
 
-        let checkStatus = null;
-        const checkInStr = String(job?.checkInTime);
-        const checkOutStr = String(job?.checkOutTime);
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) {
+                return "Invalid Date";
+            }
 
-        if (checkInStr && checkOutStr) {
-            console.log("Both checkInTime and checkOutTime are set.");
-            checkStatus = "Checked Out";
-        } else if (checkInStr && (!checkOutStr || checkOutStr === 'null' || checkOutStr === 'undefined')) {
-            console.log("checkInTime is set, but checkOutTime is null or undefined.");
-            checkStatus = "Checked In";
-        } else {
-            console.log("Neither condition is met.");
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
+        } catch (error) {
+            console.error("Error formatting date:", error);
+            return "Invalid Date";
         }
+    };
 
-        console.log("Check Status:", checkStatus);
+    const renderStatusBar = () => {
+        let checkStatus = null;
+        let displayTime = null;
+        const checkInTime = job?.checkinTime;
+        const checkOutTime = job?.checkoutTime;
+
+        if (checkInTime && checkOutTime) {
+            checkStatus = "Checked Out";
+            displayTime = formatDate(checkOutTime);
+        } else if (checkInTime && (!checkOutTime || checkOutTime === 'null' || checkOutTime === 'undefined')) {
+            checkStatus = "Checked In";
+            displayTime = formatDate(checkInTime);
+        }
 
         return (
             <div className="flex flex-col md:flex-row md:items-center md:justify-between bg-blue-100 p-4 mb-6 rounded-lg shadow-md">
@@ -94,33 +124,35 @@ const ViewJob = () => {
                     <p>Status: <span className="font-bold">{status}</span></p>
                     {checkStatus && (
                         <div className="mt-2">
-                            <p className={`font-semibold ${checkStatus === "Checked Out" ? "bg-green-200 p-1 rounded" : ""}`}>{checkStatus}</p>
-                            {checkStatus === "Checked Out" && job?.checkInTime && job?.checkoutTime && (
-                                <>
-                                    <p className="text-sm">
-                                        Check-in: {job?.checkInTime ? format(parseISO(job.checkInTime), 'yyyy-MM-dd HH:mm:ss') : "Invalid Date"}
+                            <div className={`font-semibold bg-green-200 p-1 rounded`}>
+                                {checkStatus}
+                                {displayTime && (
+                                    <p className="text-xs text-gray-600 mt-1">
+                                        {displayTime}
                                     </p>
-                                    <p className="text-sm">
-                                        Check-out: {job?.checkoutTime ? format(parseISO(job.checkoutTime), 'yyyy-MM-dd HH:mm:ss') : "Invalid Date"}
-                                    </p>
-                                </>
-                            )}
-                            {checkStatus === "Checked In" && job?.checkInTime && (
-                                <p className="text-sm">
-                                    Check-in: {job?.checkInTime ? format(parseISO(job.checkInTime), 'yyyy-MM-dd HH:mm:ss') : "Invalid Date"}
-                                </p>
-                            )}
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>
                 <div className="md:text-right mt-2 md:mt-0">
                     <h2 className="text-lg font-semibold text-blue-600">Salary: {job?.totalSalary || "---"}</h2>
                     <p className="text-sm text-gray-500">Duration: {job?.totalJobDuration || "---"}</p>
+                    {status === "Done" && jobType === "part-time" && job?.partTimeOptions?.base === "hourly" && (
+                        <>
+                            <p className="text-sm text-green-500">
+                                Payable Salary: {payableSalary}
+                            </p>
+                            <p className="text-sm text-green-500">
+                                Payable Hours: {payableHours}
+                            </p>
+                        </>
+                    )}
                 </div>
-                
             </div>
         );
     };
+
     const renderAssignedProvider = () => {
         if (!assignedApplicant) return null;
 
@@ -153,7 +185,6 @@ const ViewJob = () => {
             </div>
         );
     };
-    
 
     const renderContent = () => {
         if (mainTab === "Job Details") {
@@ -183,16 +214,17 @@ const ViewJob = () => {
                             </section>
                             <section className="my-4">
                                 <h3 className="text-xl font-semibold text-gray-800">ETA Start Time</h3>
-                                <p className="text-gray-700">{job?.startTime || '---'}</p>
+                                <p className="text-gray-700">{formatDate(job?.startTime)}</p>
                             </section>
                             <section className="my-4">
                                 <h3 className="text-xl font-semibold text-gray-800">ETA End Time</h3>
-                                <p className="text-gray-700">{job?.endTime || '---'}</p>
+                                <p className="text-gray-700">{formatDate(job?.endTime)}</p>
                             </section>
                             <section className="my-4">
                                 <h3 className="text-xl font-semibold text-gray-800">Address</h3>
                                 <p className="text-gray-700">{job?.location?.street || '---'}</p>
-                            </section><section className="my-4">
+                            </section>
+                            <section className="my-4">
                                 <h3 className="text-xl font-semibold text-gray-800">Skills</h3>
                                 <p className="text-gray-700">{job?.skills?.join(', ') || '---'}</p>
                             </section>
@@ -229,85 +261,102 @@ const ViewJob = () => {
     };
 
     if (loading) return <p>Loading job details...</p>;
+
     const renderLogsDialog = () => {
         if (!showLogsDialog) return null;
-    
+
         return (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                 <div className="bg-white p-6 rounded-lg shadow-lg">
                     <h2 className="text-lg font-semibold mb-4">Tech Logs</h2>
-                    {job?.checkInTime ? (
-                        <p>Check-in: {format(parseISO(job.checkInTime), 'yyyy-MM-dd HH:mm:ss')}</p>
+                    {job?.checkinTime ? (
+                        <p>Check-in: {formatDate(job.checkinTime)}</p>
                     ) : (
                         <p>Check-in: N/A</p>
                     )}
                     {job?.checkoutTime ? (
-                        <p>Check-out: {format(parseISO(job.checkoutTime), 'yyyy-MM-dd HH:mm:ss')}</p>
+                        <p>Check-out: {formatDate(job.checkoutTime)}</p>
                     ) : (
                         <p>Check-out: N/A</p>
                     )}
-                    {job?.checkInTime && job?.checkoutTime ? (
-                        <p>Total Time: {calculateTotalTime(job.checkInTime, job.checkoutTime)}</p>
+                    {job?.checkinTime && job?.checkoutTime ? (
+                        <p>Total Time: {calculateTotalTime(job.checkinTime, job.checkoutTime)}</p>
                     ) : (
                         <p>Total Time: N/A</p>
                     )}
-                    <button onClick={() => setShowLogsDialog(false)} className="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-2 rounded">
+                    <button onClick={() => setShowLogsDialog(false)} className="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold pyx-2 rounded">
                         Close
                     </button>
                 </div>
             </div>
         );
     };
-    
+
     const calculateTotalTime = (checkIn, checkOut) => {
         if (!checkIn || !checkOut) {
-            return "N/A"; // Or handle this case as you see fit
+            return "N/A";
         }
-    
-        const checkInDate = parseISO(checkIn);
-        const checkOutDate = parseISO(checkOut);
-        const difference = checkOutDate.getTime() - checkInDate.getTime();
-    
-        if (difference < 0) {
-            return "Invalid Time Range"; // Or handle this case appropriately
-        }
-    
-        const hours = Math.floor(difference / (1000 * 60 * 60));
-        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-    
-        return `${hours} hours, ${minutes} minutes, ${seconds} seconds`;
-    };
-    
 
-    return (
-        <div>
-            <div className="bg-gray-50 min-h-screen p-8">
-                {renderStatusBar()}
-                <div className="flex justify-center space-x-2 -mt-5 z-10" >
-                    <button onClick={() => setShowLogsDialog(true)} className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-2 rounded text-xs">
+        try {
+            const checkInDate = new Date(checkIn);
+            const checkOutDate = new Date(checkOut);
+            if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
+                return "Invalid Date";
+            }
+
+            const difference = checkOutDate.getTime() - checkInDate.getTime();
+
+            if (difference < 0) {
+                return "Invalid Time Range";
+            }
+
+            const hours = Math.floor(difference / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            return `${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+        } catch (error) {
+            console.error("Error calculating total time:", error);
+            return "Invalid Date";
+        }
+    };
+    const renderActionButtons = () => {
+        if (job && assignedApplicant && ["Assigned", "In Progress", "Done", "Complete", "Paid"].includes(status)) {
+            return (
+                <div className="flex justify-center space-x-2 -mt-5 z-10">
+                    <button
+                        onClick={() => setShowLogsDialog(true)}
+                        className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-2 rounded text-xs"
+                    >
                         Tech Log
                     </button>
                     <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-2 rounded text-xs">
                         Dummy
                     </button>
                 </div>
-<div className="mt-0">
-                {renderAssignedProvider()}
+            );
+        }
+        return null; // Don't render buttons if conditions are not met
+    };
+
+    return (
+        <div>
+            <div className="bg-gray-50 min-h-screen p-8">
+                {renderStatusBar()}
+                {renderActionButtons()}
+                <div className="mt-0">
+                    {renderAssignedProvider()}
                 </div>
                 <div className="bg-white p-8 shadow-lg rounded-lg">
                     <div className="border-b border-gray-300 flex justify-around mb-4">
-                        <button onClick={() => setMainTab("Job Details")} className={`flex-1 py-2 px-4 ${mainTab === "Job Details" && "border-b-2 border-blue-600 text-blue-600"}`}>
-                            Job Details
-                        </button>
-                        <button onClick={() => setMainTab("Provider")} className={`flex-1 py-2 px-4 ${mainTab === "Provider" && "border-b-2 border-blue-600 text-blue-600"}`}>
+                        <button onClick={() => setMainTab("Job Details")} className={`flex-1 py-2 px-4 ${mainTab === "Job Details" && "border-b-2 border-blue-600 text-blue-600"}> Job Details </button> <button onClick={() => setMainTab("Provider")} className={flex-1 py-2 px-4 ${mainTab === "Provider" && "border-b-2 border-blue-600 text-blue-600"}`}>
                             Provider
                         </button>
                     </div>
                     {renderContent()}
                 </div>
+                {renderLogsDialog()}
             </div>
-            {renderLogsDialog()}
         </div>
     );
 };

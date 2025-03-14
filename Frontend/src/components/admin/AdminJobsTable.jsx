@@ -12,7 +12,7 @@ const AdminJobsTable = () => {
     const [activeTab, setActiveTab] = useState('All');
     const navigate = useNavigate();
 
-    const jobStatuses = ['All', 'Active', 'Draft', 'Assigned', 'Pending', 'In Progress', 'Completed', 'Cancelled'];
+    const jobStatuses = ['All', 'Active', 'Draft', 'Assigned', 'Pending', 'In Progress','Done', 'Completed', 'Cancelled'];
 
     useEffect(() => {
         const filteredJobs = allAdminJobs.filter((job) => {

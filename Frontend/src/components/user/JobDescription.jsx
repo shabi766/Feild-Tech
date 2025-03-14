@@ -167,14 +167,8 @@ const JobDescription = () => {
                                 <p className="text-gray-700"><strong>Contract Type:</strong> {singleJob?.fullTimeOptions?.contractType}</p>
                             </>
                         )}
-                    </div>
-
-                    
+                    </div>                  
                 </div>
-
-               
-                
-
                 {/* 🔹 Job Description */}
                 <div className="mb-6 p-6 bg-white border border-gray-300 rounded-lg shadow-sm">
                     <h2 className="text-lg font-semibold text-gray-900 mb-3">📄 Job Description</h2>

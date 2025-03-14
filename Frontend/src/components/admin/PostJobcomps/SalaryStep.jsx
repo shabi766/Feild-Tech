@@ -1,10 +1,14 @@
-// SalaryStep.js
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const SalaryStep = ({ input, setInput, nextStep, prevStep }) => {
+    const handleRateChange = (e) => {
+        const rate = e.target.value;
+        setInput({ ...input, rate: rate });
+    };
+
     return (
         <div>
             <h2 className="font-bold text-lg mb-2">Salary</h2>
@@ -20,12 +24,13 @@ const SalaryStep = ({ input, setInput, nextStep, prevStep }) => {
             </div>
             <div className="mt-4">
                 <Label>Rate</Label>
-                <Input type="number" name="rate" value={input.rate} onChange={(e) => setInput({ ...input, rate: e.target.value })}
-                    placeholder={`Enter ${input.rateType === 'hourly' ? 'hourly' : 'fixed'} rate`} />
-            </div>
-            <div className="mt-4">
-                <Label>Calculated Salary</Label>
-                <Input type="number" name="TotalSalary" value={input.calculatedSalary} readOnly className="my-2" />
+                <Input
+                    type="number"
+                    name="rate"
+                    value={input.rate}
+                    onChange={handleRateChange}
+                    placeholder={`Enter ${input.rateType === 'hourly' ? 'hourly' : 'fixed'} rate`}
+                />
             </div>
             <div className="flex justify-between">
                 <button onClick={prevStep} className="mt-4 bg-gray-500 text-white py-2 px-4 rounded-md">Back</button>

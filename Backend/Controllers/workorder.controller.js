@@ -43,7 +43,8 @@ export const postJob = async (req, res) => {
             title, template, clientName, projectName,
             description, requiredTools, skills,
             jobType, partTimeOptions, fullTimeOptions,
-            totalSalary, street, city, state, postalCode, country,
+            rate, rateType,
+            street, city, state, postalCode, country,
             startTime, endTime, status, totalJobTime, totalJobDuration
         } = req.body;
 
@@ -54,27 +55,45 @@ export const postJob = async (req, res) => {
             return res.status(400).json({ message: "Please Fill All Feilds", errors, success: false });
         }
 
-        // Check if clientName is empty for non-draft jobs
-        if (status !== 'Draft' && (!clientName || clientName === "")) {
-            return res.status(400).json({ message: "Client name is required for active jobs", success: false });
-        }
-
-        let client = null;
-        let project = null;
-
-        if (clientName && clientName !== "") {
-            const result = await findClientAndProject(clientName, projectName);
-            client = result.client;
-            project = result.project;
+        // Find client and project
+        let client, project;
+        try {
+            const { client: foundClient, project: foundProject } = await findClientAndProject(clientName, projectName);
+            client = foundClient;
+            project = foundProject;
+        } catch (findError) {
+            return res.status(400).json({ message: findError.message, success: false });
         }
 
         // Data transformation and validation
-        template = template || null; // Handle empty template
-        totalJobTime = totalJobTime || null; // Handle empty totalJobTime
-        projectName = project ? project._id : null; // Handle null project
-        jobType = jobType || null; // Handle empty jobType
+        template = template || null;
+        totalJobTime = totalJobTime || null;
+        projectName = project ? project._id : null; // Now project is defined
+        jobType = jobType || null;
         requiredTools = requiredTools ? requiredTools.split(",").map(tool => tool.trim()) : [];
         skills = skills ? skills.split(",").map(skill => skill.trim()) : [];
+
+        // Salary Calculation Logic
+        let totalSalary = 0;
+        let salary = {}; //initialize salary object
+        if (rateType === 'fixed') {
+            totalSalary = parseInt(rate);
+            salary = { fixed: totalSalary };
+        } else if (rateType === 'hourly') {
+            if (jobType === 'part-time' && partTimeOptions && partTimeOptions.base === 'hourly') {
+                totalSalary = parseInt(rate) * parseInt(partTimeOptions.hourlyHours);
+                salary = { partTime: { hourlyRate: parseInt(rate) } };
+            } else if (jobType === 'part-time' && partTimeOptions && partTimeOptions.base === 'daily') {
+                totalSalary = parseInt(rate) * parseInt(partTimeOptions.dailyDays);
+                salary = { partTime: { dailyRate: parseInt(rate) } };
+            } else if (jobType === 'part-time' && partTimeOptions && partTimeOptions.base === 'contract') {
+                totalSalary = parseInt(rate) * parseInt(partTimeOptions.contractMonths);
+                salary = { partTime: { contractRate: parseInt(rate) } };
+            } else if (jobType === 'part-time' && partTimeOptions && partTimeOptions.base === 'weekly') {
+                totalSalary = parseInt(rate) * (parseInt(partTimeOptions.weeklyDays) * 7);
+                salary = { partTime: { weeklyRate: parseInt(rate) } };
+            }
+        }
 
         const jobData = {
             title,
@@ -93,9 +112,10 @@ export const postJob = async (req, res) => {
             totalJobTime,
             totalJobDuration,
             status: status || 'Draft',
-            clientName: client ? client._id : null, // Handle null client
+            clientName: client ? client._id : null,
             projectName: projectName,
-            isIndividual: !projectName
+            isIndividual: !projectName,
+            salary: salary, //add salary object to job data.
         };
 
         const job = await Workorder.create(jobData);
@@ -470,5 +490,66 @@ export const getDraftJobById = async (req, res) => {
             success: false,
             error: error.message,
         });
+    }
+};
+
+export const calculatePayable = async (req, res) => {
+    try {
+        const { jobId } = req.params;
+        const job = await Workorder.findById(jobId);
+
+        if (!job) {
+            return res.status(404).json({ message: "Job not found", success: false });
+        }
+
+        if (job.status !== "Done" || job.jobType !== "part-time" || !job.partTimeOptions || job.partTimeOptions.base !== "hourly") {
+            return res.status(400).json({ message: "Calculation not applicable for this job", success: false });
+        }
+
+        const checkInTime = job.checkinTime;
+        const checkOutTime = job.checkoutTime;
+        const hourlyRate = job.salary?.partTime?.hourlyRate;
+
+        if (!checkInTime || !checkOutTime || !hourlyRate) {
+            return res.status(400).json({ message: "Missing check-in, check-out, or hourly rate", success: false });
+        }
+
+        const checkInDate = new Date(checkInTime);
+        const checkOutDate = new Date(checkOutTime);
+
+        if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
+            return res.status(400).json({ message: "Invalid check-in or check-out time", success: false });
+        }
+
+        const differenceInMilliseconds = checkOutDate.getTime() - checkInDate.getTime();
+        if (differenceInMilliseconds <= 0) {
+            return res.status(400).json({ message: "Invalid time range", success: false });
+        }
+
+        const differenceInMinutes = differenceInMilliseconds / (1000 * 60);
+        let hours = differenceInMinutes / 60;
+
+        if (hours < 1) {
+            hours = 1;
+        }
+
+        let payableHours = Math.floor(hours);
+        const remainingMinutes = differenceInMinutes % 60;
+
+        if (hours > 1 && remainingMinutes >= 30) {
+            payableHours += 0.5;
+        }
+
+        const payableSalary = payableHours * hourlyRate;
+
+        res.status(200).json({
+            success: true,
+            payableHours,
+            payableSalary,
+        });
+
+    } catch (error) {
+        console.error("Error calculating payable:", error);
+        res.status(500).json({ message: error.message, success: false });
     }
 };

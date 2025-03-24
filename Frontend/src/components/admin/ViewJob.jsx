@@ -29,7 +29,7 @@ const ViewJob = () => {
         const fetchJobDetails = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(`<span class="math-inline">\{JOB\_API\_END\_POINT\}/get/</span>{id}`, { withCredentials: true });
+                const response = await axios.get(`${JOB_API_END_POINT}/get/${id}`, { withCredentials: true });
 
                 if (response.data.success && response.data.job) {
                     const jobData = response.data.job;
@@ -45,7 +45,7 @@ const ViewJob = () => {
 
                     if (jobData.status === "Done" && jobData.jobType === "part-time" && jobData.partTimeOptions?.base === "hourly") {
                         try {
-                            const payableRes = await axios.get(`<span class="math-inline">\{JOB\_API\_END\_POINT\}/calculate\-payble/</span>{id}`, { withCredentials: true });
+                            const payableRes = await axios.get(`${JOB_API_END_POINT}/calculate-payble/${id}`, { withCredentials: true });
                             if (payableRes.data.success) {
                                 setPayableHours(payableRes.data.payableHours);
                                 setPayableSalary(payableRes.data.payableSalary);
@@ -180,7 +180,7 @@ const ViewJob = () => {
                         >
                             <MessageCircle className="w-6 h-6 text-indigo-500 hover:text-indigo-700 transition" />
                         </button>
-                    </div>
+                        </div>
                 </div>
             </div>
         );
@@ -242,13 +242,13 @@ const ViewJob = () => {
             return (
                 <div>
                     <div className="border-b border-gray-300 mb-4 flex justify-around">
-                        <button onClick={() => setProviderTab("Requests")} className={`py-2 px-4 ${providerTab === "Requests" && "border-b-2 border-blue-600 text-blue-600"}`}>
+                        <button onClick={() => setProviderTab("Requests")} className={`py-2 px-4 ${providerTab === "Requests" ? "border-b-2 border-blue-600 text-blue-600" : ""}`}>
                             Requests
                         </button>
-                        <button onClick={() => setProviderTab("Talentpool")} className={`py-2 px-4 ${providerTab === "Talentpool" && "border-b-2 border-blue-600 text-blue-600"}`}>
+                        <button onClick={() => setProviderTab("Talentpool")} className={`py-2 px-4 ${providerTab === "Talentpool" ? "border-b-2 border-blue-600 text-blue-600" : ""}`}>
                             Talentpool
                         </button>
-                        <button onClick={() => setProviderTab("Technicians")} className={`py-2 px-4 ${providerTab === "Technicians" && "border-b-2 border-blue-600 text-blue-600"}`}>
+                        <button onClick={() => setProviderTab("Technicians")} className={`py-2 px-4 ${providerTab === "Technicians" ? "border-b-2 border-blue-600 text-blue-600" : ""}`}>
                             Technicians
                         </button>
                     </div>
@@ -349,7 +349,8 @@ const ViewJob = () => {
                 </div>
                 <div className="bg-white p-8 shadow-lg rounded-lg">
                     <div className="border-b border-gray-300 flex justify-around mb-4">
-                        <button onClick={() => setMainTab("Job Details")} className={`flex-1 py-2 px-4 ${mainTab === "Job Details" && "border-b-2 border-blue-600 text-blue-600"}> Job Details </button> <button onClick={() => setMainTab("Provider")} className={flex-1 py-2 px-4 ${mainTab === "Provider" && "border-b-2 border-blue-600 text-blue-600"}`}>
+                        <button onClick={() => setMainTab("Job Details")} className={`flex-1 py-2 px-4 ${mainTab === "Job Details" ? "border-b-2 border-blue-600 text-blue-600" : ""}`}> Job Details </button>
+                        <button onClick={() => setMainTab("Provider")} className={`flex-1 py-2 px-4 ${mainTab === "Provider" ? "border-b-2 border-blue-600 text-blue-600" : ""}`}>
                             Provider
                         </button>
                     </div>

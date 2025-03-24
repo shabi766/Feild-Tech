@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { NOTIFICATION_API_END_POINT } from "../utils/constant";
-import useSocket from "../hooks/useSocket";
+import useSocket from "../Hooks/useSocket";
 import { Card, CardHeader, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";

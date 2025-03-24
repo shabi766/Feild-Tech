@@ -7,7 +7,7 @@ import Jobs from "./components/user/Jobs";
 import Browse from "./components/user/Browse";
 import Profile from "./components/user/Profile";
 import JobDescription from "./components/user/JobDescription";
-import Companies from "./components/admin/companies";
+
 import CompanyCreate from "./components/admin/CompanyCreate";
 import CompanySetup from "./components/admin/CompanySetup";
 import AdminJobs from "./components/admin/AdminJobs";
@@ -38,6 +38,8 @@ import Settings from "./components/shared/Settings";
 import JobTable from "./components/user/JobTable";
 import PostJobs from "./components/admin/PostJobcomps/PostJob";
 
+import Companies from "./components/admin/Companies";
+
 function App() {
   return (
     <BrowserRouter>
@@ -58,7 +60,7 @@ function App() {
             <Route path="technicians/techs" element={<ProtectedRoute><AllTechnicians /></ProtectedRoute>} />
             <Route path="dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             <Route path="technicians/:id" element={<ProtectedRoute><TechnicianProfile /></ProtectedRoute>} />
-            <Route path="admin/companies" element={<ProtectedRoute><Companies /></ProtectedRoute>} />
+            <Route path="admin/companies" element={<ProtectedRoute>< Companies /></ProtectedRoute>} />
             <Route path="admin/companies/:id" element={<ProtectedRoute><CompanySetup /></ProtectedRoute>} />
             <Route path="admin/project/detail/:projectId" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>} />
             <Route path="admin/client/details/:clientId" element={<ProtectedRoute><ClientDetail /></ProtectedRoute>} />

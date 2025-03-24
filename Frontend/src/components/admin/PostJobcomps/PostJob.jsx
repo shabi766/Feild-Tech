@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import { JOB_API_END_POINT, NOTIFICATION_API_END_POINT } from '@/components/utils/constant';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useFetchProjectsByClient } from '@/components/hooks/useFetchProjectsByClient';
+import { useFetchProjectsByClient } from '@/components/Hooks/useFetchProjectsByClient';
 
 import JobDetailsStep from './JobDetailsStep';
 import JobDescriptionStep from './JobDescriptionStep';

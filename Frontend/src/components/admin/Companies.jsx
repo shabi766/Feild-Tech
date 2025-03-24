@@ -9,7 +9,7 @@ import { setSearchCompanyByText } from '@/redux/companySlice'
 import { useDispatch } from 'react-redux'
 import Footer from '../shared/Footer'
 
-const companies = () => {
+const Companies = () => {
   useGetAllCompanies();
   const [input, setInput] = useState("");
   const navigate = useNavigate();
@@ -41,4 +41,4 @@ dispatch(setSearchCompanyByText(input));
   )
 }
 
-export default companies
+export default Companies

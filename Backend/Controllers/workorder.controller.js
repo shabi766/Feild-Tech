@@ -434,7 +434,7 @@ export const getTechnicianJobs = async (req, res) => {
 
         const inProgressJobs = jobs.filter(job => job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() && job.status === 'In Progress');
 
-        const completedJobs = jobs.filter(job => job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() && job.status === 'Complete');
+        const completedJobs = jobs.filter(job => job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() && (job.status === 'Complete' || job.status === 'Done'));
 
         res.status(200).json({
             appliedJobs,
@@ -448,6 +448,8 @@ export const getTechnicianJobs = async (req, res) => {
         res.status(500).json({ message: "Server error", success: false });
     }
 };
+
+
 export const getDraftJobById = async (req, res) => {
     try {
         const jobId = req.params.id;

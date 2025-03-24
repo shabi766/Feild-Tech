@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import http from "http";
 import { Server } from "socket.io";
 import connectDB from "./utils/db.js";
-import { User } from "./Models/user.model.js"; // ✅ Import User model for status updates
+import { User } from "./Models/user.model.js";
 import userRoute from "./Routes/user.route.js";
 import companyRoute from "./Routes/company.route.js";
 import workorderRoute from "./Routes/workorder.route.js";
@@ -23,83 +23,77 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// ✅ Initialize Socket.io with CORS settings
+// Get ports and origins from environment variables or defaults
+const BACKEND_PORT = process.env.BACKEND_PORT || 8000;
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+
+// Initialize Socket.io with CORS settings
 const io = new Server(server, {
-    cors: {
-        origin: "http://localhost:5173",
-        methods: ["GET", "POST"],
-        credentials: true
-    }
+  cors: {
+    origin: FRONTEND_URL,
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
 });
 
-// ✅ Track online users in a Map
+// Track online users in a Map
 const onlineUsers = new Map();
 
-// ✅ Middleware
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true
-}));
+app.use(
+  cors({
+    origin: FRONTEND_URL,
+    credentials: true,
+  })
+);
 
-// ✅ Connect to Database
+// Connect to Database
 connectDB();
 
-// ✅ Handle Socket.io Connections
-io.on('connection', (socket) => {
-    console.log(`🔗 User connected: ${socket.id}`);
+// Handle Socket.io Connections
+io.on("connection", (socket) => {
+  console.log(`🔗 User connected: ${socket.id}`);
 
-    /** 
-     * ✅ User joins a room (chat or app session)
-     */
-    socket.on('joinRoom', async (userId) => {
-        socket.join(userId);
-        onlineUsers.set(socket.id, userId); // Track user
+  socket.on("joinRoom", async (userId) => {
+    socket.join(userId);
+    onlineUsers.set(socket.id, userId);
 
-        // ✅ Update user status to online
-        await User.findByIdAndUpdate(userId, { status: "online", lastSeen: new Date() });
+    await User.findByIdAndUpdate(userId, { status: "online", lastSeen: new Date() });
 
-        // ✅ Emit updated status to all clients
-        io.emit("update_status", { userId, status: "online" });
+    io.emit("update_status", { userId, status: "online" });
 
-        console.log(`✅ User ${userId} is now online`);
-    });
+    console.log(`✅ User ${userId} is now online`);
+  });
 
-    /** 
-     * ✅ User manually sets "Away" status
-     */
-    socket.on("setAway", async (userId) => {
-        await User.findByIdAndUpdate(userId, { status: "away" });
+  socket.on("setAway", async (userId) => {
+    await User.findByIdAndUpdate(userId, { status: "away" });
 
-        io.emit("update_status", { userId, status: "away" });
+    io.emit("update_status", { userId, status: "away" });
 
-        console.log(`⚠️ User ${userId} is away`);
-    });
+    console.log(`⚠️ User ${userId} is away`);
+  });
 
-    /** 
-     * ✅ User disconnects (Closes browser/tab)
-     */
-    socket.on('disconnect', async () => {
-        const userId = onlineUsers.get(socket.id);
-        if (userId) {
-            onlineUsers.delete(socket.id); // Remove user from tracking
+  socket.on("disconnect", async () => {
+    const userId = onlineUsers.get(socket.id);
+    if (userId) {
+      onlineUsers.delete(socket.id);
 
-            // ✅ Update last seen and set offline status
-            await User.findByIdAndUpdate(userId, { status: "offline", lastSeen: new Date() });
+      await User.findByIdAndUpdate(userId, { status: "offline", lastSeen: new Date() });
 
-            io.emit("update_status", { userId, status: "offline", lastSeen: new Date() });
+      io.emit("update_status", { userId, status: "offline", lastSeen: new Date() });
 
-            console.log(`❌ User ${userId} disconnected`);
-        }
-    });
+      console.log(`❌ User ${userId} disconnected`);
+    }
+  });
 });
 
-// ✅ Make io accessible in routes
-app.set('io', io);
+// Make io accessible in routes
+app.set("io", io);
 
-// ✅ API Routes
+// API Routes
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/workorder", workorderRoute);
@@ -112,11 +106,10 @@ app.use("/api/v1/dashboard", dashboardRoute);
 app.use("/api/v1/notification", notificationRoute);
 app.use("/api/v1/chat", chatRoute);
 
-// ✅ Export io for use in controllers
+// Export io for use in controllers
 export { io };
 
-// ✅ Start the Server
-const PORT = process.env.PORT || 8000;
-server.listen(PORT, () => {
-    console.log(`🚀 Server running at port ${PORT}`);
+// Start the Server
+server.listen(BACKEND_PORT, () => {
+  console.log(`🚀 Server running at port ${BACKEND_PORT}`);
 });

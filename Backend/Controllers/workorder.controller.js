@@ -314,32 +314,96 @@ export const checkinJob = async (req, res) => {
 
 export const checkoutJob = async (req, res) => {
     const { id } = req.params;
+
     try {
+        // 1. Retrieve the job from the database
         const job = await Workorder.findById(id);
 
+        // 2. Job not found check
         if (!job) {
             return res.status(404).json({ message: 'Job not found', success: false });
         }
 
+        // 3. Check if the job has been checked in
         if (!job.checkinTime) {
             return res.status(400).json({ message: 'Job has not been checked in', success: false });
         }
 
+        // 4. Calculate time spent
         const checkoutTime = new Date();
         const timeSpent = checkoutTime - job.checkinTime; // Time in milliseconds
+        const timeInMinutes = timeSpent / (1000 * 60);
 
+        // 5. Initialize payableHours and payableSalary
+        let payableHours = 0;
+        let payableSalary = 0;
+
+        // 6. Handle part-time jobs
+        if (job.jobType === 'part-time' && job.partTimeOptions) {
+            const { base } = job.partTimeOptions;
+            const { partTime } = job.salary || {}; // Safely access partTime
+
+            let rate;
+
+            // 7. Calculate based on part-time base
+            switch (base) {
+                case 'hourly':
+                    rate = partTime?.hourlyRate;
+                    if (!rate) {
+                        return res.status(400).json({ message: 'Hourly rate is missing', success: false });
+                    }
+                    payableHours = Math.ceil(timeInMinutes / 60); // Round up to the nearest hour
+                    payableSalary = payableHours * rate;
+                    break;
+
+                case 'daily':
+                    rate = partTime?.dailyRate;
+                    if (!rate) {
+                        return res.status(400).json({ message: 'Daily rate is missing', success: false });
+                    }
+                    payableHours = Math.ceil(timeInMinutes / (60 * 24)); // Round up to the nearest day
+                    payableSalary = payableHours * rate;
+                    break;
+
+                case 'weekly':
+                    rate = partTime?.weeklyRate;
+                    if (!rate) {
+                        return res.status(400).json({ message: 'Weekly rate is missing', success: false });
+                    }
+                    payableHours = Math.ceil(timeInMinutes / (60 * 24 * 7)); // Round up to the nearest week
+                    payableSalary = payableHours * rate;
+                    break;
+
+                case 'contract':
+                    rate = partTime?.contractRate;
+                    if (!rate) {
+                        return res.status(400).json({ message: 'Contract rate is missing', success: false });
+                    }
+                    payableHours = Math.ceil(timeInMinutes / (60 * 24 * 30)); // Round up to the nearest month (approx)
+                    payableSalary = payableHours * rate;
+                    break;
+
+                default:
+                    return res.status(400).json({ message: 'Invalid part-time base', success: false });
+            }
+        }
+        // 8. Update the job with checkout time, time spent, payable hours, and payable salary
         const updatedJob = await Workorder.findByIdAndUpdate(
             id,
             {
-                
                 checkoutTime: checkoutTime,
                 timeSpent: timeSpent,
+                payableHours: payableHours,
+                payableSalary: payableSalary,
             },
             { new: true }
         );
 
+        // 9. Send success response
         return res.status(200).json({ message: 'Job checked out successfully', job: updatedJob, success: true });
+
     } catch (error) {
+        // 10. Handle errors
         console.error('Error checking out job:', error);
         return res.status(500).json({ message: 'Server error', success: false, error: error.message });
     }
@@ -434,12 +498,15 @@ export const getTechnicianJobs = async (req, res) => {
 
         const inProgressJobs = jobs.filter(job => job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() && job.status === 'In Progress');
 
-        const completedJobs = jobs.filter(job => job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() && (job.status === 'Complete' || job.status === 'Done'));
+        const doneJobs = jobs.filter(job => job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() && job.status === 'Done');
+
+        const completedJobs = jobs.filter(job => job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() && job.status === 'Complete');
 
         res.status(200).json({
             appliedJobs,
             assignedJobs,
             inProgressJobs,
+            doneJobs,
             completedJobs,
             success: true
         });
@@ -448,7 +515,6 @@ export const getTechnicianJobs = async (req, res) => {
         res.status(500).json({ message: "Server error", success: false });
     }
 };
-
 
 export const getDraftJobById = async (req, res) => {
     try {
@@ -495,63 +561,3 @@ export const getDraftJobById = async (req, res) => {
     }
 };
 
-export const calculatePayable = async (req, res) => {
-    try {
-        const { jobId } = req.params;
-        const job = await Workorder.findById(jobId);
-
-        if (!job) {
-            return res.status(404).json({ message: "Job not found", success: false });
-        }
-
-        if (job.status !== "Done" || job.jobType !== "part-time" || !job.partTimeOptions || job.partTimeOptions.base !== "hourly") {
-            return res.status(400).json({ message: "Calculation not applicable for this job", success: false });
-        }
-
-        const checkInTime = job.checkinTime;
-        const checkOutTime = job.checkoutTime;
-        const hourlyRate = job.salary?.partTime?.hourlyRate;
-
-        if (!checkInTime || !checkOutTime || !hourlyRate) {
-            return res.status(400).json({ message: "Missing check-in, check-out, or hourly rate", success: false });
-        }
-
-        const checkInDate = new Date(checkInTime);
-        const checkOutDate = new Date(checkOutTime);
-
-        if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
-            return res.status(400).json({ message: "Invalid check-in or check-out time", success: false });
-        }
-
-        const differenceInMilliseconds = checkOutDate.getTime() - checkInDate.getTime();
-        if (differenceInMilliseconds <= 0) {
-            return res.status(400).json({ message: "Invalid time range", success: false });
-        }
-
-        const differenceInMinutes = differenceInMilliseconds / (1000 * 60);
-        let hours = differenceInMinutes / 60;
-
-        if (hours < 1) {
-            hours = 1;
-        }
-
-        let payableHours = Math.floor(hours);
-        const remainingMinutes = differenceInMinutes % 60;
-
-        if (hours > 1 && remainingMinutes >= 30) {
-            payableHours += 0.5;
-        }
-
-        const payableSalary = payableHours * hourlyRate;
-
-        res.status(200).json({
-            success: true,
-            payableHours,
-            payableSalary,
-        });
-
-    } catch (error) {
-        console.error("Error calculating payable:", error);
-        res.status(500).json({ message: error.message, success: false });
-    }
-};

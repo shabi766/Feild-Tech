@@ -81,13 +81,15 @@ const workorderSchema = new mongoose.Schema({
         type: {
             partTime: {
                 hourlyRate: { type: Number },
-                dailyRate: {type: Number},
-                contractRate: {type: Number},
-                weeklyRate: {type: Number},
+                dailyRate: { type: Number },
+                contractRate: { type: Number },
+                weeklyRate: { type: Number },
             },
             fixed: { type: Number }
         }
     },
+    payableHours: { type: Number }, // Payable hours
+    payableSalary: { type: Number }, // Payable salary
 }, { timestamps: true });
 
 export const Workorder = mongoose.model("Workorder", workorderSchema);

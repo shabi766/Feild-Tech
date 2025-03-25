@@ -18,13 +18,13 @@ import { Edit2, Eye, MoreHorizontal } from "lucide-react";
 
 const JobTable = () => {
     const { user } = useSelector((store) => store.auth);
-    const [jobs, setJobs] = useState([]); // Initialize as an empty array
+    const [jobs, setJobs] = useState([]);
     const [activeTab, setActiveTab] = useState("All");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    const jobStatuses = ["All", "Applied", "Assigned",'Done', "In Progress", "Completed"];
+    const jobStatuses = ["All", "Applied", "Assigned", "Done", "In Progress", "Completed"];
 
     useEffect(() => {
         const fetchJobs = async () => {
@@ -38,11 +38,12 @@ const JobTable = () => {
                 const appliedJobs = response.data?.appliedJobs || [];
                 const assignedJobs = response.data?.assignedJobs || [];
                 const inProgressJobs = response.data?.inProgressJobs || [];
+                const doneJobs = response.data?.doneJobs || [];
                 const completedJobs = response.data?.completedJobs || [];
 
                 switch (activeTab) {
                     case "All":
-                        setJobs([...appliedJobs, ...assignedJobs, ...completedJobs, ...inProgressJobs]);
+                        setJobs([...appliedJobs, ...assignedJobs, ...doneJobs, ...completedJobs, ...inProgressJobs]);
                         break;
                     case "Applied":
                         setJobs(appliedJobs);
@@ -53,16 +54,19 @@ const JobTable = () => {
                     case "In Progress":
                         setJobs(inProgressJobs);
                         break;
+                    case "Done":
+                        setJobs(doneJobs);
+                        break;
                     case "Completed":
                         setJobs(completedJobs);
                         break;
                     default:
-                        setJobs([]); // Ensure a default empty array
+                        setJobs([]);
                 }
             } catch (err) {
                 console.error("Error fetching jobs:", err);
                 setError(err.message || "Failed to fetch jobs.");
-                setJobs([]); // Ensure an empty array on error
+                setJobs([]);
             } finally {
                 setLoading(false);
             }

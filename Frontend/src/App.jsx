@@ -25,7 +25,7 @@ import AllTechnicians from "./components/admin/AllTechnicians";
 import TalentPool from "./components/admin/talentpool";
 import ClientDetail from "./components/admin/ClientDetail";
 import ProjectDetail from "./components/admin/ProjectDetail";
-import ViewJob from "./components/admin/ViewJob";
+
 import ShowApplicantProfile from "./components/admin/ShowApplicantProfile";
 import ShowJob from "./components/admin/ShowJob";
 import AdminDashboard from "./components/admin/AdminDashboard";
@@ -39,6 +39,7 @@ import JobTable from "./components/user/JobTable";
 import PostJobs from "./components/admin/PostJobcomps/PostJob";
 
 import Companies from "./components/admin/Companies";
+import ViewJob from "./components/admin/ViewJobs/ViewJob";
 
 function App() {
   return (

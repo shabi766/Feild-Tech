@@ -108,15 +108,18 @@ const ViewJob = () => {
         let displayTime = null;
         const checkInTime = job?.checkinTime;
         const checkOutTime = job?.checkoutTime;
-
-        if (checkInTime && checkOutTime) {
+    
+        if (status === "Complete") {
+            checkStatus = "Amount Paid";
+            displayTime = job?.payableSalary ? `$${job.payableSalary}` : "N/A";
+        } else if (checkInTime && checkOutTime) {
             checkStatus = "Checked Out";
             displayTime = formatDate(checkOutTime);
         } else if (checkInTime && (!checkOutTime || checkOutTime === 'null' || checkOutTime === 'undefined')) {
             checkStatus = "Checked In";
             displayTime = formatDate(checkInTime);
         }
-
+    
         return (
             <div className="flex flex-col md:flex-row md:items-center md:justify-between bg-blue-100 p-4 mb-6 rounded-lg shadow-md">
                 <div>
@@ -141,18 +144,25 @@ const ViewJob = () => {
                     {status === "Done" && jobType === "part-time" && job?.partTimeOptions?.base === "hourly" && (
                         <>
                             <p className="text-sm text-green-500">
-                                Payable Salary: {payableSalary}
+                                Payable Salary: {job.payableSalary}
                             </p>
                             <p className="text-sm text-green-500">
-                                Payable Hours: {payableHours}
+                                Payable Hours: {job.payableHours}
                             </p>
                         </>
+                    )}
+                    {status === "Done" && (
+                        <button
+                            onClick={handlePay}
+                            className="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-2 rounded text-xs"
+                        >
+                            Pay ${job.payableSalary}
+                        </button>
                     )}
                 </div>
             </div>
         );
     };
-
     const renderAssignedProvider = () => {
         if (!assignedApplicant) return null;
 
@@ -180,7 +190,7 @@ const ViewJob = () => {
                         >
                             <MessageCircle className="w-6 h-6 text-indigo-500 hover:text-indigo-700 transition" />
                         </button>
-                        </div>
+                    </div>
                 </div>
             </div>
         );
@@ -320,6 +330,7 @@ const ViewJob = () => {
             return "Invalid Date";
         }
     };
+
     const renderActionButtons = () => {
         if (job && assignedApplicant && ["Assigned", "In Progress", "Done", "Complete", "Paid"].includes(status)) {
             return (
@@ -330,6 +341,7 @@ const ViewJob = () => {
                     >
                         Tech Log
                     </button>
+                    
                     <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-2 rounded text-xs">
                         Dummy
                     </button>
@@ -337,6 +349,17 @@ const ViewJob = () => {
             );
         }
         return null; // Don't render buttons if conditions are not met
+    };
+
+    const handlePay = async () => {
+        try {
+            await axios.put(`${JOB_API_END_POINT}/update/${id}`, { status: "Complete" }, { withCredentials: true });
+            setStatus("Completed");
+            alert("Payment processed and job marked as completed.");
+        } catch (error) {
+            consoleconsole.error("Error updating job status:", error);
+            alert("Failed to update job status.");
+        }
     };
 
     return (

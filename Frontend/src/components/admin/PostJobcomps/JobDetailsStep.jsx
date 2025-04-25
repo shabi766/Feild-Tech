@@ -16,7 +16,7 @@ const JobDetailsStep = ({ input, setInput, nextStep }) => {
 
   return (
     <div>
-      <h2 className="font-bold text-lg mb-2">Job Details</h2>
+      
       <div className="mb-4">
         <Label htmlFor="title">Title</Label>
         <Input

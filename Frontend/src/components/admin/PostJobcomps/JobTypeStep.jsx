@@ -52,7 +52,7 @@ const JobTypeStep = ({ input, setInput }) => {
 
     return (
         <div>
-            <h2 className="font-bold text-lg mb-2">Job Type</h2>
+            
             <div className="mb-4">
                 <Label htmlFor="jobTypeSelect" className="block mb-2">Job Type</Label>
                 <Select id="jobTypeSelect" onValueChange={handleJobTypeChange} value={input.jobType}>

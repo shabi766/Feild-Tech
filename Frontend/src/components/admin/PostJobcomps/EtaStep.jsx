@@ -59,7 +59,7 @@ const EtaStep = ({ input, setInput }) => {
 
     return (
         <div>
-            <h2 className="font-bold text-lg mb-4">ETA</h2>
+           
             <div className="mb-4">
                 <Label htmlFor="startTime">Start Time</Label>
                 <div className="relative flex items-center">

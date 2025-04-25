@@ -314,23 +314,23 @@ const PostJobs = () => {
         <div className={styles.container}>
             <div className={styles.statusBar}>
                 <div>
-                    <h2 className={styles.sectionTitle}>Job ID: {jobId || '---'}</h2>
+                    <h2 className="py-2 px-4 font-bold">Job ID: {jobId || '---'}</h2>
                     <p>Status: <span className="font-bold">{status}</span></p>
-                    <Button onClick={saveAsDraft} className="bg-gray-500 text-white py-2 px-4 rounded-md mr-2">
-                        Save as Draft
-                    </Button>
                 </div>
-                <div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                     {loading ? (
-                        <Button className="bg-blue-500 text-white py-2 px-4 rounded-md" disabled>
+                        <Button className="bg-blue-500 text-white py-2 px-4 rounded-md mb-2" disabled>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             Posting...
                         </Button>
                     ) : (
-                        <Button onClick={submitHandler} className="bg-green-500 text-white py-2 px-4 rounded-md">
+                        <Button onClick={submitHandler} className="bg-green-500 text-white py-2 px-4 rounded-md mb-2">
                             Post Job
                         </Button>
                     )}
+                    <Button onClick={saveAsDraft} className="bg-gray-500 text-white py-2 px-4 rounded-md">
+                        Save as Draft
+                    </Button>
                 </div>
             </div>
             <div className={styles.sidebarAndContent}>

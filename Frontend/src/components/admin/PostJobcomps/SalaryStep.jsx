@@ -14,7 +14,7 @@ const SalaryStep = ({ input, setInput, jobType }) => {
 
     return (
         <div>
-            <h2 className="font-bold text-lg mb-4">Salary Details</h2>
+            
 
             <div className="mb-4">
                 <Label htmlFor="rateType">Rate Type</Label>

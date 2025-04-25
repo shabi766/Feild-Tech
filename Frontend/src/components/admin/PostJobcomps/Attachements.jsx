@@ -17,7 +17,7 @@ const Attachments = ({ attachments, onAttachmentChange, onRemoveAttachment }) =>
 
     return (
         <div>
-            <h2 className="font-bold text-lg mb-4">Attachments</h2>
+            
             <div className="mb-4">
                 <Label htmlFor="attachment" className="block mb-2">Attach Files (Documents, Images, etc.)</Label>
                 <input

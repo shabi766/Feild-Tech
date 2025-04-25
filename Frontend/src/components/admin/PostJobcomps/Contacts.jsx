@@ -21,7 +21,7 @@ const Contacts = ({ nextStep, prevStep, input, setInput }) => { // Receive input
 
   return (
     <form className="space-y-4">
-      <h2 className="font-bold text-lg mb-4">Contact Information</h2>
+     
 
       <div>
         <Label htmlFor="jobManagerInfo" className="block text-sm font-medium text-gray-700">

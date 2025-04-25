@@ -15,7 +15,7 @@ const AddressStep = ({ input, setInput, prevStep }) => {
 
     return (
         <div>
-            <h2 className="font-bold text-lg mb-2">Address</h2>
+            
             <div><Label>Street</Label><Input type="text" name="street" value={input.street} onChange={(e) => setInput({ ...input, street: e.target.value })} className="my-2" /></div>
             <div><Label>City</Label><Input type="text" name="city" value={input.city} onChange={(e) => setInput({ ...input, city: e.target.value })} className="my-2" /></div>
             <div><Label>State</Label><Input type="text" name="state" value={input.state} onChange={(e) => setInput({ ...input, state: e.target.value })} className="my-2" /></div>

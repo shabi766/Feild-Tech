@@ -103,7 +103,7 @@ const workorderSchema = new mongoose.Schema({
 
     // Attachments field
     attachments: [{
-        name: { type: String },rm -fr ".git/rebase-merge"
+        name: { type: String },
         url: { type: String }
     }],
 }, { timestamps: true });

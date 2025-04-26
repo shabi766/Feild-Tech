@@ -92,7 +92,8 @@ export const postJob = async (req, res) => {
                 startTime, endTime, status, totalJobTime, totalJobDuration,
                 siteContact,  // Get siteContact from request body
                 SecondaryContact, // Get SecondaryContact from request body
-                customFields
+                customFields,
+                tasks
             } = req.body;
 
             const userId = req.user._id;
@@ -191,6 +192,17 @@ export const postJob = async (req, res) => {
                 ...field,
                 type: field.type || 'text' // Default type is text.
             }));
+            let parsedTasks = tasks;
+            if (typeof tasks === 'string') {
+                try {
+                    parsedTasks = JSON.parse(tasks);
+                } catch (e) {
+                    return res.status(400).json({ message: "Invalid tasks format. Expected an array of objects or a JSON string representing an array.", success: false, error: e.message });
+                }
+            }
+            if (!Array.isArray(parsedTasks)) {
+                 return res.status(400).json({ message: "Invalid tasks format. Expected an array of objects.", success: false });
+            }
 
             const jobData = {
                 title,
@@ -220,6 +232,7 @@ export const postJob = async (req, res) => {
                 siteContact,  // Use the value from req.body
                 SecondaryContact, // Use the value from req.body
                 customFields: parsedCustomFields,
+                tasks: parsedTasks,
             };
 
             const job = await Workorder.create(jobData);

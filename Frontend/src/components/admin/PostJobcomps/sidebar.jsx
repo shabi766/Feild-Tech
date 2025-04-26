@@ -30,6 +30,7 @@ const JobFormStepper = ({ goToStep, setCustomFieldsEnabled, setAdvancedFieldsEna
     ];
 
     const customFieldStep = { id: 'custom-fields', label: 'Custom Fields' };
+    const taskListStep = { id: 'job-tasks', label: 'TaskList' };
 
     const advancedSteps = [
         { id: 'shipments', label: 'Shipments' },
@@ -67,15 +68,24 @@ const JobFormStepper = ({ goToStep, setCustomFieldsEnabled, setAdvancedFieldsEna
                     </label>
                 </li>
 
-                {/* Show Custom Fields if enabled */}
+                {/* Show Custom Fields and TaskList if enabled */}
                 {customFieldsToggle && (
-                    <li
-                        key={customFieldStep.id}
-                        className={styles.navItem}
-                        onClick={() => goToStep(customFieldStep.id)}
-                    >
-                        {customFieldStep.label}
-                    </li>
+                    <>
+                        <li
+                            key={customFieldStep.id}
+                            className={styles.navItem}
+                            onClick={() => goToStep(customFieldStep.id)}
+                        >
+                            {customFieldStep.label}
+                        </li>
+                        <li
+                            key={taskListStep.id}
+                            className={styles.navItem}
+                            onClick={() => goToStep(taskListStep.id)}
+                        >
+                            {taskListStep.label}
+                        </li>
+                    </>
                 )}
 
                 {/* Advanced Fields Toggle */}

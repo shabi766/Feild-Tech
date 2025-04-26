@@ -21,6 +21,7 @@ import Attachments from './Attachements';
 // import CustomFields from './CustomFields'; // Removed direct import
 // Use dynamic import with React.lazy
 const CustomFields = React.lazy(() => import('./CustomFields'));
+const JobTasks = React.lazy(() => import('./Tasks'));
 
 const PostJobs = () => {
     const [input, setInput] = useState({
@@ -59,6 +60,7 @@ const PostJobs = () => {
     const [advancedFieldsEnabled, setAdvancedFieldsEnabled] = useState(false);
     const [customFields, setCustomFields] = useState([]);
     const [customFieldsLoading, setCustomFieldsLoading] = useState(false); // Add loading state
+    const [tasks, setTasks] = useState([]);
 
     const goToSection = (sectionId) => {
         const element = document.getElementById(sectionId);
@@ -123,7 +125,7 @@ const PostJobs = () => {
         if (input.client) formData.append('clientName', input.client);
         if (input.projectId) formData.append('projectName', input.projectId);
         if (input.requiredTools) formData.append('requiredTools', input.requiredTools);
-        if (input.contacts && Array.isArray(input.contacts)) {  // Check if it is an array.
+        if (input.contacts && Array.isArray(input.contacts)) {  // Check if it is an array.
             formData.append('contacts', JSON.stringify(input.contacts)); // Append contacts
         } else {
             formData.append('contacts', JSON.stringify([]));
@@ -153,8 +155,11 @@ const PostJobs = () => {
             formData.append('attachments', file);
         });
 
-        // Append Custom Fields.  Important:  Stringify the customFields array.
+        // Append Custom Fields.  Important:  Stringify the customFields array.
         formData.append('customFields', JSON.stringify(customFields));
+
+        // Append Tasks
+        formData.append('tasks', JSON.stringify(tasks));
 
         console.log('Form Data Contents:');
         for (const pair of formData.entries()) {
@@ -244,6 +249,7 @@ const PostJobs = () => {
             attachments: input.attachments, // Include attachments in draft save
             contacts: input.contacts,
             customFields: customFields,
+            tasks: tasks,
         };
 
         try {
@@ -280,7 +286,7 @@ const PostJobs = () => {
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [input, customFields]);
+    }, [input, customFields, tasks]);
 
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
@@ -318,6 +324,7 @@ const PostJobs = () => {
                                 contacts: job.contacts || [],
                             });
                             setCustomFields(job.customFields || []); // Also load custom fields
+                            setTasks(job.tasks || []);
                             setStatus('Draft');
                             setJobId(draftJobId.slice(-6));
                         } else {
@@ -394,6 +401,7 @@ const PostJobs = () => {
                                         setInput={setInput}
                                         jobType={input.jobType}
                                         partTime={input.partTime}
+                                        fullTime={input.fullTime}
                                     />
                                 </section>
                             </div>
@@ -454,6 +462,20 @@ const PostJobs = () => {
                                     </section>
                                 </div>
                             )}
+                            {customFieldsEnabled && (
+                                <div className={styles.section}>
+                                    <section id="job-tasks" className="mb-4">
+                                        <h3 className={styles.sectionTitle}>TaskList</h3>
+                                        {customFieldsLoading ? (
+                                            <div>Loading Tasks...</div>
+                                        ) : (
+                                            <React.Suspense fallback={<div>Loading Custom Task...</div>}>
+                                                <JobTasks tasks={tasks} onChange={setTasks} />
+                                            </React.Suspense>
+                                        )}
+                                    </section>
+                                </div>
+                            )}
 
                             {advancedFieldsEnabled && (
                                 <>
@@ -488,3 +510,4 @@ const PostJobs = () => {
 };
 
 export default PostJobs;
+

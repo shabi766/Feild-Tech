@@ -9,6 +9,14 @@ const addressSchema = new mongoose.Schema({
     country: { type: String }
 });
 
+// Task schema for the tasks array
+const taskSchema = new mongoose.Schema({
+    id: { type: String, required: true },
+    description: { type: String, required: true },
+    completed: { type: Boolean, default: false },
+    // You can add more fields here, like assignedTo, dueDate, etc.
+});
+
 // Main workorder schema
 const workorderSchema = new mongoose.Schema({
     // Title section
@@ -62,7 +70,7 @@ const workorderSchema = new mongoose.Schema({
     Company: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Company' }],
     // Contacts array
     siteContact: { type: String },  //  Simple text field
-    SecondaryContact: { type: String }, 
+    SecondaryContact: { type: String },
 
     // Time fields
     startTime: { type: Date },
@@ -113,15 +121,17 @@ const workorderSchema = new mongoose.Schema({
             id: { type: String, required: true },
             label: { type: String, required: true },
             value: { type: String, required: true },
-             type: { type: String, required: true },  // Store the type of custom field
+            type: { type: String, required: true },  // Store the type of custom field
             options: [
-              {
-                label: { type: String },
-                value: { type: String }
-              }
+                {
+                    label: { type: String },
+                    value: { type: String }
+                }
             ]
         }
     ],
+    // New field for tasks
+    tasks: [taskSchema], // Array of task objects
 }, { timestamps: true });
 
 export const Workorder = mongoose.model("Workorder", workorderSchema);

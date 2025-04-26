@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import JobFormStepper from './sidebar';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
@@ -15,9 +15,12 @@ import JobTypeStep from './JobTypeStep';
 import SalaryStep from './SalaryStep';
 import EtaStep from './EtaStep';
 import AddressStep from './AddressStep';
-import styles from './PostJobs.module.css'; // Import the CSS module
+import styles from './PostJobs.module.css';
 import Contacts from './Contacts';
 import Attachments from './Attachements';
+// import CustomFields from './CustomFields'; // Removed direct import
+// Use dynamic import with React.lazy
+const CustomFields = React.lazy(() => import('./CustomFields'));
 
 const PostJobs = () => {
     const [input, setInput] = useState({
@@ -43,6 +46,7 @@ const PostJobs = () => {
         partTime: { base: '', hourlyHours: 0, dailyDays: 0, contractMonths: 0, weeklyDays: 0 },
         fullTime: { base: '', contractMonths: 0 },
         attachments: [],
+        contacts: [], // Initialize contacts in state
     });
     const [jobId, setJobId] = useState('');
     const [status, setStatus] = useState('Draft');
@@ -53,6 +57,8 @@ const PostJobs = () => {
     const { projects, loading: projectLoading, error: projectError } = useFetchProjectsByClient(input.client);
     const [customFieldsEnabled, setCustomFieldsEnabled] = useState(false);
     const [advancedFieldsEnabled, setAdvancedFieldsEnabled] = useState(false);
+    const [customFields, setCustomFields] = useState([]);
+    const [customFieldsLoading, setCustomFieldsLoading] = useState(false); // Add loading state
 
     const goToSection = (sectionId) => {
         const element = document.getElementById(sectionId);
@@ -65,6 +71,14 @@ const PostJobs = () => {
         const { name, value } = e.target;
         setInput({ ...input, [name]: value });
     };
+
+    // added useCallback
+    const handleContactsChange = useCallback((newContacts) => {
+        setInput(prevInput => ({
+            ...prevInput,
+            contacts: newContacts,
+        }));
+    }, []);
 
     useEffect(() => {
         // No direct calculation of endTime here anymore.
@@ -109,7 +123,11 @@ const PostJobs = () => {
         if (input.client) formData.append('clientName', input.client);
         if (input.projectId) formData.append('projectName', input.projectId);
         if (input.requiredTools) formData.append('requiredTools', input.requiredTools);
-        if (input.contacts) formData.append('contacts', JSON.stringify(input.contacts)); // Assuming contacts is an array/object
+        if (input.contacts && Array.isArray(input.contacts)) {  // Check if it is an array.
+            formData.append('contacts', JSON.stringify(input.contacts)); // Append contacts
+        } else {
+            formData.append('contacts', JSON.stringify([]));
+        }
 
         // Salary Details based on jobType
         formData.append('rate', input.rate);
@@ -134,6 +152,9 @@ const PostJobs = () => {
         input.attachments.forEach((file) => { // Use input.attachments here
             formData.append('attachments', file);
         });
+
+        // Append Custom Fields.  Important:  Stringify the customFields array.
+        formData.append('customFields', JSON.stringify(customFields));
 
         console.log('Form Data Contents:');
         for (const pair of formData.entries()) {
@@ -170,7 +191,7 @@ const PostJobs = () => {
         console.log('Sending notification for jobId:', newJobId);
 
         try {
-            const jobDetails = await axios.get(`<span class="math-inline">\{JOB\_API\_END\_POINT\}/get/</span>{newJobId}`, { withCredentials: true });
+            const jobDetails = await axios.get(`${JOB_API_END_POINT}/get/${newJobId}`, { withCredentials: true });
 
             if (!jobDetails.data.success || !jobDetails.data.job) {
                 console.warn('Failed to fetch job details:', jobDetails.data?.message || 'No job data');
@@ -221,6 +242,8 @@ const PostJobs = () => {
             endTime: input.endTime,
             status: 'Draft',
             attachments: input.attachments, // Include attachments in draft save
+            contacts: input.contacts,
+            customFields: customFields,
         };
 
         try {
@@ -257,7 +280,7 @@ const PostJobs = () => {
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [input]);
+    }, [input, customFields]);
 
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
@@ -266,7 +289,7 @@ const PostJobs = () => {
         if (draftJobId) {
             const fetchDraftJob = async () => {
                 try {
-                    const res = await axios.get(`<span class="math-inline">\{JOB\_API\_END\_POINT\}/workorders/draft/</span>{draftJobId}`, { withCredentials: true });
+                    const res = await axios.get(`${JOB_API_END_POINT}/workorders/draft/${draftJobId}`, { withCredentials: true });
                     if (res.data.success && res.data.job) {
                         if (res.data.job) {
                             const job = res.data.job;
@@ -292,7 +315,9 @@ const PostJobs = () => {
                                 partTime: job.partTimeOptions || { base: '', hourlyHours: 0, dailyDays: 0, contractMonths: 0, weeklyDays: 0 },
                                 fullTime: job.fullTimeOptions || { base: '', contractMonths: 0 },
                                 attachments: job.attachments || [], // Load attachments when fetching draft
+                                contacts: job.contacts || [],
                             });
+                            setCustomFields(job.customFields || []); // Also load custom fields
                             setStatus('Draft');
                             setJobId(draftJobId.slice(-6));
                         } else {
@@ -339,7 +364,7 @@ const PostJobs = () => {
                 </div>
                 <div className={styles.content}>
                     <div className={styles.formContainer}>
-                        <form onSubmit={submitHandler}> {/* Ensure the form has onSubmit */}
+                        <form onSubmit={submitHandler}>
                             <div className={styles.section}>
                                 <section id="job-details" className="mb-4">
                                     <h3 className={styles.sectionTitle}>Job Details</h3>
@@ -395,14 +420,17 @@ const PostJobs = () => {
                             </div>
 
                             <div className={styles.section}>
-                                <section id="contacts" className="mb-4" style={{ display: 'block' }}> {/* Always show */}
+                                <section id="contacts" className="mb-4" style={{ display: 'block' }}>
                                     <h3 className={styles.sectionTitle}>Contacts</h3>
-                                    <Contacts input={input} setInput={setInput} /> {/* Pass input and setInput */}
+                                    <Contacts
+                                        input={input}
+                                        setInput={setInput}
+                                    />
                                 </section>
                             </div>
 
                             <div className={styles.section}>
-                                <section id="attachments" className="mb-4" style={{ display: 'block' }}> {/* Always show */}
+                                <section id="attachments" className="mb-4" style={{ display: 'block' }}>
                                     <h3 className={styles.sectionTitle}>Attachments</h3>
                                     <Attachments
                                         attachments={input.attachments}
@@ -416,8 +444,13 @@ const PostJobs = () => {
                                 <div className={styles.section}>
                                     <section id="custom-fields" className="mb-4">
                                         <h3 className={styles.sectionTitle}>Custom Fields</h3>
-                                        {/* Render CustomFieldsStep component here */}
-                                        <h2>Custom Fields</h2> {/* Placeholder for CustomFieldsStep */}
+                                        {customFieldsLoading ? (
+                                            <div>Loading Custom Fields...</div>
+                                        ) : (
+                                            <React.Suspense fallback={<div>Loading Custom Fields...</div>}>
+                                                <CustomFields fields={customFields} onChange={setCustomFields} />
+                                            </React.Suspense>
+                                        )}
                                     </section>
                                 </div>
                             )}
@@ -427,24 +460,21 @@ const PostJobs = () => {
                                     <div className={styles.section}>
                                         <section id="shipments" className="mb-4">
                                             <h3 className={styles.sectionTitle}>Shipments</h3>
-                                            {/* Render ShipmentsStep component here */}
-                                            <h2>Shipments</h2> {/* Placeholder for ShipmentsStep */}
+                                            <h2>Shipments</h2>
                                         </section>
                                     </div>
 
                                     <div className={styles.section}>
                                         <section id="selection-rule" className="mb-4">
                                             <h3 className={styles.sectionTitle}>Selection Rule</h3>
-                                            {/* Render SelectionRuleStep component here */}
-                                            <h2>Selection Rule</h2> {/* Placeholder for SelectionRuleStep */}
+                                            <h2>Selection Rule</h2>
                                         </section>
                                     </div>
 
                                     <div className={styles.section}>
                                         <section id="smart-audit" className="mb-4">
                                             <h3 className={styles.sectionTitle}>Smart Audit</h3>
-                                            {/* Render SmartAuditStep component here */}
-                                            <h2>Smart Audit</h2> {/* Placeholder for SmartAuditStep */}
+                                            <h2>Smart Audit</h2>
                                         </section>
                                     </div>
                                 </>

@@ -5,6 +5,18 @@ const JobFormStepper = ({ goToStep, setCustomFieldsEnabled, setAdvancedFieldsEna
     const [customFieldsToggle, setCustomFieldsToggle] = useState(false);
     const [advancedFieldsToggle, setAdvancedFieldsToggle] = useState(false);
 
+    const handleCustomFieldsToggle = () => {
+        const newValue = !customFieldsToggle; // Store the new value
+        setCustomFieldsToggle(newValue);
+        setCustomFieldsEnabled(newValue); // Use the stored value
+    };
+
+    const handleAdvancedFieldsToggle = () => {
+        const newValue = !advancedFieldsToggle;  // Store the new value
+        setAdvancedFieldsToggle(newValue);
+        setAdvancedFieldsEnabled(newValue); // Use the stored value
+    };
+
     const baseSteps = [
         { id: 'job-details', label: 'Title' },
         { id: 'job-description', label: 'Job Description' },
@@ -14,6 +26,7 @@ const JobFormStepper = ({ goToStep, setCustomFieldsEnabled, setAdvancedFieldsEna
         { id: 'address', label: 'Address' },
         { id: 'contacts', label: 'Contacts' },
         { id: 'attachments', label: 'Attachments' },
+
     ];
 
     const customFieldStep = { id: 'custom-fields', label: 'Custom Fields' };
@@ -23,16 +36,6 @@ const JobFormStepper = ({ goToStep, setCustomFieldsEnabled, setAdvancedFieldsEna
         { id: 'selection-rule', label: 'Selection Rule' },
         { id: 'smart-audit', label: 'Smart Audit' },
     ];
-
-    const handleCustomFieldsToggle = () => {
-        setCustomFieldsToggle(!customFieldsToggle);
-        setCustomFieldsEnabled(!customFieldsEnabled);
-    };
-
-    const handleAdvancedFieldsToggle = () => {
-        setAdvancedFieldsToggle(!advancedFieldsToggle);
-        setAdvancedFieldsEnabled(!advancedFieldsEnabled);
-    };
 
     return (
         <div className={styles.sidebar}>

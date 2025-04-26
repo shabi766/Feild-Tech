@@ -17,7 +17,7 @@ const workorderSchema = new mongoose.Schema({
     clientName: { type: mongoose.Schema.Types.ObjectId, ref: 'Client' },
     projectName: { type: mongoose.Schema.Types.ObjectId, ref: 'Project' },
     IncidentID: { type: String },
-    Teams: {type: String},
+    Teams: { type: String },
 
     // New field for identifying individual jobs
     isIndividual: { type: Boolean, default: true },
@@ -60,14 +60,15 @@ const workorderSchema = new mongoose.Schema({
     Application: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Application' }],
     assignedApplicant: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     Company: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Company' }],
-    siteContact: {type: String},
-    SecondaryContact: {type: String},
+    // Contacts array
+    siteContact: { type: String },  //  Simple text field
+    SecondaryContact: { type: String }, 
 
     // Time fields
     startTime: { type: Date },
     endTime: { type: Date },
-    checkinTime: { type: Date }, // Added checkinTime
-    checkoutTime: { type: Date }, // Added checkoutTime
+    checkinTime: { type: Date },
+    checkoutTime: { type: Date },
 
     // Status field
     status: {
@@ -98,14 +99,29 @@ const workorderSchema = new mongoose.Schema({
             fixed: { type: Number }
         }
     },
-    payableHours: { type: Number }, // Payable hours
-    payableSalary: { type: Number }, // Payable salary
+    payableHours: { type: Number },
+    payableSalary: { type: Number },
 
     // Attachments field
     attachments: [{
         name: { type: String },
         url: { type: String }
     }],
+    // Custom Fields
+    customFields: [
+        {
+            id: { type: String, required: true },
+            label: { type: String, required: true },
+            value: { type: String, required: true },
+             type: { type: String, required: true },  // Store the type of custom field
+            options: [
+              {
+                label: { type: String },
+                value: { type: String }
+              }
+            ]
+        }
+    ],
 }, { timestamps: true });
 
 export const Workorder = mongoose.model("Workorder", workorderSchema);

@@ -90,7 +90,9 @@ export const postJob = async (req, res) => {
                 rate, rateType,
                 street, city, state, postalCode, country,
                 startTime, endTime, status, totalJobTime, totalJobDuration,
-                contacts // Assuming you're sending contact info in the request body
+                siteContact,  // Get siteContact from request body
+                SecondaryContact, // Get SecondaryContact from request body
+                customFields
             } = req.body;
 
             const userId = req.user._id;
@@ -171,6 +173,24 @@ export const postJob = async (req, res) => {
                     }
                 }
             }
+            // Ensure customFields is an array, parse if it's a string, and ensure each field has a type.
+            let parsedCustomFields = customFields;
+            if (typeof customFields === 'string') {
+                try {
+                    parsedCustomFields = JSON.parse(customFields);
+                } catch (e) {
+                    return res.status(400).json({ message: "Invalid customFields format.  Expected an array of objects or a JSON string representing an array of objects.", success: false, error: e.message });
+                }
+            }
+            if (!Array.isArray(parsedCustomFields)) {
+                 return res.status(400).json({ message: "Invalid customFields format.  Expected an array of objects.", success: false });
+            }
+
+            // Add a default type if it's missing
+            parsedCustomFields = parsedCustomFields.map(field => ({
+                ...field,
+                type: field.type || 'text' // Default type is text.
+            }));
 
             const jobData = {
                 title,
@@ -196,8 +216,10 @@ export const postJob = async (req, res) => {
                 projectName: projectName,
                 isIndividual: !projectName,
                 salary: salary,
-                attachments: attachments, // Save S3 URLs
-                contacts: contacts || [] // Assuming you'll handle contacts later or they are already part of your logic
+                attachments: attachments,
+                siteContact,  // Use the value from req.body
+                SecondaryContact, // Use the value from req.body
+                customFields: parsedCustomFields,
             };
 
             const job = await Workorder.create(jobData);
@@ -209,6 +231,7 @@ export const postJob = async (req, res) => {
         }
     });
 };
+
 
 // Existing functionality to get all jobs
 export const getAllJobs = async (req, res) => {

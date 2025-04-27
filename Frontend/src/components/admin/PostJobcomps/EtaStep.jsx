@@ -69,7 +69,7 @@ const EtaStep = ({ input, setInput }) => {
                         onChange={handleStartTimeChange}
                         showTimeSelect
                         dateFormat="Pp"
-                        className="w-full px-3 py-2 border rounded-md"
+                        className="w-[400px] px-3 py-2 border rounded-md"
                     />
                     <FaCalendarAlt className="absolute right-8 text-gray-500" />
                     <FaClock className="absolute right-2 text-gray-500" />
@@ -84,7 +84,7 @@ const EtaStep = ({ input, setInput }) => {
                         onChange={handleEndTimeChange}
                         showTimeSelect
                         dateFormat="Pp"
-                        className="w-full px-3 py-2 border rounded-md"
+                        className="w-[400px] px-3 py-2 border rounded-md"
                         disabled // Make it read-only based on automatic calculation
                     />
                     <FaCalendarAlt className="absolute right-8 text-gray-500" />

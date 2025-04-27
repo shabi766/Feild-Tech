@@ -93,7 +93,7 @@ const JobDescriptionStep = ({ input, setInput, nextStep, prevStep }) => {
           value={input.requiredTools}
           onChange={(e) => setInput({ ...input, requiredTools: e.target.value })}
           placeholder="add multiple tools by separating using commas"
-          className="my-2 w-[500px]"
+          className="my-2 w-[400px]"
         />
       </div>
       <div>
@@ -104,7 +104,7 @@ const JobDescriptionStep = ({ input, setInput, nextStep, prevStep }) => {
           value={input.skills}
           onChange={(e) => setInput({ ...input, skills: e.target.value })}
           placeholder="add multiple tools by separating using commas"
-          className="my-2 w-[500px]"
+          className="my-2 w-[400px]"
         />
       </div>
     </div>

@@ -56,7 +56,7 @@ const JobTypeStep = ({ input, setInput }) => {
             <div className="mb-4">
                 <Label htmlFor="jobTypeSelect" className="block mb-2">Job Type</Label>
                 <Select id="jobTypeSelect" onValueChange={handleJobTypeChange} value={input.jobType}>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-[400px]">
                         <SelectValue placeholder="Select Job Type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -73,7 +73,7 @@ const JobTypeStep = ({ input, setInput }) => {
                     <div className="mb-4">
                         <Label htmlFor="partTimeBaseSelect" className="block mb-2">Base Type</Label>
                         <Select id="partTimeBaseSelect" onValueChange={handlePartTimeBaseChange} value={localPartTime.base}>
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="w-[400px]">
                                 <SelectValue placeholder="Select Part-Time Base" />
                             </SelectTrigger>
                             <SelectContent>

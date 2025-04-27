@@ -25,7 +25,7 @@ const Attachments = ({ attachments, onAttachmentChange, onRemoveAttachment }) =>
                     id="attachment"
                     multiple
                     onChange={handleFileChange}
-                    className="w-full border rounded-md py-2 px-3"
+                    className="w-[400px] border rounded-md py-2 px-3"
                 />
             </div>
 

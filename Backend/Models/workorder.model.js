@@ -9,12 +9,12 @@ const addressSchema = new mongoose.Schema({
     country: { type: String }
 });
 
-// Task schema for the tasks array
+
 const taskSchema = new mongoose.Schema({
     id: { type: String, required: true },
     description: { type: String, required: true },
     completed: { type: Boolean, default: false },
-    // You can add more fields here, like assignedTo, dueDate, etc.
+    // add more fields here, like assignedTo, dueDate, etc.
 });
 
 // Main workorder schema
@@ -68,8 +68,8 @@ const workorderSchema = new mongoose.Schema({
     Application: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Application' }],
     assignedApplicant: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     Company: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Company' }],
-    // Contacts array
-    siteContact: { type: String },  //  Simple text field
+   
+    siteContact: { type: String },  
     SecondaryContact: { type: String },
 
     // Time fields
@@ -86,8 +86,6 @@ const workorderSchema = new mongoose.Schema({
     },
     checkinRequired: { type: Boolean, default: false },
     checkoutRequired: { type: Boolean, default: false },
-
-    // Modified to store arrays of check-in and check-out times
     checkinTimes: [{ type: Date }],
     checkoutTimes: [{ type: Date }],
 
@@ -95,7 +93,6 @@ const workorderSchema = new mongoose.Schema({
     completeTime: { type: Date, default: null },
     paidTime: { type: Date, default: null },
     timeSpent: { type: Number, default: null },
-    // New salary field
     salary: {
         type: {
             partTime: {
@@ -109,19 +106,17 @@ const workorderSchema = new mongoose.Schema({
     },
     payableHours: { type: Number },
     payableSalary: { type: Number },
-
-    // Attachments field
     attachments: [{
         name: { type: String },
         url: { type: String }
     }],
-    // Custom Fields
+    
     customFields: [
         {
             id: { type: String, required: true },
             label: { type: String, required: true },
             value: { type: String, required: true },
-            type: { type: String, required: true },  // Store the type of custom field
+            type: { type: String, required: true },  
             options: [
                 {
                     label: { type: String },
@@ -130,8 +125,7 @@ const workorderSchema = new mongoose.Schema({
             ]
         }
     ],
-    // New field for tasks
-    tasks: [taskSchema], // Array of task objects
+    tasks: [taskSchema], 
 }, { timestamps: true });
 
 export const Workorder = mongoose.model("Workorder", workorderSchema);

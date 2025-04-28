@@ -94,7 +94,9 @@ export const postJob = async (req, res) => {
                 SecondaryContact, // Get SecondaryContact from request body
                 customFields,
                 tasks,
-                shipments // Get shipments from request body
+                shipments,
+                selectionRules,
+                auditRules // Get shipments from request body
             } = req.body;
 
             const userId = req.user._id;
@@ -232,6 +234,28 @@ export const postJob = async (req, res) => {
                 }
                 return shipment; // If no file buffer, assume it's already a URL or empty
             }));
+            let parsedSelectionRules = selectionRules;
+            if (typeof selectionRules === 'string') {
+                try {
+                    parsedSelectionRules = JSON.parse(selectionRules);
+                } catch (e) {
+                    return res.status(400).json({ message: "Invalid selectionRules format. Expected a JSON object.", success: false, error: e.message });
+                }
+            }
+            if (typeof parsedSelectionRules !== 'object' || parsedSelectionRules === null) {
+                return res.status(400).json({ message: "Invalid selectionRules format. Expected a JSON object.", success: false });
+            }
+            let parsedAuditRules = auditRules;
+            if (typeof auditRules === 'string') {
+                try {
+                    parsedAuditRules = JSON.parse(auditRules);
+                } catch (e) {
+                    return res.status(400).json({ message: "Invalid auditRules format. Expected an array of objects or a JSON string representing an array.", success: false, error: e.message });
+                }
+            }
+             if (!Array.isArray(parsedAuditRules)) {
+                return res.status(400).json({ message: "Invalid auditRules format. Expected an array of objects.", success: false });
+            }
 
             const jobData = {
                 title,
@@ -262,7 +286,9 @@ export const postJob = async (req, res) => {
                 SecondaryContact, // Use the value from req.body
                 customFields: parsedCustomFields,
                 tasks: parsedTasks,
-                shipments: uploadedShipments, // Save the shipments with S3 URLs
+                shipments: uploadedShipments,
+                selectionRules: parsedSelectionRules,
+                auditRules: parsedAuditRules // Save the shipments with S3 URLs
             };
 
             const job = await Workorder.create(jobData);

@@ -113,10 +113,10 @@ const workorderSchema = new mongoose.Schema({
 
     customFields: [
         {
-            id: { type: String, required: true },
-            label: { type: String, required: true },
-            value: { type: String, required: true },
-            type: { type: String, required: true },
+            id: { type: String },
+            label: { type: String},
+            value: { type: String },
+            type: { type: String },
             options: [
                 {
                     label: { type: String },
@@ -133,6 +133,23 @@ const workorderSchema = new mongoose.Schema({
             picture: { type: String }, // To store the S3 URL
             trackingId: { type: String },
         },
+    ],
+    selectionRules: { // New field for selection rules
+        requiredSkills: [String],
+        requiredDegrees: [String],
+        requiredCertifications: [String],
+        requiredTools: [String],
+        minimumExperience: { type: Number },
+        mustHavePortfolio: { type: Boolean }
+        // Add more rules here based on your SelectionRules component
+    },
+    auditRules: [ // New field for Smart Audit rules
+        {
+            description: { type: String},
+            weight: { type: Number }, // Example validation
+            isRequired: { type: Boolean, default: false },
+            // Add more fields as needed (e.g., type of check, expected value, etc.)
+        }
     ],
 }, { timestamps: true });
 

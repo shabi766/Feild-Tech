@@ -21,6 +21,8 @@ import Attachments from './Attachements';
 const CustomFields = React.lazy(() => import('./CustomFields'));
 const JobTasks = React.lazy(() => import('./Tasks'));
 const Shipments = React.lazy(() => import('./Shipments'));
+const SelectionRules = React.lazy(() => import('./SelectionRule'));
+const SmartAudit = React.lazy(() => import('./SmartAudit'));
 
 const PostJobs = () => {
     const [input, setInput] = useState({
@@ -61,6 +63,8 @@ const PostJobs = () => {
     const [customFieldsLoading, setCustomFieldsLoading] = useState(false);
     const [tasks, setTasks] = useState([]);
     const [shipmentsData, setShipmentsData] = useState([]);
+    const [SelectionRule, setSelectionRule] = useState({});
+    const [auditRules, setAuditRules] = useState([]);
 
     const goToSection = (sectionId) => {
         const element = document.getElementById(sectionId);
@@ -84,6 +88,9 @@ const PostJobs = () => {
     const handleShipmentsChange = useCallback((newShipments) => {
         setShipmentsData(newShipments);
     }, []);
+    const handleSelectionRulesChange = (rules) => { // Handler for selection rules
+        setSelectionRule(rules);
+    };
 
     useEffect(() => {
         // No direct calculation of endTime here anymore.
@@ -169,6 +176,9 @@ const PostJobs = () => {
                 }
             });
         }
+        formData.append('selectionRules', JSON.stringify(SelectionRules));
+
+        formData.append('auditRules', JSON.stringify(auditRules)); 
 
         console.log('Form Data Contents:');
         for (const pair of formData.entries()) {
@@ -500,18 +510,24 @@ const PostJobs = () => {
                                     </div>
 
                                     <div className={styles.section}>
-                                        <section id="selection-rule" className="mb-4">
-                                            <h3 className={styles.sectionTitle}>Selection Rule</h3>
-                                            <h2>Selection Rule</h2>
+                                        <section id="shipments" className="mb-4">
+                                            <h3 className={styles.sectionTitle}>Shipments</h3>
+                                            <React.Suspense fallback={<div>Loading Shipments...</div>}>
+                                                <SelectionRules onShipmentsChange={handleShipmentsChange} initialShipments={shipmentsData} />
+                                            </React.Suspense>
                                         </section>
                                     </div>
 
                                     <div className={styles.section}>
-                                        <section id="smart-audit" className="mb-4">
-                                            <h3 className={styles.sectionTitle}>Smart Audit</h3>
-                                            <h2>Smart Audit</h2>
+                                        <section id="shipments" className="mb-4">
+                                            <h3 className={styles.sectionTitle}>Shipments</h3>
+                                            <React.Suspense fallback={<div>Loading Shipments...</div>}>
+                                                <SmartAudit onShipmentsChange={handleShipmentsChange} initialShipments={shipmentsData} />
+                                            </React.Suspense>
                                         </section>
                                     </div>
+
+                                    
                                 </>
                             )}
                         </form>

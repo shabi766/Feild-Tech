@@ -68,8 +68,8 @@ const workorderSchema = new mongoose.Schema({
     Application: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Application' }],
     assignedApplicant: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     Company: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Company' }],
-   
-    siteContact: { type: String },  
+
+    siteContact: { type: String },
     SecondaryContact: { type: String },
 
     // Time fields
@@ -110,13 +110,13 @@ const workorderSchema = new mongoose.Schema({
         name: { type: String },
         url: { type: String }
     }],
-    
+
     customFields: [
         {
             id: { type: String, required: true },
             label: { type: String, required: true },
             value: { type: String, required: true },
-            type: { type: String, required: true },  
+            type: { type: String, required: true },
             options: [
                 {
                     label: { type: String },
@@ -125,7 +125,15 @@ const workorderSchema = new mongoose.Schema({
             ]
         }
     ],
-    tasks: [taskSchema], 
+    tasks: [taskSchema],
+    shipments: [ // Add this array of shipment objects
+        {
+            shipmentNumber: { type: String },
+            status: { type: String },
+            picture: { type: String }, // To store the S3 URL
+            trackingId: { type: String },
+        },
+    ],
 }, { timestamps: true });
 
 export const Workorder = mongoose.model("Workorder", workorderSchema);

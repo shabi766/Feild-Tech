@@ -53,7 +53,7 @@ const validateJobFields = (fields, status) => {
         } else if (fields.jobType === 'part-time' && (!fields.rate || !fields.rateType || !fields.partTimeOptions?.base)) {
             errors.salaryDetails = "Rate, rate type, and part-time base are required for part-time jobs.";
         }
-    
+
     }
 
     return errors;
@@ -90,10 +90,11 @@ export const postJob = async (req, res) => {
                 rate, rateType,
                 street, city, state, postalCode, country,
                 startTime, endTime, status, totalJobTime, totalJobDuration,
-                siteContact,  // Get siteContact from request body
+                siteContact,   // Get siteContact from request body
                 SecondaryContact, // Get SecondaryContact from request body
                 customFields,
-                tasks
+                tasks,
+                shipments // Get shipments from request body
             } = req.body;
 
             const userId = req.user._id;
@@ -184,7 +185,7 @@ export const postJob = async (req, res) => {
                 }
             }
             if (!Array.isArray(parsedCustomFields)) {
-                 return res.status(400).json({ message: "Invalid customFields format.  Expected an array of objects.", success: false });
+                return res.status(400).json({ message: "Invalid customFields format.  Expected an array of objects.", success: false });
             }
 
             // Add a default type if it's missing
@@ -201,8 +202,36 @@ export const postJob = async (req, res) => {
                 }
             }
             if (!Array.isArray(parsedTasks)) {
-                 return res.status(400).json({ message: "Invalid tasks format. Expected an array of objects.", success: false });
+                return res.status(400).json({ message: "Invalid tasks format. Expected an array of objects.", success: false });
             }
+
+            // Handle Shipments data and upload pictures to S3
+            let parsedShipments = shipments;
+            if (typeof shipments === 'string') {
+                try {
+                    parsedShipments = JSON.parse(shipments);
+                } catch (e) {
+                    return res.status(400).json({ message: "Invalid shipments format. Expected an array of objects or a JSON string representing an array.", success: false, error: e.message });
+                }
+            }
+            if (!Array.isArray(parsedShipments)) {
+                return res.status(400).json({ message: "Invalid shipments format. Expected an array of objects.", success: false });
+            }
+
+            // Process shipment pictures
+            const uploadedShipments = await Promise.all(parsedShipments.map(async (shipment, index) => {
+                if (shipment.picture instanceof Object && shipment.picture.buffer) {
+                    try {
+                        const s3Url = await uploadToS3(shipment.picture);
+                        return { ...shipment, picture: s3Url };
+                    } catch (uploadError) {
+                        console.error(`Error uploading shipment picture ${index + 1}:`, uploadError);
+                        // Optionally handle the error - you might want to skip this shipment or return an error to the client
+                        return { ...shipment, picture: null }; // Or throw the error
+                    }
+                }
+                return shipment; // If no file buffer, assume it's already a URL or empty
+            }));
 
             const jobData = {
                 title,
@@ -229,10 +258,11 @@ export const postJob = async (req, res) => {
                 isIndividual: !projectName,
                 salary: salary,
                 attachments: attachments,
-                siteContact,  // Use the value from req.body
+                siteContact,   // Use the value from req.body
                 SecondaryContact, // Use the value from req.body
                 customFields: parsedCustomFields,
                 tasks: parsedTasks,
+                shipments: uploadedShipments, // Save the shipments with S3 URLs
             };
 
             const job = await Workorder.create(jobData);
@@ -244,6 +274,7 @@ export const postJob = async (req, res) => {
         }
     });
 };
+
 
 
 // Existing functionality to get all jobs

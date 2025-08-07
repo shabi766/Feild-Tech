@@ -23,17 +23,20 @@ const Layout = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Sidebar />
+    <div className="min-h-screen bg-gray-50">
+      {/* Fixed navbar at top */}
       <Navbar />
+      
+      {/* Content wrapper with top margin */}
+      <div className="pt-20">
+        {/* Sidebar */}
+        <Sidebar />
 
-      {/* ✅ Ensures content pushes the footer down */}
-      <div className="flex-grow">
-        <Outlet />
+        {/* Main content area */}
+        <main className="min-h-screen">
+          <Outlet />
+        </main>
       </div>
-
-      {/* ✅ Adds proper spacing before the footer */}
-      <Footer className="mt-10" />
     </div>
   );
 };

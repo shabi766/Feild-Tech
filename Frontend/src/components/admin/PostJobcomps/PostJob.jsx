@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import JobFormStepper from './sidebar';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
@@ -8,16 +8,16 @@ import axios from 'axios';
 import { JOB_API_END_POINT, NOTIFICATION_API_END_POINT } from '@/components/utils/constant';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useFetchProjectsByClient } from '@/components/hooks/useFetchProjectsByClient';
-
 import JobDetailsStep from './JobDetailsStep';
 import JobDescriptionStep from './JobDescriptionStep';
 import JobTypeStep from './JobTypeStep';
 import SalaryStep from './SalaryStep';
 import EtaStep from './EtaStep';
 import AddressStep from './AddressStep';
-import styles from './PostJobs.module.css';
 import Contacts from './Contacts';
 import Attachments from './Attachements';
+
+// Lazy-load components
 const CustomFields = React.lazy(() => import('./CustomFields'));
 const JobTasks = React.lazy(() => import('./Tasks'));
 const Shipments = React.lazy(() => import('./Shipments'));
@@ -25,6 +25,7 @@ const SelectionRules = React.lazy(() => import('./SelectionRule'));
 const SmartAudit = React.lazy(() => import('./SmartAudit'));
 
 const PostJobs = () => {
+    // ... all your state and handler functions remain the same ...
     const [input, setInput] = useState({
         title: '',
         template: '',
@@ -56,14 +57,14 @@ const PostJobs = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { clients } = useSelector((store) => store.client);
-    const { projects, loading: projectLoading, error: projectError } = useFetchProjectsByClient(input.client);
+    const { projects, loading: projectLoading } = useFetchProjectsByClient(input.client);
     const [customFieldsEnabled, setCustomFieldsEnabled] = useState(false);
     const [advancedFieldsEnabled, setAdvancedFieldsEnabled] = useState(false);
     const [customFields, setCustomFields] = useState([]);
     const [customFieldsLoading, setCustomFieldsLoading] = useState(false);
     const [tasks, setTasks] = useState([]);
     const [shipmentsData, setShipmentsData] = useState([]);
-    const [SelectionRule, setSelectionRule] = useState({});
+    const [selectionRule, setSelectionRule] = useState({});
     const [auditRules, setAuditRules] = useState([]);
 
     const goToSection = (sectionId) => {
@@ -88,13 +89,18 @@ const PostJobs = () => {
     const handleShipmentsChange = useCallback((newShipments) => {
         setShipmentsData(newShipments);
     }, []);
-    const handleSelectionRulesChange = (rules) => { // Handler for selection rules
+
+    const handleSelectionRulesChange = useCallback((rules) => {
         setSelectionRule(rules);
-    };
+    }, []);
+
+    const handleAuditRulesChange = useCallback((rules) => {
+        setAuditRules(rules);
+    }, []);
 
     useEffect(() => {
-        // No direct calculation of endTime here anymore.
-        // The EtaStep component will handle the duration input.
+        // Your useEffect logic for ETA calculation is fine, but it seems to be commented out.
+        // It's good to keep the `useEffect` hook even if its body is empty for now, as it might be used later.
     }, [input.startTime, input.partTime, input.fullTime, input.jobType]);
 
     const handleAttachmentChange = (files) => {
@@ -163,27 +169,22 @@ const PostJobs = () => {
 
         formData.append('customFields', JSON.stringify(customFields));
         formData.append('tasks', JSON.stringify(tasks));
-        if (shipmentsData && Array.isArray(shipmentsData)) {
-            shipmentsData.forEach((shipment, index) => {
-                formData.append(`shipments[${index}][shipmentNumber]`, shipment.shipmentNumber || '');
-                formData.append(`shipments[${index}][status]`, shipment.status || '');
-                formData.append(`shipments[${index}][trackingId]`, shipment.trackingId || '');
-                if (shipment.picture instanceof File) {
-                    formData.append(`shipments[${index}][picture]`, shipment.picture);
-                } else if (typeof shipment.picture === 'string' && shipment.picture) {
-                    // If it's already a URL, you might want to just send the URL or handle it differently on the backend
-                    formData.append(`shipments[${index}][picture]`, shipment.picture);
-                }
-            });
-        }
-        formData.append('selectionRules', JSON.stringify(SelectionRules));
 
-        formData.append('auditRules', JSON.stringify(auditRules)); 
-
-        console.log('Form Data Contents:');
-        for (const pair of formData.entries()) {
-            console.log(pair[0] + ', ' + pair[1]);
-        }
+       if (shipmentsData && shipmentsData.length > 0) {
+        shipmentsData.forEach((shipment, index) => {
+            formData.append(`shipments[${index}][shipmentNumber]`, shipment.shipmentNumber || '');
+            formData.append(`shipments[${index}][status]`, shipment.status || '');
+            formData.append(`shipments[${index}][trackingId]`, shipment.trackingId || '');
+            if (shipment.picture instanceof File) {
+                formData.append(`shipments[${index}][picture]`, shipment.picture);
+            }
+        });
+        } else {
+      
+        formData.append('shipments', JSON.stringify([]));
+    }
+        formData.append('selectionRules', JSON.stringify(selectionRule));
+        formData.append('auditRules', JSON.stringify(auditRules));
 
         try {
             const res = await axios.post(`${JOB_API_END_POINT}/post`, formData, {
@@ -213,24 +214,19 @@ const PostJobs = () => {
 
     const sendJobCreatedNotification = async (newJobId) => {
         console.log('Sending notification for jobId:', newJobId);
-
         try {
             const jobDetails = await axios.get(`${JOB_API_END_POINT}/get/${newJobId}`, { withCredentials: true });
-
             if (!jobDetails.data.success || !jobDetails.data.job) {
                 console.warn('Failed to fetch job details:', jobDetails.data?.message || 'No job data');
                 return;
             }
-
             const job = jobDetails.data.job;
             const message = `A new job, ${job.title}, has been created!`;
-
             const notificationResponse = await axios.post(
                 `${NOTIFICATION_API_END_POINT}/Job-create`,
                 { message },
                 { withCredentials: true }
             );
-
             if (notificationResponse && notificationResponse.data.success) {
                 console.log('Notification sent successfully');
             } else {
@@ -242,6 +238,7 @@ const PostJobs = () => {
     };
 
     const saveAsDraft = async () => {
+        setLoading(true);
         const jobData = {
             title: input.title,
             template: input.template,
@@ -270,6 +267,8 @@ const PostJobs = () => {
             customFields: customFields,
             tasks: tasks,
             shipments: shipmentsData,
+            selectionRules: selectionRule,
+            auditRules: auditRules,
         };
 
         try {
@@ -291,6 +290,8 @@ const PostJobs = () => {
         } catch (error) {
             console.error('Error saving job as draft:', error);
             toast.error(error.response ? error.response.data.message : 'An unexpected error occurred.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -300,13 +301,11 @@ const PostJobs = () => {
             e.returnValue = '';
             saveAsDraft();
         };
-
         window.addEventListener('beforeunload', handleBeforeUnload);
-
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [input, customFields, tasks, shipmentsData]);
+    }, [input, customFields, tasks, shipmentsData, selectionRule, auditRules]);
 
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
@@ -346,6 +345,8 @@ const PostJobs = () => {
                             setCustomFields(job.customFields || []);
                             setTasks(job.tasks || []);
                             setShipmentsData(job.shipments || []);
+                            setSelectionRule(job.selectionRules || {});
+                            setAuditRules(job.auditRules || []);
                             setStatus('Draft');
                             setJobId(draftJobId.slice(-6));
                         } else {
@@ -358,180 +359,154 @@ const PostJobs = () => {
                     toast.error(error.response ? error.response.data.message : 'An unexpected error occurred.');
                 }
             };
-
             fetchDraftJob();
         }
-    }, [location.search]);
-
+    }, [location.search, setCustomFields, setTasks, setShipmentsData, setSelectionRule, setAuditRules]);
+    
     return (
-        <div className={styles.container}>
-            <div className={styles.statusBar}>
-                <div>
-                    <h2 className="py-2 px-4 font-bold">Job ID: {jobId || '---'}</h2>
-                    <p>Status: <span className="font-bold">{status}</span></p>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                    {loading ? (
-                        <Button className="bg-blue-500 text-white py-2 px-4 rounded-md mb-2" disabled>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Posting...
-                        </Button>
-                    ) : (
-                        <Button onClick={submitHandler} className="bg-green-500 text-white py-2 px-4 rounded-md mb-2">
-                            Post Job
-                        </Button>
-                    )}
-                    <Button onClick={saveAsDraft} className="bg-gray-500 text-white py-2 px-4 rounded-md">
-                        Save as Draft
-                    </Button>
-                </div>
+        <div className="flex min-h-screen">
+            {/* Sidebar */}
+            <div className="w-[300px] h-screen sticky top-0 overflow-y-auto p-4 bg-gradient-to-br from-blue-50 via-white to-blue-100 border-sky-200">
+                <JobFormStepper 
+                    goToStep={goToSection} 
+                    setCustomFieldsEnabled={setCustomFieldsEnabled} 
+                    setAdvancedFieldsEnabled={setAdvancedFieldsEnabled} 
+                />
             </div>
-            <div className={styles.sidebarAndContent}>
-                <div className={styles.sidebar}>
-                    <JobFormStepper goToStep={goToSection} singlePage={true} setCustomFieldsEnabled={setCustomFieldsEnabled} setAdvancedFieldsEnabled={setAdvancedFieldsEnabled} />
-                </div>
-                <div className={styles.content}>
-                    <div className={styles.formContainer}>
-                        <form onSubmit={submitHandler}>
-                            <div className={styles.section}>
-                                <section id="job-details" className="mb-4">
-                                    <h3 className={styles.sectionTitle}>Job Details</h3>
-                                    <JobDetailsStep input={input} setInput={setInput} />
-                                </section>
-                            </div>
 
-                            <div className={styles.section}>
-                                <section id="job-description" className="mb-4">
-                                    <h3 className={styles.sectionTitle}>Job Description</h3>
-                                    <JobDescriptionStep input={input} setInput={setInput} />
-                                </section>
-                            </div>
-
-                            <div className={styles.section}>
-                                <section id="job-type" className="mb-4">
-                                    <h3 className={styles.sectionTitle}>Job Type</h3>
-                                    <JobTypeStep input={input} setInput={setInput} />
-                                </section>
-                            </div>
-
-                            <div className={styles.section}>
-                                <section id="salary-details" className="mb-4">
-                                    <h3 className={styles.sectionTitle}>Salary / Pay Rates</h3>
-                                    <SalaryStep
-                                        input={input}
-                                        setInput={setInput}
-                                        jobType={input.jobType}
-                                        partTime={input.partTime}
-                                        fullTime={input.fullTime}
-                                    />
-                                </section>
-                            </div>
-
-                            <div className={styles.section}>
-                                <section id="eta" className="mb-4">
-                                    <h3 className={styles.sectionTitle}>ETA</h3>
-                                    <EtaStep
-                                        input={input}
-                                        setInput={setInput}
-                                        jobType={input.jobType}
-                                        partTime={input.partTime}
-                                        fullTime={input.fullTime}
-                                        setEndTime={(time) => setInput({ ...input, endTime: time })}
-                                    />
-                                </section>
-                            </div>
-
-                            <div className={styles.section}>
-                                <section id="address" className="mb-4">
-                                    <h3 className={styles.sectionTitle}>Job Location</h3>
-                                    <AddressStep input={input} setInput={setInput} />
-                                </section>
-                            </div>
-
-                            <div className={styles.section}>
-                                <section id="contacts" className="mb-4" style={{ display: 'block' }}>
-                                    <h3 className={styles.sectionTitle}>Contacts</h3>
-                                    <Contacts
-                                        input={input}
-                                        setInput={setInput}
-                                    />
-                                </section>
-                            </div>
-
-                            <div className={styles.section}>
-                                <section id="attachments" className="mb-4" style={{ display: 'block' }}>
-                                    <h3 className={styles.sectionTitle}>Attachments</h3>
-                                    <Attachments
-                                        attachments={input.attachments}
-                                        onAttachmentChange={handleAttachmentChange}
-                                        onRemoveAttachment={handleRemoveAttachment}
-                                    />
-                                </section>
-                            </div>
-
-                            {customFieldsEnabled && (
-                                <div className={styles.section}>
-                                    <section id="custom-fields" className="mb-4">
-                                        <h3 className={styles.sectionTitle}>Custom Fields</h3>
-                                        {customFieldsLoading ? (
-                                            <div>Loading Custom Fields...</div>
-                                        ) : (
-                                            <React.Suspense fallback={<div>Loading Custom Fields...</div>}>
-                                                <CustomFields fields={customFields} onChange={setCustomFields} />
-                                            </React.Suspense>
-                                        )}
-                                    </section>
-                                </div>
-                            )}
-                            {customFieldsEnabled && (
-                                <div className={styles.section}>
-                                    <section id="job-tasks" className="mb-4">
-                                        <h3 className={styles.sectionTitle}>TaskList</h3>
-                                        {customFieldsLoading ? (
-                                            <div>Loading Tasks...</div>
-                                        ) : (
-                                            <React.Suspense fallback={<div>Loading Custom Task...</div>}>
-                                                <JobTasks tasks={tasks} onChange={setTasks} />
-                                            </React.Suspense>
-                                        )}
-                                    </section>
-                                </div>
-                            )}
-
-                            {advancedFieldsEnabled && (
-                                <>
-                                    <div className={styles.section}>
-                                        <section id="shipments" className="mb-4">
-                                            <h3 className={styles.sectionTitle}>Shipments</h3>
-                                            <React.Suspense fallback={<div>Loading Shipments...</div>}>
-                                                <Shipments onShipmentsChange={handleShipmentsChange} initialShipments={shipmentsData} />
-                                            </React.Suspense>
-                                        </section>
-                                    </div>
-
-                                    <div className={styles.section}>
-                                        <section id="shipments" className="mb-4">
-                                            <h3 className={styles.sectionTitle}>Shipments</h3>
-                                            <React.Suspense fallback={<div>Loading Shipments...</div>}>
-                                                <SelectionRules onShipmentsChange={handleShipmentsChange} initialShipments={shipmentsData} />
-                                            </React.Suspense>
-                                        </section>
-                                    </div>
-
-                                    <div className={styles.section}>
-                                        <section id="shipments" className="mb-4">
-                                            <h3 className={styles.sectionTitle}>Shipments</h3>
-                                            <React.Suspense fallback={<div>Loading Shipments...</div>}>
-                                                <SmartAudit onShipmentsChange={handleShipmentsChange} initialShipments={shipmentsData} />
-                                            </React.Suspense>
-                                        </section>
-                                    </div>
-
-                                    
-                                </>
-                            )}
-                        </form>
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col p-8 bg-gradient-to-br from-blue-50 via-white to-blue-100">
+                {/* Status Bar & Action Buttons */}
+                <div className="backdrop-blur-sm bg-white/30 p-6 rounded-xl shadow-lg border border-sky-200 mb-8 sticky top-0 z-10 flex justify-between items-center">
+                    <div>
+                        <h2 className="text-xl font-bold text-gray-800">Post a New Job</h2>
+                        <p className="text-gray-500">
+                            Job ID: <span className="font-bold">{jobId || '---'}</span> | Status: <span className="font-bold">{status}</span>
+                        </p>
                     </div>
+                    <div className="flex space-x-4">
+                        <Button onClick={saveAsDraft} variant="outline" className="text-gray-700 hover:bg-gray-100">
+                            Save as Draft
+                        </Button>
+                        <Button onClick={submitHandler} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors" disabled={loading}>
+                            {loading ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                'Post Job'
+                            )}
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Form Sections */}
+                <div className="space-y-12">
+                    {/* Job Details */}
+                    <section id="job-details" >
+                        <JobDetailsStep input={input} setInput={setInput} clients={clients} projects={projects} projectLoading={projectLoading} />
+                    </section>
+                    
+                    {/* Job Description */}
+                    <section id="job-description" >
+                        
+                        <JobDescriptionStep input={input} setInput={setInput} />
+                    </section>
+
+                    {/* Job Type */}
+                    <section id="job-type" >
+                        
+                        <JobTypeStep input={input} setInput={setInput} />
+                    </section>
+
+                    {/* Salary/Pay Rates */}
+                    <section id="salary-details" >
+                       
+                        <SalaryStep
+                            input={input}
+                            setInput={setInput}
+                            jobType={input.jobType}
+                            partTime={input.partTime}
+                            fullTime={input.fullTime}
+                        />
+                    </section>
+
+                    {/* ETA */}
+                    <section id="eta" >
+                       
+                        <EtaStep
+                            input={input}
+                            setInput={setInput}
+                            jobType={input.jobType}
+                            partTime={input.partTime}
+                            fullTime={input.fullTime}
+                            setEndTime={(time) => setInput({ ...input, endTime: time })}
+                        />
+                    </section>
+
+                    {/* Address */}
+                    <section id="address">
+                       
+                        <AddressStep input={input} setInput={setInput} />
+                    </section>
+
+                    {/* Contacts */}
+                    <section id="contacts" >
+                        
+                        <Contacts input={input} setInput={setInput} />
+                    </section>
+
+                    {/* Attachments */}
+                    <section id="attachments" >
+                      
+                        <Attachments
+                            attachments={input.attachments}
+                            onAttachmentChange={handleAttachmentChange}
+                            onRemoveAttachment={handleRemoveAttachment}
+                        />
+                    </section>
+
+                    {/* Conditional Sections */}
+                    {customFieldsEnabled && (
+                        <>
+                            <section id="custom-fields">
+                                
+                                <Suspense fallback={<div>Loading Custom Fields...</div>}>
+                                    <CustomFields fields={customFields} onChange={setCustomFields} />
+                                </Suspense>
+                            </section>
+
+                            <section id="job-tasks">
+                               
+                                <Suspense fallback={<div>Loading Tasks...</div>}>
+                                    <JobTasks tasks={tasks} onChange={setTasks} />
+                                </Suspense>
+                            </section>
+                        </>
+                    )}
+
+                    {advancedFieldsEnabled && (
+                        <>
+                            <section id="shipments" >
+                                
+                                <Suspense fallback={<div>Loading Shipments...</div>}>
+                                    <Shipments onShipmentsChange={handleShipmentsChange} initialShipments={shipmentsData} />
+                                </Suspense>
+                            </section>
+                            
+                            <section id="selection-rule" >
+                               
+                                <Suspense fallback={<div>Loading Selection Rules...</div>}>
+                                    <SelectionRules initialRules={selectionRule} onChange={handleSelectionRulesChange} />
+                                </Suspense>
+                            </section>
+
+                            <section id="smart-audit" >
+                               
+                                <Suspense fallback={<div>Loading Smart Audit Rules...</div>}>
+                                   <SmartAudit initialRules={auditRules} onAuditRulesChange={handleAuditRulesChange} />
+                                </Suspense>
+                            </section>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

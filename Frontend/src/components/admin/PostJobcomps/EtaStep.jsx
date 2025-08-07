@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
-import { FaCalendarAlt, FaClock } from 'react-icons/fa';
+import { Calendar, Clock, Lock } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { cn } from '@/lib/utils';
 
 const EtaStep = ({ input, setInput }) => {
     const [startTime, setStartTime] = useState(input.startTime ? new Date(input.startTime) : new Date());
     const [endTime, setEndTime] = useState(input.endTime ? new Date(input.endTime) : null);
 
+    // This effect ensures the parent state is always in sync with the local state
     useEffect(() => {
         setInput(prevInput => ({ ...prevInput, startTime }));
     }, [startTime, setInput]);
@@ -40,59 +42,76 @@ const EtaStep = ({ input, setInput }) => {
         return calculatedEndTime;
     };
 
+    // This effect handles the automatic calculation of the end time
     useEffect(() => {
         const calculatedEndTime = calculateEndTime(startTime, input.jobType, input.partTime, input.fullTime);
         if (calculatedEndTime) {
             setEndTime(calculatedEndTime);
         } else {
-            setEndTime(null); // Reset end time if calculation fails or dependencies are missing
+            setEndTime(null);
         }
-    }, [startTime, input.jobType, input.partTime, input.fullTime]);
+    }, [startTime, input.jobType, input.partTime, input.fullTime, setEndTime]);
 
     const handleStartTimeChange = (date) => {
         setStartTime(date);
     };
 
-    const handleEndTimeChange = (date) => {
-        setEndTime(date);
-    };
-
     return (
-        <div>
-           
-            <div className="mb-4">
-                <Label htmlFor="startTime">Start Time</Label>
-                <div className="relative flex items-center">
-                    <DatePicker
-                        id="startTime"
-                        selected={startTime}
-                        onChange={handleStartTimeChange}
-                        showTimeSelect
-                        dateFormat="Pp"
-                        className="w-[400px] px-3 py-2 border rounded-md"
-                    />
-                    <FaCalendarAlt className="absolute right-8 text-gray-500" />
-                    <FaClock className="absolute right-2 text-gray-500" />
+        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 max-w-5xl mx-auto">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 border-b pb-4">
+                Estimated Time
+            </h2>
+            <p className="text-gray-500 mb-8">
+                Set the start time for the job. The end time will be automatically calculated based on the job type.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                {/* Start Time Section */}
+                <div className="space-y-2">
+                    <Label htmlFor="startTime" className="text-sm font-semibold text-gray-700">
+                        Start Time
+                    </Label>
+                    <div className="relative">
+                        <DatePicker
+                            id="startTime"
+                            selected={startTime}
+                            onChange={handleStartTimeChange}
+                            showTimeSelect
+                            dateFormat="Pp"
+                            className="w-full rounded-lg bg-white border border-gray-300 shadow-sm px-4 py-2 pl-10 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+                        <Clock className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    </div>
                 </div>
-            </div>
-            <div className="mb-4">
-                <Label htmlFor="endTime">End Time</Label>
-                <div className="relative flex items-center">
-                    <DatePicker
-                        id="endTime"
-                        selected={endTime}
-                        onChange={handleEndTimeChange}
-                        showTimeSelect
-                        dateFormat="Pp"
-                        className="w-[400px] px-3 py-2 border rounded-md"
-                        disabled // Make it read-only based on automatic calculation
-                    />
-                    <FaCalendarAlt className="absolute right-8 text-gray-500" />
-                    <FaClock className="absolute right-2 text-gray-500" />
+
+                {/* End Time Section (Read-only) */}
+                <div className="space-y-2">
+                    <Label htmlFor="endTime" className="text-sm font-semibold text-gray-700">
+                        End Time
+                    </Label>
+                    <div className="relative">
+                        <DatePicker
+                            id="endTime"
+                            selected={endTime}
+                            showTimeSelect
+                            dateFormat="Pp"
+                            className={cn(
+                                "w-full rounded-lg bg-gray-100 border border-gray-300 shadow-sm px-4 py-2 pl-10 cursor-not-allowed",
+                                !endTime && "text-gray-400"
+                            )}
+                            disabled
+                        />
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+                        <Clock className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    </div>
+                    {endTime && startTime && endTime <= startTime && (
+                        <p className="text-red-500 text-sm mt-1">End Time must be after Start Time.</p>
+                    )}
+                    {!endTime && (
+                         <p className="text-gray-500 text-sm mt-1">End time will be calculated automatically.</p>
+                    )}
                 </div>
-                {endTime && startTime && endTime <= startTime && (
-                    <p className="text-red-500 mt-1">End Time must be after Start Time.</p>
-                )}
             </div>
         </div>
     );

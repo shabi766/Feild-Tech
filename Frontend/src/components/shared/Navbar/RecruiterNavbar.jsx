@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Building2, Users, Briefcase, UserPlus, FileText, Building } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SEARCH_API_END_POINT } from '@/components/utils/constant';
 import axios from 'axios';
@@ -68,95 +68,157 @@ const RecruiterNavbar = ({ user }) => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    const createMenuItems = [
+        { path: '/admin/clients/create', label: 'Post Client', icon: UserPlus },
+        { path: '/admin/projects/create', label: 'Post Project', icon: FileText },
+        { path: '/admin/jobs/create', label: 'Post Jobs', icon: Briefcase },
+        { path: '/admin/companies/create', label: 'Post Companies', icon: Building }
+    ];
+
+    const workMenuItems = [
+        { path: '/admin/companies', label: 'Companies', icon: Building2 },
+        { path: '/admin/jobs', label: 'Jobs', icon: Briefcase },
+        { path: '/admin/clients', label: 'Clients', icon: UserPlus },
+        { path: '/admin/projects', label: 'Projects', icon: FileText }
+    ];
+
+    const workforceMenuItems = [
+        { path: '/technicians/techs', label: 'All Technicians', icon: Users },
+        { path: '/admin/talentpool', label: 'Talent Pool', icon: Users }
+    ];
+
     return (
         <NavbarBase user={user}>
             <div className="flex items-center w-full">
-                <div className="flex items-center">
-                    <div className="border-l-2 border-gray-300 h-10 mx-2 ml-3" />
+                {/* Create Menu */}
+                <div className="flex items-center gap-2">
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button variant="link" className="text-teal-600 hover:text-teal-800">
-                                <Plus size={24} />
+                            <Button 
+                                variant="ghost" 
+                                className="flex items-center gap-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50/50 transition-all duration-300 font-medium"
+                            >
+                                <Plus size={20} />
+                                <span>Create</span>
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className='w-48 bg-white shadow-lg rounded-lg border border-gray-300 z-10'>                            <ul>
-                                <li className='border-b border-gray-300'>
-                                    <Link to="/admin/clients/create" className='block p-2 hover:bg-gray-100 focus:bg-gray-100'>Post Client</Link>
-                                </li>
-                                <li className='border-b border-gray-300'>
-                                    <Link to="/admin/projects/create" className='block p-2 hover:bg-gray-100 focus:bg-gray-100'>Post Project</Link>
-                                </li>
-                                <li className='border-b border-gray-300'>
-                                    <Link to="/admin/jobs/create" className='block p-2 hover:bg-gray-100 focus:bg-gray-100'>Post Jobs</Link>
-                                </li>
-                                <li>
-                                    <Link to="/admin/companies/create" className='block p-2 hover:bg-gray-100 focus:bg-gray-100'>Post Companies</Link>
-                                </li>
+                        <PopoverContent className='w-56 bg-white/95 backdrop-blur-md shadow-xl rounded-xl border border-gray-200/50 z-50 p-2'>
+                            <ul className="space-y-1">
+                                {createMenuItems.map((item) => {
+                                    const IconComponent = item.icon;
+                                    return (
+                                        <li key={item.path}>
+                                            <Link 
+                                                to={item.path} 
+                                                className='flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50/80 transition-all duration-200 text-gray-700 hover:text-blue-600'
+                                            >
+                                                <IconComponent size={18} />
+                                                <span className="font-medium">{item.label}</span>
+                                            </Link>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </PopoverContent>
                     </Popover>
 
+                    {/* Work Menu */}
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button variant="link" className="text-teal-600 hover:text-teal-800">Work</Button>
+                            <Button 
+                                variant="ghost" 
+                                className="flex items-center gap-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50/50 transition-all duration-300 font-medium"
+                            >
+                                <Briefcase size={20} />
+                                <span>Work</span>
+                            </Button>
                         </PopoverTrigger>
-                        <PopoverContent className='w-48 bg-white shadow-lg rounded-lg border border-gray-300 z-10'>
-                            <ul>
-                                <li className='border-b border-gray-300'>
-                                    <Link to="/admin/companies" className='block p-2 hover:bg-gray-100 focus:bg-gray-100'>Companies</Link>
-                                </li>
-                                <li className='border-b border-gray-300'>
-                                    <Link to="/admin/jobs" className='block p-2 hover:bg-gray-100 focus:bg-gray-100'>Jobs</Link>
-                                </li>
-                                <li className='border-b border-gray-300'>
-                                    <Link to="/admin/clients" className='block p-2 hover:bg-gray-100 focus:bg-gray-100'>Clients</Link>
-                                </li>
-                                <li>
-                                    <Link to="/admin/projects" className='block p-2 hover:bg-gray-100 focus:bg-gray-100'>Projects</Link>
-                                </li>
+                        <PopoverContent className='w-56 bg-white/95 backdrop-blur-md shadow-xl rounded-xl border border-gray-200/50 z-50 p-2'>
+                            <ul className="space-y-1">
+                                {workMenuItems.map((item) => {
+                                    const IconComponent = item.icon;
+                                    return (
+                                        <li key={item.path}>
+                                            <Link 
+                                                to={item.path} 
+                                                className='flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50/80 transition-all duration-200 text-gray-700 hover:text-blue-600'
+                                            >
+                                                <IconComponent size={18} />
+                                                <span className="font-medium">{item.label}</span>
+                                            </Link>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </PopoverContent>
                     </Popover>
 
+                    {/* Workforce Menu */}
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button variant="link" className="text-teal-600 hover:text-teal-800">Workforce</Button>
+                            <Button 
+                                variant="ghost" 
+                                className="flex items-center gap-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50/50 transition-all duration-300 font-medium"
+                            >
+                                <Users size={20} />
+                                <span>Workforce</span>
+                            </Button>
                         </PopoverTrigger>
-                        <PopoverContent className='w-48 bg-white shadow-lg rounded-lg border border-gray-300 z-10'>
-                            <ul>
-                                <li className='border-b border-gray-300'>
-                                    <Link to="/technicians/techs" className='block p-2 hover:bg-gray-100 focus:bg-gray-100'>All Technicians</Link>
-                                </li>
-                                <li className='border-b border-gray-300'>
-                                    <Link to="/admin/talentpool" className='block p-2 hover:bg-gray-100 focus:bg-gray-100'>Talentpool</Link>
-                                </li>
+                        <PopoverContent className='w-56 bg-white/95 backdrop-blur-md shadow-xl rounded-xl border border-gray-200/50 z-50 p-2'>
+                            <ul className="space-y-1">
+                                {workforceMenuItems.map((item) => {
+                                    const IconComponent = item.icon;
+                                    return (
+                                        <li key={item.path}>
+                                            <Link 
+                                                to={item.path} 
+                                                className='flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50/80 transition-all duration-200 text-gray-700 hover:text-blue-600'
+                                            >
+                                                <IconComponent size={18} />
+                                                <span className="font-medium">{item.label}</span>
+                                            </Link>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </PopoverContent>
                     </Popover>
                 </div>
 
-                <div className="relative flex-grow mx-20 flex items-center w-full" ref={searchRef}>
-                    <input
-                        type="text"
-                     className="px-20 py-2 w-full border border-gray-300 rounded-full focus:outline-none"
-                        placeholder="Search jobs, clients, projects..."
-                        value={query}
-                        onChange={handleSearchChange}
-                    />
-                    <Search className="absolute right-3 top-2.5 text-gray-400" size={20} />
-                    {showSuggestions && suggestions.length > 0 && (
-                        <ul className="absolute mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-auto z-10">
-                            {suggestions.map((suggestion) => (
-                                <li
-                                    key={suggestion.id || suggestion.name}
-                                    className="px-4 py-2 cursor-pointer hover:bg-gray-100"
-                                    onClick={() => handleSuggestionClick(suggestion)}
-                                >
-                                    {suggestion.name} {suggestion.type !== "none" && `(${suggestion.type})`}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
+                {/* Search Bar */}
+                <div className="relative flex-grow mx-8 flex items-center" ref={searchRef}>
+                    <div className="relative w-full max-w-md">
+                        <input
+                            type="text"
+                            className="w-full px-4 py-2.5 pl-12 pr-12 bg-white/80 backdrop-blur-sm border border-gray-200/50 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 placeholder-gray-500 text-gray-700 shadow-sm hover:shadow-md"
+                            placeholder="Search jobs, clients, projects..."
+                            value={query}
+                            onChange={handleSearchChange}
+                        />
+                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                        {showSuggestions && suggestions.length > 0 && (
+                            <div className="absolute mt-2 w-full bg-white/95 backdrop-blur-md border border-gray-200/50 rounded-xl shadow-xl max-h-64 overflow-auto z-50">
+                                <ul className="py-2">
+                                    {suggestions.map((suggestion, index) => (
+                                        <li
+                                            key={suggestion.id || suggestion.name || index}
+                                            className="px-4 py-3 cursor-pointer hover:bg-gray-50/80 transition-all duration-200 border-b border-gray-100/50 last:border-b-0"
+                                            onClick={() => handleSuggestionClick(suggestion)}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-gray-700 font-medium">{suggestion.name}</span>
+                                                {suggestion.type !== "none" && (
+                                                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">
+                                                        {suggestion.type}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </NavbarBase>

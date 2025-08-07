@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Label } from '@/components/ui/label'; // Assuming this path is correct
-import { Input } from '@/components/ui/input'; // Assuming this path is correct
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { cn } from "@/lib/utils"; // Assuming this path is correct
+import { cn } from "@/lib/utils";
 
 const JobDescriptionStep = ({ input, setInput, nextStep, prevStep }) => {
-  const [description, setDescription] = useState(input.description);
-  const [confidential, setConfidential] = useState(input.confidential);
+  const [description, setDescription] = useState(input.description || '');
+  const [confidential, setConfidential] = useState(input.confidential || '');
 
   useEffect(() => {
-    setDescription(input.description);
+    setDescription(input.description || '');
   }, [input.description]);
 
   useEffect(() => {
-    setConfidential(input.confidential);
+    setConfidential(input.confidential || '');
   }, [input.confidential]);
 
   const handleDescriptionChange = (value) => {
@@ -27,85 +27,110 @@ const JobDescriptionStep = ({ input, setInput, nextStep, prevStep }) => {
     setInput({ ...input, confidential: value });
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setInput({ ...input, [name]: value });
+  };
+
   const modules = {
     toolbar: [
       ['bold', 'italic', 'underline', 'strike'],
-      ['blockquote', 'code-block'],
-      [{ 'header': 1 }, { 'header': 2 }],
       [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-      [{ 'script': 'sub' }, { 'script': 'super' }],
-      [{ 'indent': '-1' }, { 'indent': '+1' }],
-      [{ 'direction': 'rtl' }],
-      [{ 'size': ['small', false, 'large', 'huge'] }],
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'font': [] }],
+      [{ 'header': [1, 2, 3, 4, false] }],
       [{ 'align': [] }],
-      ['clean']
+      ['link'],
+      ['clean'],
     ]
   };
 
   const formats = [
     'bold', 'italic', 'underline', 'strike',
-    'blockquote', 'code-block',
-    'header',
-    'list', 'script', 'indent', 'direction',
-    'size', 'color', 'background', 'font', 'align',
-    'link', 'image', 'video'
+    'list', 'bullet',
+    'header', 'align', 'link',
+    'clean'
   ];
 
   return (
-    <div>
-      
-      <div style={{ display: 'grid', gridTemplateRows: 'repeat(5, minmax(0, 1fr))', marginBottom: '1rem' }}>
-        <Label style={{ gridRow: '1' }}>Description</Label>
-        <div style={{ gridRow: '2 / span 4', overflowY: 'auto' }}>
+    <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 max-w-5xl mx-auto">
+      <h2 className="text-3xl font-bold text-gray-800 mb-6 border-b pb-4">
+        Job Details
+      </h2>
+      <p className="text-gray-500 mb-8">
+        Craft a detailed description of the job and specify any required skills or tools.
+      </p>
+
+      {/* Job Description Section */}
+      <div className="space-y-4 mb-8">
+        <Label htmlFor="jobDescription" className="text-md font-semibold text-gray-700">
+          Job Description
+        </Label>
+        <div className="rounded-lg border border-gray-300 overflow-hidden">
           <ReactQuill
+            id="jobDescription"
             value={description}
             onChange={handleDescriptionChange}
             modules={modules}
             formats={formats}
-            className="my-2"
-            style={{ minHeight: '100%', boxSizing: 'border-box' }} // Ensure it fills the grid area
+            theme="snow"
+            className="h-64"
           />
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateRows: 'repeat(5, minmax(0, 1fr))', marginBottom: '1rem' }}>
-        <Label style={{ gridRow: '1' }}>Confidential information (optional)</Label>
-        <div style={{ gridRow: '2 / span 4', overflowY: 'auto' }}>
+      {/* Confidential Information Section */}
+      <div className="space-y-4 mb-8">
+        <Label htmlFor="confidentialInfo" className="text-md font-semibold text-gray-700">
+          Confidential Information <span className="text-gray-400 font-normal italic">(Optional)</span>
+        </Label>
+        <div className="rounded-lg border border-gray-300 overflow-hidden">
           <ReactQuill
+            id="confidentialInfo"
             value={confidential}
             onChange={handleConfidentialChange}
             modules={modules}
             formats={formats}
-            className="my-2"
-            style={{ minHeight: '100%', boxSizing: 'border-box' }} // Ensure it fills the grid area
+            theme="snow"
+            className="h-48"
           />
         </div>
       </div>
 
-      <div>
-        <Label>Required Tools</Label>
+      {/* Required Tools Section */}
+      <div className="space-y-4 mb-8">
+        <Label htmlFor="requiredTools" className="text-md font-semibold text-gray-700">
+          Required Tools
+        </Label>
         <Input
           type="text"
+          id="requiredTools"
           name="requiredTools"
           value={input.requiredTools}
-          onChange={(e) => setInput({ ...input, requiredTools: e.target.value })}
-          placeholder="add multiple tools by separating using commas"
-          className="my-2 w-[400px]"
+          onChange={handleInputChange}
+          placeholder="e.g., Jira, Trello, Figma"
+          className="w-full rounded-lg bg-white border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
         />
+        <p className="text-sm text-gray-500">
+          Separate multiple tools with a comma.
+        </p>
       </div>
-      <div>
-        <Label>Skills</Label>
+
+      {/* Skills Section */}
+      <div className="space-y-4">
+        <Label htmlFor="skills" className="text-md font-semibold text-gray-700">
+          Skills
+        </Label>
         <Input
           type="text"
+          id="skills"
           name="skills"
           value={input.skills}
-          onChange={(e) => setInput({ ...input, skills: e.target.value })}
-          placeholder="add multiple tools by separating using commas"
-          className="my-2 w-[400px]"
+          onChange={handleInputChange}
+          placeholder="e.g., JavaScript, React, Node.js"
+          className="w-full rounded-lg bg-white border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
         />
+        <p className="text-sm text-gray-500">
+          Separate multiple skills with a comma.
+        </p>
       </div>
     </div>
   );

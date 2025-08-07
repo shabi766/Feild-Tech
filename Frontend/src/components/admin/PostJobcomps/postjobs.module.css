@@ -10,8 +10,8 @@
   justify-content: space-between;
   align-items: center;
   background-color: rgba(243, 244, 246, 0.7);
-  padding: 4rem 1.5rem;
-  height: 3rem;
+  padding: 1rem 1.5rem;
+  height: 6rem; /* Adjusted height for better spacing */
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
@@ -29,7 +29,7 @@
 
 .sidebar {
   position: sticky;
-  top: 3rem;
+  top: 6rem; /* Adjusted top position to be below the new status bar height */
   width: 20%;
   min-width: 200px;
   padding: 1rem 1.5rem 1rem 1rem;
@@ -44,22 +44,22 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  gap: 2rem; /* Gap between formContainer and other elements if needed */
+  gap: 2rem;
 }
 
 .formContainer {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem; /* Increase gap between sections */
+  gap: 2.5rem;
 }
 
 .section {
-  background-color: #f9fafb; /* Light gray for sections */
+  background-color: #f9fafb;
   border-radius: 0.5rem;
   box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.08);
   padding: 2rem;
   border: 1px solid #e5e7eb;
-  margin-bottom: 2rem; /* Add margin-bottom for visible separation */
+  margin-bottom: 2rem;
 }
 
 .sectionTitle {

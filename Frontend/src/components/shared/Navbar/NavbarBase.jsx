@@ -18,7 +18,18 @@ const NavbarBase = ({ children, user }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
     const { unreadMessages, setUnreadMessages, chats, setSelectedChat } = useContext(ChatContext);
+
+    // Handle scroll effect for navbar transparency
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 10);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     useEffect(() => {
         if (user) {
@@ -87,11 +98,23 @@ const NavbarBase = ({ children, user }) => {
     };
 
     return (
-        <div className='bg-blue-400'>
-            <div className='flex items-center mx-auto max-w-7xl h-16 w-full px-4'>
-                <div className="flex items-center gap-4">
-                    <img src={logo} alt="ShiftsMate Logo" className="h-14" />
-                    {children}
+        <div className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+            isScrolled 
+                ? 'bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-200/50' 
+                : 'bg-transparent'
+        }`}>
+            <div className='flex items-center mx-auto max-w-7xl h-20 w-full px-6'>
+                <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2 group">
+                        <img 
+                            src={logo} 
+                            alt="ShiftsMate Logo" 
+                            className="h-12 transition-transform duration-300 group-hover:scale-105" 
+                        />
+                    </div>
+                    <nav className="hidden md:flex items-center gap-1">
+                        {children}
+                    </nav>
                 </div>
 
                 <div className='flex items-center gap-4 ml-auto'>
@@ -99,17 +122,22 @@ const NavbarBase = ({ children, user }) => {
                         <>
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <div className="relative cursor-pointer">
-                                        <MessageSquareCodeIcon size={24} className="text-teal-600 hover:text-teal-800" />
+                                    <div className="relative cursor-pointer group">
+                                        <div className="p-2 rounded-full transition-all duration-300 group-hover:bg-gray-100/50 group-hover:scale-110">
+                                            <MessageSquareCodeIcon 
+                                                size={22} 
+                                                className="text-gray-700 group-hover:text-blue-600 transition-colors duration-300" 
+                                            />
+                                        </div>
                                         {unreadMessages.length > 0 && (
-                                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full animate-pulse shadow-lg">
                                                 {unreadMessages.length}
                                             </span>
                                         )}
                                     </div>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-80 bg-white shadow-lg rounded-lg border border-gray-300 z-10 p-4">
-                                    <h3 className="font-semibold text-gray-700 mb-2">Unread Messages</h3>
+                                <PopoverContent className="w-80 bg-white/95 backdrop-blur-md shadow-xl rounded-xl border border-gray-200/50 z-50 p-4">
+                                    <h3 className="font-semibold text-gray-800 mb-3 text-lg">Unread Messages</h3>
                                     {unreadMessages.length === 0 ? (
                                         <p className="text-gray-500 text-sm">No new messages</p>
                                     ) : (
@@ -120,9 +148,9 @@ const NavbarBase = ({ children, user }) => {
                                                     <li
                                                         key={chat._id}
                                                         onClick={() => handleUnreadMessagesClick(chat._id)}
-                                                        className="p-2 border rounded-md hover:bg-gray-100 cursor-pointer flex items-center gap-3"
+                                                        className="p-3 border border-gray-100 rounded-lg hover:bg-gray-50/80 cursor-pointer flex items-center gap-3 transition-all duration-200 hover:shadow-sm"
                                                     >
-                                                        <Avatar>
+                                                        <Avatar className="ring-2 ring-blue-100">
                                                             <AvatarImage
                                                                 src={
                                                                     chat.participants.find((p) => p._id !== user._id)?.profilePhoto ||
@@ -148,11 +176,16 @@ const NavbarBase = ({ children, user }) => {
 
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <Button variant="link" className="text-teal-600 hover:text-teal-800">
-                                        <Bell size={24} />
-                                    </Button>
+                                    <div className="relative cursor-pointer group">
+                                        <div className="p-2 rounded-full transition-all duration-300 group-hover:bg-gray-100/50 group-hover:scale-110">
+                                            <Bell 
+                                                size={22} 
+                                                className="text-gray-700 group-hover:text-blue-600 transition-colors duration-300" 
+                                            />
+                                        </div>
+                                    </div>
                                 </PopoverTrigger>
-                                <PopoverContent className='w-80 bg-white shadow-lg rounded-lg border border-gray-300 z-10'>
+                                <PopoverContent className='w-80 bg-white/95 backdrop-blur-md shadow-xl rounded-xl border border-gray-200/50 z-50'>
                                     <NotificationComponent />
                                 </PopoverContent>
                             </Popover>
@@ -160,42 +193,68 @@ const NavbarBase = ({ children, user }) => {
                     )}
 
                     {!user ? (
-                        <div className='flex items-center gap-2'>
+                        <div className='flex items-center gap-3'>
                             <Link to="/Login">
-                                <Button variant="outline">Login</Button>
+                                <Button 
+                                    variant="ghost" 
+                                    className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/50 transition-all duration-300 font-medium"
+                                >
+                                    Login
+                                </Button>
                             </Link>
                             <Link to="/Signup">
-                                <Button className='bg-teal-600 hover:bg-teal-700'>Signup</Button>
+                                <Button className='bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-medium'>
+                                    Sign Up
+                                </Button>
                             </Link>
                         </div>
                     ) : (
                         <Popover>
                             <PopoverTrigger asChild>
-                                <Avatar className='cursor-pointer'>
-                                    <AvatarImage src={user?.profile?.profilePhoto || '/path/to/default-avatar.png'} alt={user.fullname} />
-                                </Avatar>
+                                <div className="cursor-pointer group">
+                                    <Avatar className='cursor-pointer ring-2 ring-gray-200 group-hover:ring-blue-300 transition-all duration-300 group-hover:scale-105'>
+                                        <AvatarImage 
+                                            src={user?.profile?.profilePhoto || '/path/to/default-avatar.png'} 
+                                            alt={user.fullname} 
+                                        />
+                                    </Avatar>
+                                </div>
                             </PopoverTrigger>
-                            <PopoverContent className="w-80 bg-white shadow-lg rounded-lg border border-gray-300 z-10 p-4">
-                                <div className='flex gap-2 space-y-2 forced-color-adjust-auto'>
-                                    <Avatar className='cursor-pointer'>
-                                        <AvatarImage src={user?.profile?.profilePhoto || '/path/to/default-avatar.png'} alt={user.fullname} />
+                            <PopoverContent className="w-80 bg-white/95 backdrop-blur-md shadow-xl rounded-xl border border-gray-200/50 z-50 p-6">
+                                <div className='flex gap-4 items-center mb-4 pb-4 border-b border-gray-100'>
+                                    <Avatar className='cursor-pointer ring-2 ring-blue-100'>
+                                        <AvatarImage 
+                                            src={user?.profile?.profilePhoto || '/path/to/default-avatar.png'} 
+                                            alt={user.fullname} 
+                                        />
                                     </Avatar>
                                     <div>
-                                        <h4 className='font-medium'>{user.fullname}</h4>
-                                        <p className='text-xs text-gray-500'>{user.email}
-                                        </p>
+                                        <h4 className='font-semibold text-gray-800'>{user.fullname}</h4>
+                                        <p className='text-sm text-gray-500'>{user.email}</p>
                                     </div>
                                 </div>
-                                <div className='py-2'>
-                                    <Link to="/profile" className='flex items-center gap-2 py-2'>
-                                        <User2 size={16} /> Profile
+                                <div className='space-y-2'>
+                                    <Link 
+                                        to="/profile" 
+                                        className='flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-gray-50/80 transition-all duration-200 text-gray-700 hover:text-blue-600'
+                                    >
+                                        <User2 size={18} /> 
+                                        <span className="font-medium">Profile</span>
                                     </Link>
-                                    <Link to="/settings" className="flex items-center gap-2 py-2">
-                                        <Settings size={16} /> Settings
+                                    <Link 
+                                        to="/settings" 
+                                        className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-gray-50/80 transition-all duration-200 text-gray-700 hover:text-blue-600"
+                                    >
+                                        <Settings size={18} /> 
+                                        <span className="font-medium">Settings</span>
                                     </Link>
-
-                                    <button onClick={LogoutHandler} disabled={loading} className='flex items-center gap-2 py-2 w-full'>
-                                        <LogOut size={16} /> Logout
+                                    <button 
+                                        onClick={LogoutHandler} 
+                                        disabled={loading} 
+                                        className='flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-red-50/80 transition-all duration-200 text-gray-700 hover:text-red-600 w-full disabled:opacity-50'
+                                    >
+                                        <LogOut size={18} /> 
+                                        <span className="font-medium">{loading ? 'Logging out...' : 'Logout'}</span>
                                     </button>
                                 </div>
                             </PopoverContent>

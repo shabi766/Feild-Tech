@@ -1,5 +1,6 @@
 // App.jsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Signup from "./components/Auth/Signup";
 import Login from "./components/Auth/Login";
 import Home from "./components/user/Home";
@@ -40,26 +41,85 @@ import PostJobs from "./components/admin/PostJobcomps/PostJob";
 
 import Companies from "./components/admin/Companies";
 import ViewJob from "./components/admin/ViewJobs/ViewJob";
+import LandingPage from "./components/LandingPage/LandingPage";
+
+// Import new info pages
+import FindTech from "./components/LandingPage/info/FindTech";
+import FindWork from "./components/LandingPage/info/FindWork";
+import ServiceCoverage from "./components/LandingPage/info/ServiceCoverage";
+import Resources from "./components/LandingPage/info/Resources";
+import About from "./components/LandingPage/info/About";
+
+// Component to handle role-based redirects
+const RoleBasedRedirect = () => {
+  const { user } = useSelector(store => store.auth);
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  // Redirect based on user role
+  if (user.role === 'Recruiter' || user.role === 'Admin') {
+    return <Navigate to="/dashboard" replace />;
+  } else if (user.role === 'Technician') {
+    return <Navigate to="/home" replace />;
+  }
+  
+  // Default fallback
+  return <Navigate to="/home" replace />;
+};
+
+// Component to handle authenticated user landing
+const AuthenticatedLanding = () => {
+  const { user } = useSelector(store => store.auth);
+  
+  if (!user) {
+    return <LandingPage />;
+  }
+  
+  // If user is logged in, redirect based on role
+  if (user.role === 'Recruiter' || user.role === 'Admin') {
+    return <Navigate to="/dashboard" replace />;
+  } else if (user.role === 'Technician') {
+    return <Navigate to="/home" replace />;
+  }
+  
+  return <LandingPage />;
+};
 
 function App() {
   return (
     <BrowserRouter>
       <ChatProvider>
         <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<AuthenticatedLanding />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+
+          {/* Info pages routes */}
+          <Route path="/find-tech" element={<FindTech />} />
+          <Route path="/find-work" element={<FindWork />} />
+          <Route path="/service-coverage" element={<ServiceCoverage />} />
+          <Route path="/resources" element={<Resources />} />
+          <Route path="/about" element={<About />} />
+
+          {/* Protected routes with Layout */}
           <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
+            {/* Technician routes */}
+            <Route path="home" element={<Home />} />
             <Route path="jobs" element={<Jobs />} />
             <Route path="description/:id" element={<JobDescription />} />
             <Route path="browse" element={<Browse />} />
             <Route path="profile" element={<Profile />} />
             <Route path="calender" element={<JobCalendar />} />
             <Route path="chat" element={<Chat />} />
-            <Route path="/settings" element={<Settings/>} />
-            <Route path="/Myjobs" element={<JobTable/>} />
-            <Route path="technicians/techs" element={<ProtectedRoute><AllTechnicians /></ProtectedRoute>} />
+            <Route path="settings" element={<Settings/>} />
+            <Route path="Myjobs" element={<JobTable/>} />
+            
+            {/* Admin/Recruiter routes */}
             <Route path="dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+            <Route path="technicians/techs" element={<ProtectedRoute><AllTechnicians /></ProtectedRoute>} />
             <Route path="technicians/:id" element={<ProtectedRoute><TechnicianProfile /></ProtectedRoute>} />
             <Route path="admin/companies" element={<ProtectedRoute>< Companies /></ProtectedRoute>} />
             <Route path="admin/companies/:id" element={<ProtectedRoute><CompanySetup /></ProtectedRoute>} />
@@ -81,6 +141,9 @@ function App() {
             <Route path="admin/jobs/:id" element={<ProtectedRoute><ShowJob /></ProtectedRoute>} />
             <Route path="jobcalender" element={<ProtectedRoute><JobCalendarPage /></ProtectedRoute>} />
           </Route>
+
+          {/* Catch all route - redirect to role-based page */}
+          <Route path="*" element={<RoleBasedRedirect />} />
         </Routes>
       </ChatProvider>
     </BrowserRouter>

@@ -7,6 +7,7 @@ const JobTypeStep = ({ input, setInput }) => {
     const [localPartTime, setLocalPartTime] = useState(input.partTime || { base: '', hourlyHours: '', dailyDays: '', weeklyDays: '', monthlyMonths: '' });
     const [localFullTime, setLocalFullTime] = useState(input.fullTime || { contractMonths: '' });
 
+    // Sync local state with parent state on changes
     useEffect(() => {
         setInput(prevInput => ({
             ...prevInput,
@@ -15,14 +16,15 @@ const JobTypeStep = ({ input, setInput }) => {
         }));
     }, [localPartTime, localFullTime, setInput]);
 
+    // Handlers for logic
     const handleJobTypeChange = (value) => {
         setInput(prevInput => ({
             ...prevInput,
             jobType: value,
             partTime: { base: '', hourlyHours: '', dailyDays: '', weeklyDays: '', monthlyMonths: '' },
             fullTime: { contractMonths: '' },
-            rateType: 'fixed', // Reset rate type
-            rate: '', // Reset rate
+            rateType: 'fixed',
+            rate: '',
         }));
     };
 
@@ -30,15 +32,12 @@ const JobTypeStep = ({ input, setInput }) => {
         setLocalPartTime(prev => ({
             ...prev,
             base: value,
-            hourlyHours: '',
-            dailyDays: '',
-            weeklyDays: '',
-            monthlyMonths: '',
+            hourlyHours: '', dailyDays: '', weeklyDays: '', monthlyMonths: '',
         }));
         setInput(prevInput => ({
             ...prevInput,
-            rateType: 'fixed', // Reset rate type when base changes
-            rate: '', // Reset rate
+            rateType: 'fixed',
+            rate: '',
         }));
     };
 
@@ -51,15 +50,22 @@ const JobTypeStep = ({ input, setInput }) => {
     };
 
     return (
-        <div>
-            
-            <div className="mb-4">
-                <Label htmlFor="jobTypeSelect" className="block mb-2">Job Type</Label>
+        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 max-w-5xl mx-auto">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 border-b pb-4">
+                Job Type & Duration
+            </h2>
+            <p className="text-gray-500 mb-8">
+                Specify the type of job and its duration. This information is used to calculate the estimated end time.
+            </p>
+
+            {/* Job Type Section */}
+            <div className="mb-6 space-y-2">
+                <Label htmlFor="jobTypeSelect" className="text-sm font-semibold text-gray-700">Job Type</Label>
                 <Select id="jobTypeSelect" onValueChange={handleJobTypeChange} value={input.jobType}>
-                    <SelectTrigger className="w-[400px]">
+                    <SelectTrigger className="w-full rounded-lg bg-white border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
                         <SelectValue placeholder="Select Job Type" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-lg">
                         <SelectGroup>
                             <SelectItem value="part-time">Part-Time</SelectItem>
                             <SelectItem value="full-time">Full-Time</SelectItem>
@@ -68,15 +74,16 @@ const JobTypeStep = ({ input, setInput }) => {
                 </Select>
             </div>
 
+            {/* Conditional Part-Time Fields */}
             {input.jobType === 'part-time' && (
                 <>
-                    <div className="mb-4">
-                        <Label htmlFor="partTimeBaseSelect" className="block mb-2">Base Type</Label>
+                    <div className="mb-6 space-y-2">
+                        <Label htmlFor="partTimeBaseSelect" className="text-sm font-semibold text-gray-700">Part-Time Base</Label>
                         <Select id="partTimeBaseSelect" onValueChange={handlePartTimeBaseChange} value={localPartTime.base}>
-                            <SelectTrigger className="w-[400px]">
-                                <SelectValue placeholder="Select Part-Time Base" />
+                            <SelectTrigger className="w-full rounded-lg bg-white border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                <SelectValue placeholder="Select Base Type" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="rounded-lg">
                                 <SelectGroup>
                                     <SelectItem value="hourly">Hourly</SelectItem>
                                     <SelectItem value="daily">Daily</SelectItem>
@@ -86,71 +93,78 @@ const JobTypeStep = ({ input, setInput }) => {
                             </SelectContent>
                         </Select>
                     </div>
+
                     {localPartTime.base === 'hourly' && (
-                        <div className="mb-4">
-                            <Label htmlFor="hourlyHoursInput" className="block mb-2">Hourly Hours</Label>
+                        <div className="space-y-2">
+                            <Label htmlFor="hourlyHoursInput" className="text-sm font-semibold text-gray-700">Hourly Hours</Label>
                             <Input
                                 type="number"
                                 id="hourlyHoursInput"
                                 name="hourlyHours"
                                 value={localPartTime.hourlyHours}
                                 onChange={(e) => handlePartTimeInputChange('hourlyHours', e.target.value)}
-                                placeholder="Enter hours"
+                                placeholder="Enter total hours for the job"
+                                className="w-full rounded-lg bg-white border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
                     )}
                     {localPartTime.base === 'daily' && (
-                        <div className="mb-4">
-                            <Label htmlFor="dailyDaysInput" className="block mb-2">Daily Days</Label>
+                        <div className="space-y-2">
+                            <Label htmlFor="dailyDaysInput" className="text-sm font-semibold text-gray-700">Number of Days</Label>
                             <Input
                                 type="number"
                                 id="dailyDaysInput"
                                 name="dailyDays"
                                 value={localPartTime.dailyDays}
                                 onChange={(e) => handlePartTimeInputChange('dailyDays', e.target.value)}
-                                placeholder="Enter days"
+                                placeholder="Enter number of days"
+                                className="w-full rounded-lg bg-white border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
                     )}
                     {localPartTime.base === 'weekly' && (
-                        <div className="mb-4">
-                            <Label htmlFor="weeklyDaysInput" className="block mb-2">Weekly Days</Label>
+                        <div className="space-y-2">
+                            <Label htmlFor="weeklyDaysInput" className="text-sm font-semibold text-gray-700">Number of Weeks</Label>
                             <Input
                                 type="number"
                                 id="weeklyDaysInput"
                                 name="weeklyDays"
                                 value={localPartTime.weeklyDays}
                                 onChange={(e) => handlePartTimeInputChange('weeklyDays', e.target.value)}
-                                placeholder="Enter weeks"
+                                placeholder="Enter number of weeks"
+                                className="w-full rounded-lg bg-white border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
                     )}
                     {localPartTime.base === 'monthly' && (
-                        <div className="mb-4">
-                            <Label htmlFor="monthlyMonthsInput" className="block mb-2">Monthly Months</Label>
+                        <div className="space-y-2">
+                            <Label htmlFor="monthlyMonthsInput" className="text-sm font-semibold text-gray-700">Number of Months</Label>
                             <Input
                                 type="number"
                                 id="monthlyMonthsInput"
                                 name="monthlyMonths"
                                 value={localPartTime.monthlyMonths}
                                 onChange={(e) => handlePartTimeInputChange('monthlyMonths', e.target.value)}
-                                placeholder="Enter months"
+                                placeholder="Enter number of months"
+                                className="w-full rounded-lg bg-white border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
                     )}
                 </>
             )}
 
+            {/* Conditional Full-Time Fields */}
             {input.jobType === 'full-time' && (
-                <div className="mt-4">
-                    <Label htmlFor="contractMonthsInput" className="block mb-2">Contract Months</Label>
+                <div className="space-y-2 mt-6">
+                    <Label htmlFor="contractMonthsInput" className="text-sm font-semibold text-gray-700">Contract Months</Label>
                     <Input
                         type="number"
                         id="contractMonthsInput"
                         name="contractMonths"
                         value={localFullTime.contractMonths}
                         onChange={(e) => handleFullTimeInputChange('contractMonths', e.target.value)}
-                        placeholder="Enter months"
+                        placeholder="Enter total months for the contract"
+                        className="w-full rounded-lg bg-white border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
             )}

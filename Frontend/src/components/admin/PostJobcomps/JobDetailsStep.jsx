@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useFetchProjectsByClient } from '@/components/Hooks/useFetchProjectsByClient';
 import useGetAllClients from '@/components/Hooks/useGetAllClients';
+import { cn } from '@/lib/utils'; // Assuming this utility is available
 
-const JobDetailsStep = ({ input, setInput, nextStep }) => {
-  const dispatch = useDispatch();
+const JobDetailsStep = ({ input, setInput }) => {
   const { clients, loading: clientsLoading, error: clientsError } = useSelector((store) => store.client);
   const { projects, loading: projectLoading, error: projectError } = useFetchProjectsByClient(input.client);
   const [focusedInput, setFocusedInput] = useState(null);
@@ -19,14 +19,27 @@ const JobDetailsStep = ({ input, setInput, nextStep }) => {
   };
 
   const handleSelectChange = (value, name) => {
-    setInput({ ...input, [name]: value });
+    // If the client changes, reset the project to avoid mismatched data
+    if (name === 'client') {
+      setInput({ ...input, client: value, projectId: '' });
+    } else {
+      setInput({ ...input, [name]: value });
+    }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-x-6 gap-y-6">
-        <div className="relative">
-          <Label htmlFor="title" className={`block text-sm font-medium text-gray-700 ${focusedInput === 'title' ? 'text-indigo-500' : ''}`}>
+    <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 max-w-5xl mx-auto">
+      <h2 className="text-3xl font-bold text-gray-800 mb-6 border-b pb-4">
+        Job Details
+      </h2>
+      <p className="text-gray-500 mb-8">
+        Provide essential information about the job, including the client and project details.
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+        {/* Title Field */}
+        <div>
+          <Label htmlFor="title" className="text-sm font-semibold text-gray-700">
             Title
           </Label>
           <Input
@@ -35,28 +48,21 @@ const JobDetailsStep = ({ input, setInput, nextStep }) => {
             name="title"
             value={input.title}
             onChange={handleInputChange}
-            className={`mt-1 w-[400px] rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 ${focusedInput === 'title' ? 'border-indigo-500' : ''}`}
-            placeholder="Enter job title"
-            onFocus={() => setFocusedInput('title')}
-            onBlur={() => setFocusedInput(null)}
+            placeholder="e.g., HVAC Maintenance"
+            className="mt-2 w-full rounded-lg bg-white border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
           />
-          {focusedInput === 'title' && (
-            <div className="absolute inset-0 border-2 border-indigo-500 rounded-md pointer-events-none"></div>
-          )}
         </div>
-        <div className="relative">
-          <Label htmlFor="template" className={`block text-sm font-medium text-gray-700 ${focusedInput === 'template' ? 'text-indigo-500' : ''}`}>
-            Template (optional)
+
+        {/* Template Field */}
+        <div>
+          <Label htmlFor="template" className="text-sm font-semibold text-gray-700">
+            Template <span className="text-gray-400 font-normal italic">(optional)</span>
           </Label>
           <Select onValueChange={(value) => handleSelectChange(value, 'template')}>
-            <SelectTrigger
-              className={`w-[400px] mt-1 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 ${focusedInput === 'template' ? 'border-indigo-500' : ''}`}
-              onFocus={() => setFocusedInput('template')}
-              onBlur={() => setFocusedInput(null)}
-            >
-              <SelectValue placeholder="Select Template" />
+            <SelectTrigger className="mt-2 w-full rounded-lg bg-white border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
+              <SelectValue placeholder="Select a template" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-lg">
               <SelectGroup>
                 <SelectItem value="Template1">Template 1</SelectItem>
                 <SelectItem value="Template2">Template 2</SelectItem>
@@ -64,28 +70,25 @@ const JobDetailsStep = ({ input, setInput, nextStep }) => {
               </SelectGroup>
             </SelectContent>
           </Select>
-          {focusedInput === 'template' && (
-            <div className="absolute inset-0 border-2 border-indigo-500 rounded-md pointer-events-none"></div>
-          )}
         </div>
-        <div className="relative">
-          <Label htmlFor="client" className={`block text-sm font-medium text-gray-700 ${focusedInput === 'client' ? 'text-indigo-500' : ''}`}>
+
+        {/* Client Selection */}
+        <div>
+          <Label htmlFor="client" className="text-sm font-semibold text-gray-700">
             Select Client <span className="text-red-500">*</span>
           </Label>
           {clientsLoading ? (
-            <p className="mt-1 text-sm text-gray-500">Loading clients...</p>
+            <p className="mt-2 text-sm text-gray-500">Loading clients...</p>
           ) : clientsError ? (
-            <p className="mt-1 text-red-500">{clientsError}</p>
+            <p className="mt-2 text-sm text-red-500">{clientsError}</p>
           ) : (
             <select
               id="client"
-              className={`mt-1 block w-[400px] border border-gray-300 rounded-md p-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${focusedInput === 'client' ? 'border-indigo-500' : ''}`}
               name="client"
               value={input.client}
               onChange={handleInputChange}
               required
-              onFocus={() => setFocusedInput('client')}
-              onBlur={() => setFocusedInput(null)}
+              className="mt-2 block w-full rounded-lg border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select a client</option>
               {Array.isArray(clients) &&
@@ -96,49 +99,26 @@ const JobDetailsStep = ({ input, setInput, nextStep }) => {
                 ))}
             </select>
           )}
-          {focusedInput === 'client' && (
-            <div className="absolute inset-0 border-2 border-indigo-500 rounded-md pointer-events-none"></div>
-          )}
-        </div>
-        <div className="relative">
-          <Label htmlFor="incidentId" className={`block text-sm font-medium text-gray-700 ${focusedInput === 'incidentId' ? 'text-indigo-500' : ''}`}>
-            Incident/SiteID (optional)
-          </Label>
-          <Input
-            type="text"
-            id="incidentId"
-            name="IncidentID"
-            value={input.IncidentID}
-            onChange={handleInputChange}
-            className={`mt-1 w-[400px] rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 ${focusedInput === 'incidentId' ? 'border-indigo-500' : ''}`}
-            placeholder="Enter Incident/SiteID"
-            onFocus={() => setFocusedInput('incidentId')}
-            onBlur={() => setFocusedInput(null)}
-          />
-          {focusedInput === 'incidentId' && (
-            <div className="absolute inset-0 border-2 border-indigo-500 rounded-md pointer-events-none"></div>
-          )}
         </div>
 
+        {/* Project Selection (Conditional) */}
         {input.client && (
-          <div className="relative">
-            <Label htmlFor="project" className={`block text-sm font-medium text-gray-700 ${focusedInput === 'project' ? 'text-indigo-500' : ''}`}>
+          <div>
+            <Label htmlFor="projectId" className="text-sm font-semibold text-gray-700">
               Select Project <span className="text-red-500">*</span>
             </Label>
             {projectLoading ? (
-              <p className="mt-1 text-sm text-gray-500">Loading projects...</p>
+              <p className="mt-2 text-sm text-gray-500">Loading projects...</p>
             ) : projectError ? (
-              <p className="mt-1 text-red-500">{projectError}</p>
+              <p className="mt-2 text-sm text-red-500">{projectError}</p>
             ) : projects.length > 0 ? (
               <select
-                id="project"
-                className={`mt-1 block w-[400px] border border-gray-300 rounded-md p-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${focusedInput === 'project' ? 'border-indigo-500' : ''}`}
+                id="projectId"
                 name="projectId"
                 value={input.projectId}
                 onChange={handleInputChange}
                 required
-                onFocus={() => setFocusedInput('project')}
-                onBlur={() => setFocusedInput(null)}
+                className="mt-2 block w-full rounded-lg border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Select a project</option>
                 {projects.map((project) => (
@@ -148,27 +128,37 @@ const JobDetailsStep = ({ input, setInput, nextStep }) => {
                 ))}
               </select>
             ) : (
-              <p className="mt-1 text-sm text-gray-500">No projects registered under this client.</p>
-            )}
-            {focusedInput === 'project' && (
-              <div className="absolute inset-0 border-2 border-indigo-500 rounded-md pointer-events-none"></div>
+              <p className="mt-2 text-sm text-gray-500">No projects found for this client.</p>
             )}
           </div>
         )}
-
-        <div className="relative">
-          <Label htmlFor="teams" className={`block text-sm font-medium text-gray-700 ${focusedInput === 'teams' ? 'text-indigo-500' : ''}`}>
-            Teams (optional)
+        
+        {/* Incident ID */}
+        <div>
+          <Label htmlFor="incidentId" className="text-sm font-semibold text-gray-700">
+            Incident/Site ID <span className="text-gray-400 font-normal italic">(optional)</span>
           </Label>
-          <Select onValueChange={(value) => handleSelectChange(value, 'Teams')}>
-            <SelectTrigger
-              className={`w-[400px] mt-1 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 ${focusedInput === 'teams' ? 'border-indigo-500' : ''}`}
-              onFocus={() => setFocusedInput('teams')}
-              onBlur={() => setFocusedInput(null)}
-            >
-              <SelectValue placeholder="Select Team" />
+          <Input
+            type="text"
+            id="incidentId"
+            name="incidentId" // Corrected name to be consistent
+            value={input.incidentId} // Corrected name to be consistent
+            onChange={handleInputChange}
+            placeholder="Enter Incident/Site ID"
+            className="mt-2 w-full rounded-lg bg-white border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        {/* Teams Field */}
+        <div>
+          <Label htmlFor="teams" className="text-sm font-semibold text-gray-700">
+            Teams <span className="text-gray-400 font-normal italic">(optional)</span>
+          </Label>
+          <Select onValueChange={(value) => handleSelectChange(value, 'teams')}>
+            <SelectTrigger className="mt-2 w-full rounded-lg bg-white border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
+              <SelectValue placeholder="Select a team" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-lg">
               <SelectGroup>
                 <SelectItem value="Team1">Team 1</SelectItem>
                 <SelectItem value="Team2">Team 2</SelectItem>
@@ -176,9 +166,6 @@ const JobDetailsStep = ({ input, setInput, nextStep }) => {
               </SelectGroup>
             </SelectContent>
           </Select>
-          {focusedInput === 'teams' && (
-            <div className="absolute inset-0 border-2 border-indigo-500 rounded-md pointer-events-none"></div>
-          )}
         </div>
       </div>
     </div>

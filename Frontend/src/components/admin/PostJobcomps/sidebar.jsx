@@ -1,20 +1,19 @@
 import React, { useState } from 'react';
-import styles from '../PostJobcomps/jobformstepper.module.css'; // Import the CSS module
 
 const JobFormStepper = ({ goToStep, setCustomFieldsEnabled, setAdvancedFieldsEnabled }) => {
     const [customFieldsToggle, setCustomFieldsToggle] = useState(false);
     const [advancedFieldsToggle, setAdvancedFieldsToggle] = useState(false);
 
     const handleCustomFieldsToggle = () => {
-        const newValue = !customFieldsToggle; // Store the new value
+        const newValue = !customFieldsToggle;
         setCustomFieldsToggle(newValue);
-        setCustomFieldsEnabled(newValue); // Use the stored value
+        setCustomFieldsEnabled(newValue);
     };
 
     const handleAdvancedFieldsToggle = () => {
-        const newValue = !advancedFieldsToggle;  // Store the new value
+        const newValue = !advancedFieldsToggle;
         setAdvancedFieldsToggle(newValue);
-        setAdvancedFieldsEnabled(newValue); // Use the stored value
+        setAdvancedFieldsEnabled(newValue);
     };
 
     const baseSteps = [
@@ -26,7 +25,6 @@ const JobFormStepper = ({ goToStep, setCustomFieldsEnabled, setAdvancedFieldsEna
         { id: 'address', label: 'Address' },
         { id: 'contacts', label: 'Contacts' },
         { id: 'attachments', label: 'Attachments' },
-
     ];
 
     const customFieldStep = { id: 'custom-fields', label: 'Custom Fields' };
@@ -39,14 +37,14 @@ const JobFormStepper = ({ goToStep, setCustomFieldsEnabled, setAdvancedFieldsEna
     ];
 
     return (
-        <div className={styles.sidebar}>
-            <ul className={styles.navList}>
-
+        <div className="w-[300px] bg-white rounded-xl shadow-lg p-6 sticky top-4 self-start max-h-[calc(100vh-2rem)] overflow-y-auto">
+            <h3 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">Form Steps</h3>
+            <ul className="space-y-2">
                 {/* Base Steps */}
                 {baseSteps.map((step) => (
                     <li
                         key={step.id}
-                        className={styles.navItem}
+                        className="py-2 px-4 rounded-lg cursor-pointer text-gray-600 hover:bg-gray-100 transition-colors duration-200 ease-in-out"
                         onClick={() => goToStep(step.id)}
                     >
                         {step.label}
@@ -54,17 +52,16 @@ const JobFormStepper = ({ goToStep, setCustomFieldsEnabled, setAdvancedFieldsEna
                 ))}
 
                 {/* Custom Fields Toggle */}
-                <li className={`${styles.navItem} ${styles.navItemWithToggle}`}>
-                    <span>Custom Fields</span>
-                    <label className="relative inline-block w-12 h-6 cursor-pointer">
+                <li className="py-2 px-4 flex items-center justify-between space-x-2 border-t mt-4 pt-4">
+                    <span className="font-medium text-gray-700">Custom Fields</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
                         <input
                             type="checkbox"
                             className="sr-only peer"
                             checked={customFieldsToggle}
                             onChange={handleCustomFieldsToggle}
                         />
-                        <div className="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-blue-500 transition-colors"></div>
-                        <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-6"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                 </li>
 
@@ -73,14 +70,14 @@ const JobFormStepper = ({ goToStep, setCustomFieldsEnabled, setAdvancedFieldsEna
                     <>
                         <li
                             key={customFieldStep.id}
-                            className={styles.navItem}
+                            className="py-2 px-4 rounded-lg cursor-pointer text-gray-600 hover:bg-gray-100 transition-colors duration-200 ease-in-out"
                             onClick={() => goToStep(customFieldStep.id)}
                         >
                             {customFieldStep.label}
                         </li>
                         <li
                             key={taskListStep.id}
-                            className={styles.navItem}
+                            className="py-2 px-4 rounded-lg cursor-pointer text-gray-600 hover:bg-gray-100 transition-colors duration-200 ease-in-out"
                             onClick={() => goToStep(taskListStep.id)}
                         >
                             {taskListStep.label}
@@ -89,17 +86,16 @@ const JobFormStepper = ({ goToStep, setCustomFieldsEnabled, setAdvancedFieldsEna
                 )}
 
                 {/* Advanced Fields Toggle */}
-                <li className={`${styles.navItem} ${styles.navItemWithToggle}`}>
-                    <span>Advanced Fields</span>
-                    <label className="relative inline-block w-12 h-6 cursor-pointer">
+                <li className="py-2 px-4 flex items-center justify-between space-x-2 border-t mt-4 pt-4">
+                    <span className="font-medium text-gray-700">Advanced Fields</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
                         <input
                             type="checkbox"
                             className="sr-only peer"
                             checked={advancedFieldsToggle}
                             onChange={handleAdvancedFieldsToggle}
                         />
-                        <div className="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-blue-500 transition-colors"></div>
-                        <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-6"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                 </li>
 
@@ -108,7 +104,7 @@ const JobFormStepper = ({ goToStep, setCustomFieldsEnabled, setAdvancedFieldsEna
                     advancedSteps.map((step) => (
                         <li
                             key={step.id}
-                            className={styles.navItem}
+                            className="py-2 px-4 rounded-lg cursor-pointer text-gray-600 hover:bg-gray-100 transition-colors duration-200 ease-in-out"
                             onClick={() => goToStep(step.id)}
                         >
                             {step.label}

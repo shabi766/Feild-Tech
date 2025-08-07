@@ -1,42 +1,88 @@
 /* JobFormStepper.module.css */
 .sidebar {
   width: 100%;
-  background-color: #f3f4f6;
-  padding: 1rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  overflow-y: auto; /* Allow scrolling if content overflows */
+  background-color: #ffffff; /* White background for a clean look */
+  padding: 1.5rem; /* Increased padding */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* More pronounced shadow */
+  border-radius: 1rem; /* Rounded corners for a modern feel */
+  border: 1px solid #e5e7eb; /* Subtle border */
 }
 
 .navList {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem; /* Increased space between list items */
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
 .navItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* Space between icon and text */
   font-weight: 600;
-  padding: 0.5rem;
-  border-radius: 0.25rem;
+  padding: 0.75rem 1rem; /* Slightly larger padding */
+  border-radius: 0.5rem; /* More rounded corners */
   cursor: pointer;
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
-  background-color: #e5e7eb;
-  color: #4b5563;
+  transition: all 0.2s ease-in-out;
+  background-color: transparent;
+  color: #6b7280; /* Neutral text color */
 }
 
 .navItem:hover {
-  background-color: #d1d5db;
+  background-color: #f3f4f6; /* Subtle hover effect */
+  color: #1f2937; /* Darker text on hover */
 }
 
 .navItemActive {
-  background-color: #e5e7eb;
-  color: #4b5563;
+  background-color: #eff6ff; /* Light blue background for active state */
+  color: #2563eb; /* Blue text for active state */
+  border: 1px solid #bfdbfe; /* A thin border for added emphasis */
+}
+
+.navItemActive:hover {
+  background-color: #dbeafe; /* Slightly darker blue on hover for active item */
 }
 
 .navItemWithToggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.navItemNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: 9999px; /* Fully rounded circle */
+  background-color: #d1d5db; /* Gray circle for inactive state */
+  color: #4b5563;
+  transition: all 0.2s ease-in-out;
+}
+
+.navItemActive .navItemNumber {
+  background-color: #2563eb; /* Blue circle for active state */
+  color: #ffffff; /* White number for active state */
+}
+
+.navItemWithToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #9ca3af; /* Gray icon color */
+  transition: color 0.2s ease-in-out;
+}
+
+.navItemActive .navIcon {
+  color: #2563eb; /* Blue icon color for active state */
 }

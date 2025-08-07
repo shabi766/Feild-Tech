@@ -1,39 +1,45 @@
-import React, { useState, useCallback } from 'react';
-import styles from './SmartAudit.module.css'; // Create a CSS module for this component
+import React, { useState, useCallback, useEffect } from 'react';
+import styles from './SmartAudit.module.css';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 
 const AuditRuleItem = ({ rule, index, onRuleChange, onRemoveRule }) => {
+    // We can define the change handler right here, using the index
     const handleInputChange = useCallback((e) => {
         const { name, value } = e.target;
         onRuleChange(index, { ...rule, [name]: value });
     }, [index, rule, onRuleChange]);
 
-    const handleCheckboxChange = useCallback((e) => {
-        const { name, checked } = e.target;
-        onRuleChange(index, { ...rule, [name]: checked });
-    }, [index, rule, onRuleChange]);
-
     return (
         <div className={styles.auditRuleItem}>
-            <h4 className={styles.ruleTitle}>Rule #{index + 1}</h4>
+            <div className={styles.ruleHeader}>
+                <h4 className={styles.ruleTitle}>Rule #{index + 1}</h4>
+                <Button 
+                    onClick={() => onRemoveRule(index)} 
+                    variant="destructive" // Assuming your Button component has a destructive variant for red color
+                    className="py-1 px-3"
+                >
+                    Remove
+                </Button>
+            </div>
+            
             <div className={styles.formGroup}>
-                <Label htmlFor={`description-${index}`}>Description</Label>
+                <Label htmlFor={`description-${rule.id}`}>Description</Label>
                 <Input
                     type="text"
-                    id={`description-${index}`}
+                    id={`description-${rule.id}`}
                     name="description"
                     value={rule.description || ''}
                     onChange={handleInputChange}
                 />
             </div>
             <div className={styles.formGroup}>
-                <Label htmlFor={`weight-${index}`}>Weight (e.g., 1-5, importance)</Label>
+                <Label htmlFor={`weight-${rule.id}`}>Weight (e.g., 1-5, importance)</Label>
                 <Input
                     type="number"
-                    id={`weight-${index}`}
+                    id={`weight-${rule.id}`}
                     name="weight"
                     value={rule.weight || ''}
                     onChange={handleInputChange}
@@ -49,31 +55,46 @@ const AuditRuleItem = ({ rule, index, onRuleChange, onRemoveRule }) => {
                     Is Required
                 </Label>
             </div>
-            <Button onClick={() => onRemoveRule(index)} className="bg-red-500 text-white py-2 px-4 rounded-md mt-2">
-                Remove Rule
-            </Button>
         </div>
     );
 };
 
 const SmartAudit = ({ initialRules = [], onAuditRulesChange }) => {
-    const [auditRules, setAuditRules] = useState(initialRules);
+    // Initialize with unique IDs for new rules
+    const [auditRules, setAuditRules] = useState(() => 
+        initialRules.map(rule => ({ ...rule, id: rule.id || Date.now() + Math.random() }))
+    );
 
+    // Sync initialRules prop with internal state
+    useEffect(() => {
+      setAuditRules(initialRules.map(rule => ({ ...rule, id: rule.id || Date.now() + Math.random() })));
+    }, [initialRules]);
+    
     const handleRuleChange = useCallback((index, newRule) => {
-        const updatedRules = [...auditRules];
-        updatedRules[index] = newRule;
-        setAuditRules(updatedRules);
-        onAuditRulesChange(updatedRules); // Notify parent
-    }, [auditRules, onAuditRulesChange]);
+        setAuditRules(prevRules => {
+            const updatedRules = [...prevRules];
+            updatedRules[index] = newRule;
+            onAuditRulesChange(updatedRules); // Notify parent
+            return updatedRules;
+        });
+    }, [onAuditRulesChange]);
 
     const handleAddRule = useCallback(() => {
-        setAuditRules([...auditRules, {}]);
-    }, [auditRules]);
+        const newRule = { id: Date.now() + Math.random(), description: '', weight: 0, isRequired: false };
+        setAuditRules(prevRules => {
+            const updatedRules = [...prevRules, newRule];
+            onAuditRulesChange(updatedRules); // Notify parent
+            return updatedRules;
+        });
+    }, [onAuditRulesChange]);
 
     const handleRemoveRule = useCallback((indexToRemove) => {
-        setAuditRules(auditRules.filter((_, index) => index !== indexToRemove));
-        onAuditRulesChange(auditRules.filter((_, index) => index !== indexToRemove)); // Notify parent
-    }, [auditRules, onAuditRulesChange]);
+        setAuditRules(prevRules => {
+            const updatedRules = prevRules.filter((_, index) => index !== indexToRemove);
+            onAuditRulesChange(updatedRules); // Notify parent
+            return updatedRules;
+        });
+    }, [onAuditRulesChange]);
 
     return (
         <div className={styles.smartAuditContainer}>
@@ -82,7 +103,7 @@ const SmartAudit = ({ initialRules = [], onAuditRulesChange }) => {
 
             {auditRules.map((rule, index) => (
                 <AuditRuleItem
-                    key={index}
+                    key={rule.id} // Use a unique ID for the key
                     rule={rule}
                     index={index}
                     onRuleChange={handleRuleChange}
@@ -90,7 +111,7 @@ const SmartAudit = ({ initialRules = [], onAuditRulesChange }) => {
                 />
             ))}
 
-            <Button onClick={handleAddRule} className="bg-blue-500 text-white py-2 px-4 rounded-md mt-4">
+            <Button onClick={handleAddRule} className="mt-4">
                 Add Audit Rule
             </Button>
         </div>

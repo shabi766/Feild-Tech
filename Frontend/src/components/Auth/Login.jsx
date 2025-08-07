@@ -45,7 +45,17 @@ const Login = () => {
             });
             if (res.data.success) {
                 dispatch(setuser(res.data.user));
-                navigate("/");
+                
+                // Redirect based on user role
+                if (res.data.user.role === 'Recruiter' || res.data.user.role === 'Admin') {
+                    navigate("/dashboard");
+                } else if (res.data.user.role === 'Technician') {
+                    navigate("/home");
+                } else {
+                    // Default fallback
+                    navigate("/home");
+                }
+                
                 toast.success(res.data.message);
             }
         } catch (error) {
@@ -58,10 +68,16 @@ const Login = () => {
     
     useEffect(()=>{
         if(user){
-            navigate("/");
+            // If user is already logged in, redirect based on role
+            if (user.role === 'Recruiter' || user.role === 'Admin') {
+                navigate("/dashboard");
+            } else if (user.role === 'Technician') {
+                navigate("/home");
+            } else {
+                navigate("/home");
+            }
         }
-
-    },[])
+    }, [user, navigate])
 
     return (
         <div>

@@ -1,16 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import NavbarBase from './NavbarBase';
 import { SEARCH_API_END_POINT } from '@/components/utils/constant';
 import axios from 'axios';
-import { Search } from 'lucide-react';
+import { Search, Briefcase, Clock } from 'lucide-react';
 
 const TechnicianNavbar = ({ user }) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [query, setQuery] = useState('');
     const [suggestions, setSuggestions] = useState();
     const [showSuggestions, setShowSuggestions] = useState(false);
     const searchRef = useRef(null);
+
+    const navItems = [
+        { path: '/browse', label: 'Latest Jobs', icon: Briefcase },
+        { path: '/Myjobs', label: 'My Jobs', icon: Clock }
+    ];
 
     const fetchSuggestions = async (searchTerm) => {
         if (searchTerm.length < 2) {
@@ -67,45 +73,65 @@ const TechnicianNavbar = ({ user }) => {
     },);
 
     return (
-
         <NavbarBase user={user}>
             <div className="flex items-center w-full">
-                <div className="flex items-center">
-                    <div className="border-l-2 border-gray-300 h-10 mx-2 ml-3" />
-            <div className='flex items-center gap-4 mx-4 text-white text-bold'>
-                
-                
-                <li><Link to="/browse">Latest Jobs</Link></li>
-                <li><Link to="/Myjobs">MyJobs</Link></li>
-                
-                {/* Add more Technician-specific links here */}
-            </div>
-            </div>
-
-            {/* Search Bar */}
-            <div className="relative flex-grow mx-20 flex items-center w-full" ref={searchRef}>
-                <input
-                    type="text"
-                    className="px-20 py-2 border border-gray-300 rounded-full focus:outline-none w-full"
-                    placeholder="Search jobs, clients, projects..."
-                    value={query}
-                    onChange={handleSearchChange}
-                />
-                <Search className="absolute right-3 top-2.5 text-gray-400" size={20} />
-                {showSuggestions && suggestions.length > 0 && (
-                    <ul className="absolute mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-auto z-10">
-                        {suggestions.map((suggestion) => (
-                            <li
-                                key={suggestion.id || suggestion.name}
-                                className="px-4 py-2 cursor-pointer hover:bg-gray-100"
-                                onClick={() => handleSuggestionClick(suggestion)}
+                {/* Navigation Links */}
+                <div className="flex items-center gap-1">
+                    {navItems.map((item) => {
+                        const isActive = location.pathname === item.path;
+                        const IconComponent = item.icon;
+                        return (
+                            <Link 
+                                key={item.path}
+                                to={item.path}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 group ${
+                                    isActive 
+                                        ? 'text-blue-600 bg-blue-50/80' 
+                                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50/50'
+                                }`}
                             >
-                                {suggestion.name} {suggestion.type !== "none" && `(${suggestion.type})`}
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </div>
+                                <IconComponent size={18} className="transition-transform duration-300 group-hover:scale-110" />
+                                <span>{item.label}</span>
+                            </Link>
+                        );
+                    })}
+                </div>
+
+                {/* Search Bar */}
+                <div className="relative flex-grow mx-8 flex items-center" ref={searchRef}>
+                    <div className="relative w-full max-w-md">
+                        <input
+                            type="text"
+                            className="w-full px-4 py-2.5 pl-12 pr-12 bg-white/80 backdrop-blur-sm border border-gray-200/50 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 placeholder-gray-500 text-gray-700 shadow-sm hover:shadow-md"
+                            placeholder="Search jobs, clients, projects..."
+                            value={query}
+                            onChange={handleSearchChange}
+                        />
+                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                        {showSuggestions && suggestions && suggestions.length > 0 && (
+                            <div className="absolute mt-2 w-full bg-white/95 backdrop-blur-md border border-gray-200/50 rounded-xl shadow-xl max-h-64 overflow-auto z-50">
+                                <ul className="py-2">
+                                    {suggestions.map((suggestion, index) => (
+                                        <li
+                                            key={suggestion.id || suggestion.name || index}
+                                            className="px-4 py-3 cursor-pointer hover:bg-gray-50/80 transition-all duration-200 border-b border-gray-100/50 last:border-b-0"
+                                            onClick={() => handleSuggestionClick(suggestion)}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-gray-700 font-medium">{suggestion.name}</span>
+                                                {suggestion.type !== "none" && (
+                                                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">
+                                                        {suggestion.type}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
         </NavbarBase>
     );

@@ -64,3 +64,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom navbar spacing */
+.navbar-spacing {
+  padding-top: 80px !important;
+  margin-top: 0 !important;
+}
+
+.content-below-navbar {
+  padding-top: 80px !important;
+}

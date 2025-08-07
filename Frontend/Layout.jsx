@@ -24,15 +24,14 @@ const Layout = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Fixed navbar at top */}
+      {/* Sticky navbar at top */}
       <Navbar />
       
-      {/* Content wrapper with top margin */}
-      <div className="pt-20">
-        {/* Sidebar */}
-        <Sidebar />
+      {/* Sidebar */}
+      <Sidebar />
 
-        {/* Main content area */}
+      {/* Main content area */}
+      <div style={{ paddingLeft: '16px' }}>
         <main className="min-h-screen">
           <Outlet />
         </main>

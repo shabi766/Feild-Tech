@@ -3,6 +3,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Signup from "./components/Auth/Signup";
 import Login from "./components/Auth/Login";
+import RoleSelection from "./components/Auth/RoleSelection";
+import ForgotPassword from "./components/Auth/ForgotPassword";
+import ProfileSetup from "./components/Auth/ProfileSetup";
 import Home from "./components/user/Home";
 import Jobs from "./components/user/Jobs";
 import Browse from "./components/user/Browse";
@@ -95,7 +98,10 @@ function App() {
           {/* Public routes */}
           <Route path="/" element={<AuthenticatedLanding />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/role-selection" element={<RoleSelection />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/profile-setup" element={<ProfileSetup />} />
 
           {/* Info pages routes */}
           <Route path="/find-tech" element={<FindTech />} />

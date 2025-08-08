@@ -45,6 +45,10 @@ const userSchema = new mongoose.Schema(
         // ✅ New Fields
         darkMode: { type: Boolean, default: false }, // Dark mode toggle
         notifications: { type: Boolean, default: true }, // Notifications toggle
+        
+        // Password Reset Fields
+        resetPasswordOtp: { type: String },
+        resetPasswordOtpExpiry: { type: Date },
     },
     { timestamps: true }
 );

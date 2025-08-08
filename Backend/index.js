@@ -51,7 +51,9 @@ app.use(
 );
 
 // Connect to Database
-connectDB();
+connectDB().catch(err => {
+    console.log('⚠️ Database connection failed, but server will continue running');
+});
 
 // Handle Socket.io Connections
 io.on("connection", (socket) => {
@@ -61,7 +63,11 @@ io.on("connection", (socket) => {
     socket.join(userId);
     onlineUsers.set(socket.id, userId);
 
-    await User.findByIdAndUpdate(userId, { status: "online", lastSeen: new Date() });
+    try {
+      await User.findByIdAndUpdate(userId, { status: "online", lastSeen: new Date() });
+    } catch (error) {
+      console.log('⚠️ Could not update user status in database:', error.message);
+    }
 
     io.emit("update_status", { userId, status: "online" });
 
@@ -69,11 +75,91 @@ io.on("connection", (socket) => {
   });
 
   socket.on("setAway", async (userId) => {
-    await User.findByIdAndUpdate(userId, { status: "away" });
+    try {
+      await User.findByIdAndUpdate(userId, { status: "away" });
+    } catch (error) {
+      console.log('⚠️ Could not update user status in database:', error.message);
+    }
 
     io.emit("update_status", { userId, status: "away" });
 
     console.log(`⚠️ User ${userId} is away`);
+  });
+
+  // Audio Call Events
+  socket.on("audio_call_request", (data) => {
+    const { recipientId, caller, recipient } = data;
+    console.log(`📞 Audio call request from ${caller.fullname} to ${recipient.fullname}`);
+    
+    // Emit to the recipient
+    socket.to(recipientId).emit("audio_call_request", {
+      caller,
+      recipient,
+      recipientId
+    });
+  });
+
+  socket.on("audio_call_accepted", (data) => {
+    const { callerId } = data;
+    console.log(`✅ Audio call accepted by ${callerId}`);
+    
+    // Emit to the caller
+    socket.to(callerId).emit("audio_call_accepted", {
+      caller: { _id: callerId }
+    });
+  });
+
+  socket.on("audio_call_rejected", (data) => {
+    const { callerId } = data;
+    console.log(`❌ Audio call rejected by ${callerId}`);
+    
+    // Emit to the caller
+    socket.to(callerId).emit("audio_call_rejected", {
+      caller: { _id: callerId }
+    });
+  });
+
+  socket.on("audio_call_ended", (data) => {
+    const { recipientId } = data;
+    console.log(`📞 Audio call ended`);
+    
+    // Emit to the recipient
+    socket.to(recipientId).emit("audio_call_ended", {
+      recipientId
+    });
+  });
+
+  socket.on("audio_call_offer", (data) => {
+    const { offer, recipientId } = data;
+    console.log(`📤 Audio call offer sent to ${recipientId}`);
+    
+    // Emit to the recipient
+    socket.to(recipientId).emit("audio_call_offer", {
+      offer,
+      callerId: socket.id
+    });
+  });
+
+  socket.on("audio_call_answer", (data) => {
+    const { answer, recipientId } = data;
+    console.log(`📤 Audio call answer sent to ${recipientId}`);
+    
+    // Emit to the recipient
+    socket.to(recipientId).emit("audio_call_answer", {
+      answer,
+      callerId: socket.id
+    });
+  });
+
+  socket.on("audio_call_ice_candidate", (data) => {
+    const { candidate, recipientId } = data;
+    console.log(`🧊 ICE candidate sent to ${recipientId}`);
+    
+    // Emit to the recipient
+    socket.to(recipientId).emit("audio_call_ice_candidate", {
+      candidate,
+      callerId: socket.id
+    });
   });
 
   socket.on("disconnect", async () => {
@@ -81,7 +167,11 @@ io.on("connection", (socket) => {
     if (userId) {
       onlineUsers.delete(socket.id);
 
-      await User.findByIdAndUpdate(userId, { status: "offline", lastSeen: new Date() });
+      try {
+        await User.findByIdAndUpdate(userId, { status: "offline", lastSeen: new Date() });
+      } catch (error) {
+        console.log('⚠️ Could not update user status in database:', error.message);
+      }
 
       io.emit("update_status", { userId, status: "offline", lastSeen: new Date() });
 

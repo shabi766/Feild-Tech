@@ -93,6 +93,15 @@ const workorderSchema = new mongoose.Schema({
     completeTime: { type: Date, default: null },
     paidTime: { type: Date, default: null },
     timeSpent: { type: Number, default: null },
+    // Work order completion requirements
+    workOrderNotes: { type: String, default: null },
+    workOrderDeliverables: [{ type: String }],
+    workOrderImages: [{ type: String }], // URLs to uploaded images
+    completionRequirements: {
+        notesRequired: { type: Boolean, default: true },
+        imagesRequired: { type: Boolean, default: true },
+        deliverablesRequired: { type: Boolean, default: false }
+    },
     salary: {
         type: {
             partTime: {

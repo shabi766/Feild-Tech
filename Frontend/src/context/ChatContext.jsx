@@ -63,14 +63,32 @@ export const ChatProvider = ({ children }) => {
         // Join chat room with socket
         socket.emit("join_chat", selectedChat._id);
 
-        socket.on("new_message", (message) => {
+        const handleIncoming = (message) => {
+            // Update open chat messages
             if (message.chatId === selectedChat._id) {
                 setMessages((prev) => [...prev, message]);
             }
-        });
+            // Update chats list order and last message
+            setChats((prev) => {
+                const copy = [...prev];
+                const index = copy.findIndex(c => c._id === message.chatId);
+                if (index !== -1) {
+                    // Append message to chat messages array if present
+                    const updatedChat = { ...copy[index] };
+                    const msgs = Array.isArray(updatedChat.messages) ? [...updatedChat.messages, message] : [message];
+                    updatedChat.messages = msgs;
+                    updatedChat.updatedAt = message.createdAt || new Date().toISOString();
+                    copy.splice(index, 1);
+                    return [updatedChat, ...copy];
+                }
+                return prev;
+            });
+        };
+
+        socket.on("new_message", handleIncoming);
 
         return () => {
-            socket.off("new_message");
+            socket.off("new_message", handleIncoming);
         };
     }, [selectedChat]);
 
@@ -91,6 +109,20 @@ export const ChatProvider = ({ children }) => {
                 // Avoid duplicates & only add new unread messages
                 if (!prev.find((m) => m.chatId === message.chatId)) {
                     return [...prev, { chatId: message.chatId, messages: [message] }];
+                }
+                return prev;
+            });
+            // Also update chat list ordering when not in selected chat
+            setChats((prev) => {
+                const copy = [...prev];
+                const index = copy.findIndex(c => c._id === message.chatId);
+                if (index !== -1) {
+                    const updatedChat = { ...copy[index] };
+                    const msgs = Array.isArray(updatedChat.messages) ? [...updatedChat.messages, message] : [message];
+                    updatedChat.messages = msgs;
+                    updatedChat.updatedAt = message.createdAt || new Date().toISOString();
+                    copy.splice(index, 1);
+                    return [updatedChat, ...copy];
                 }
                 return prev;
             });
@@ -127,7 +159,7 @@ export const ChatProvider = ({ children }) => {
     
             setChats((prev) => {
                 const chatExists = prev.some(chat => chat._id === data.chat._id);
-                return chatExists ? prev : [...prev, data.chat];
+                return chatExists ? prev : [data.chat, ...prev];
             });
     
             setSelectedChat(data.chat);  // ✅ Set the selected chat
@@ -153,6 +185,7 @@ export const ChatProvider = ({ children }) => {
             socket.off("user_offline");
         };
     }, []);
+
     const sendMessage = async (content, type = "text", fileUrl = null) => {
         if (!selectedChat) {
             console.error("❌ Cannot send message: No chat selected.");
@@ -169,6 +202,21 @@ export const ChatProvider = ({ children }) => {
     
             // ✅ Update state with new message
             setMessages((prev) => [...prev, data.message]);
+
+            // ✅ Reorder chats and update last message locally
+            setChats((prev) => {
+                const copy = [...prev];
+                const index = copy.findIndex(c => c._id === selectedChat._id);
+                if (index !== -1) {
+                    const updatedChat = { ...copy[index] };
+                    const msgs = Array.isArray(updatedChat.messages) ? [...updatedChat.messages, data.message] : [data.message];
+                    updatedChat.messages = msgs;
+                    updatedChat.updatedAt = data.message.createdAt || new Date().toISOString();
+                    copy.splice(index, 1);
+                    return [updatedChat, ...copy];
+                }
+                return prev;
+            });
     
             // ✅ Emit event for real-time updates
             socket.emit("send_message", data.message);

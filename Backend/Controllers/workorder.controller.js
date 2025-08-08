@@ -3,36 +3,8 @@ import { Client } from "../Models/client.model.js";
 import { Project } from "../Models/project.model.js";
 import { Application } from "../Models/application.model.js";
 import mongoose from 'mongoose';
-import AWS from 'aws-sdk';
 import { multipleUpload } from "../middleware/multer.js";
-
-
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_REGION,
-});
-
-const uploadToS3 = (file) => {
-    return new Promise((resolve, reject) => {
-        const params = {
-            Bucket: process.env.AWS_S3_BUCKET_NAME,
-            Key: `jobs/${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`, // Sanitize filename
-            Body: file.buffer,
-            ContentType: file.mimetype,
-            ACL: 'public-read', // Adjust ACL as needed
-        };
-
-        s3.upload(params, (err, data) => {
-            if (err) {
-                console.error("Error uploading to S3:", err);
-                reject(err);
-            } else {
-                resolve(data.Location); // Return the S3 URL
-            }
-        });
-    });
-};
+import { uploadToS3 } from "../utils/s3Upload.js";
 
 // Constants for job statuses
 const JOB_STATUSES = ['Draft', 'Active', 'Assigned', 'In Progress', 'Done', 'Review', 'Complete', 'Cancel', 'Paid'];
@@ -170,7 +142,7 @@ export const postJob = async (req, res) => {
             if (req.files && Array.isArray(req.files) && req.files.length > 0) {
                 for (const file of req.files) {
                     try {
-                        const s3Url = await uploadToS3(file);
+                        const s3Url = await uploadToS3(file, 'attachments');
                         attachments.push({ name: file.originalname, url: s3Url });
                     } catch (uploadError) {
                         return res.status(500).json({ message: "Error uploading files to S3", success: false, error: uploadError.message });
@@ -224,7 +196,7 @@ export const postJob = async (req, res) => {
             const uploadedShipments = await Promise.all(parsedShipments.map(async (shipment, index) => {
                 if (shipment.picture instanceof Object && shipment.picture.buffer) {
                     try {
-                        const s3Url = await uploadToS3(shipment.picture);
+                        const s3Url = await uploadToS3(shipment.picture, 'shipments');
                         return { ...shipment, picture: s3Url };
                     } catch (uploadError) {
                         console.error(`Error uploading shipment picture ${index + 1}:`, uploadError);
@@ -551,10 +523,47 @@ export const checkoutJob = async (req, res) => {
 
 export const doneJob = async (req, res) => {
     const { id } = req.params;
+    const { notes, deliverables, images } = req.body;
+    
     try {
-        const job = await Workorder.findByIdAndUpdate(id, { status: 'Done', doneTime: new Date() }, { new: true });
+        const job = await Workorder.findById(id);
         if (!job) return res.status(404).json({ message: 'Job not found', success: false });
-        return res.status(200).json({ message: 'Job marked done successfully', job, success: true });
+
+        // Validate completion requirements
+        const { completionRequirements } = job;
+        const errors = [];
+
+        if (completionRequirements.notesRequired && (!notes || notes.trim().length === 0)) {
+            errors.push('Work order notes are required');
+        }
+
+        if (completionRequirements.imagesRequired && (!images || images.length === 0)) {
+            errors.push('At least one image is required');
+        }
+
+        if (completionRequirements.deliverablesRequired && (!deliverables || deliverables.length === 0)) {
+            errors.push('At least one deliverable is required');
+        }
+
+        if (errors.length > 0) {
+            return res.status(400).json({ 
+                message: 'Completion requirements not met', 
+                errors, 
+                success: false 
+            });
+        }
+
+        // Update job with completion data
+        const updateData = {
+            status: 'Done',
+            doneTime: new Date(),
+            workOrderNotes: notes || null,
+            workOrderDeliverables: deliverables || [],
+            workOrderImages: images || []
+        };
+
+        const updatedJob = await Workorder.findByIdAndUpdate(id, updateData, { new: true });
+        return res.status(200).json({ message: 'Job marked done successfully', job: updatedJob, success: true });
     } catch (error) {
         return res.status(500).json({ message: 'Server error', success: false, error: error.message });
     }
@@ -698,4 +707,58 @@ export const getDraftJobById = async (req, res) => {
             error: error.message,
         });
     }
+};
+
+export const uploadWorkOrderImages = async (req, res) => {
+    const uploadMiddleware = multipleUpload;
+
+    uploadMiddleware(req, res, async (err) => {
+        if (err) {
+            console.error("File upload error:", err);
+            return res.status(400).json({ message: "Error uploading file(s)", success: false, error: err.message });
+        }
+
+        try {
+            const { jobId } = req.params;
+            
+            if (!mongoose.Types.ObjectId.isValid(jobId)) {
+                return res.status(400).json({ message: "Invalid job ID", success: false });
+            }
+
+            const job = await Workorder.findById(jobId);
+            if (!job) {
+                return res.status(404).json({ message: "Job not found", success: false });
+            }
+
+            let uploadedImages = [];
+            if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+                for (const file of req.files) {
+                    try {
+                        const s3Url = await uploadToS3(file, 'jobs');
+                        uploadedImages.push(s3Url);
+                    } catch (uploadError) {
+                        return res.status(500).json({ message: "Error uploading files to S3", success: false, error: uploadError.message });
+                    }
+                }
+            }
+
+            // Update job with new images
+            const updatedJob = await Workorder.findByIdAndUpdate(
+                jobId,
+                { $push: { workOrderImages: { $each: uploadedImages } } },
+                { new: true }
+            );
+
+            return res.status(200).json({ 
+                message: "Images uploaded successfully", 
+                images: uploadedImages, 
+                job: updatedJob, 
+                success: true 
+            });
+
+        } catch (error) {
+            console.error('Error uploading work order images:', error);
+            return res.status(500).json({ message: 'Server error', success: false, error: error.message });
+        }
+    });
 };

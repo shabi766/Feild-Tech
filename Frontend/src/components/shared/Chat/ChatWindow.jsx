@@ -1,21 +1,39 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { ChatContext } from "@/context/ChatContext";
-import { Trash2, Eye, CheckCircle, Clock } from "lucide-react"; // Icon for delete button
+import { useAudioCall } from "@/context/AudioCallContext";
+import { Trash2, Eye, CheckCircle, Clock, Send, Paperclip, Smile, MoreVertical, Phone, Video, Search } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { CHAT_API_END_POINT } from "@/components/utils/constant";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import EmojiPicker from "./EmojiPicker";
+import FileUpload from "./FileUpload";
+import ChatMessage from "./ChatMessage";
+
 const ChatWindow = () => {
-    const { selectedChat,setSelectedChat, chats, messages, sendMessage, deleteMessage, currentUser, unreadMessages, setUnreadMessages } = useContext(ChatContext);
+    const { selectedChat, setSelectedChat, chats, messages, sendMessage, deleteMessage, currentUser, unreadMessages, setUnreadMessages, fetchChats } = useContext(ChatContext);
+    const { initiateCall } = useAudioCall();
     const [searchParams] = useSearchParams();
     const chatId = searchParams.get("chatId");
     const [newMessage, setNewMessage] = useState("");
     const [showSeen, setShowSeen] = useState(false);
+    const [isTyping, setIsTyping] = useState(false);
+    const [typingTimeout, setTypingTimeout] = useState(null);
     const messageListRef = useRef(null);
+    const inputRef = useRef(null);
+
     useEffect(() => {
         if (chatId) {
             const foundChat = chats.find(chat => chat._id === chatId);
             if (foundChat) {
                 setSelectedChat(foundChat);
+            } else {
+                // Ensure latest chats data
+                fetchChats();
             }
         }
     }, [chatId, chats]);
@@ -23,8 +41,6 @@ const ChatWindow = () => {
     useEffect(() => {
         if (selectedChat) {
             axios.post(`${CHAT_API_END_POINT}/mark-as-read`, { chatId: selectedChat._id }, { withCredentials: true });
-
-            // ✅ Remove chat from unread messages
             setUnreadMessages((prev) => prev.filter((msg) => msg.chatId !== selectedChat._id));
         }
     }, [selectedChat]);
@@ -35,116 +51,225 @@ const ChatWindow = () => {
         }
     }, [messages]);
 
-    if (!selectedChat) {
-        return <p className="text-center text-gray-5000">Select a chat to start messaging.</p>;
-    }
-    const recipient = selectedChat.participants.find((p) => p._id !== currentUser?._id);
+    // Handle typing indicator
+    const handleTyping = () => {
+        setIsTyping(true);
+        if (typingTimeout) clearTimeout(typingTimeout);
+        
+        const timeout = setTimeout(() => {
+            setIsTyping(false);
+        }, 1000);
+        
+        setTypingTimeout(timeout);
+    };
+
+    const handleSendMessage = () => {
+        if (newMessage.trim() !== "") {
+            sendMessage(newMessage);
+            setNewMessage("");
+            setIsTyping(false);
+            if (typingTimeout) clearTimeout(typingTimeout);
+        }
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
+        }
+    };
+
+    // Handle emoji selection
+    const handleEmojiSelect = (emoji) => {
+        setNewMessage(prev => prev + emoji);
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    };
+
+    // Handle file selection
+    const handleFileSelect = async (files) => {
+        try {
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('chatId', selectedChat._id);
+
+                // Upload file to S3
+                const uploadResponse = await axios.post(
+                    `${CHAT_API_END_POINT}/upload-file`,
+                    formData,
+                    {
+                        withCredentials: true,
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                );
+
+                if (uploadResponse.data.success) {
+                    const fileUrl = uploadResponse.data.fileUrl;
+                    const fileName = file.name;
+                    
+                    // Send message with file URL
+                    sendMessage(`📎 ${fileName}`, 'file', fileUrl);
+                    toast.success(`File "${fileName}" sent successfully!`);
+                }
+            }
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            toast.error('Failed to upload file. Please try again.');
+        }
+    };
+
+    // Resolve recipient robustly
+    const getRecipient = () => {
+        if (!selectedChat || !currentUser) return null;
+        const populated = selectedChat.participants?.find(p => p?._id && p._id !== currentUser._id);
+        if (populated) return populated;
+        // Fallback: find the same chat from populated chats list
+        const chatFromList = chats.find(c => c._id === selectedChat._id);
+        return chatFromList?.participants?.find(p => p?._id && p._id !== currentUser._id) || null;
+    };
+
+    const recipient = getRecipient();
     const recipientStatus = recipient?.status;
 
+    // Delete handler passthrough
+    const handleDeleteMessage = (messageId) => deleteMessage(messageId);
+
     return (
-        <div className="w-3/4 p-4 flex flex-col bg-white shadow-md rounded-md">
-            {/* ✅ Chat Header */}
-            <div className="flex justify-between items-center p-3 bg-indigo-500 text-white rounded-md">
+        <div className="flex-1 flex flex-col bg-white h-screen">
+            {/* Chat Header - Fixed at top */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white shadow-sm flex-shrink-0">
                 <div className="flex items-center gap-3">
-                    {/* ✅ Correctly Display the Profile Image */}
-                    <img
-                        src={selectedChat?.participants?.find(p => p?._id !== currentUser?._id)?.profile?.profilePhoto || "/default-avatar.png"}
-                        alt="Recipient"
-                        className="w-10 h-10 rounded-full object-cover"
-                    />
-                    {/* ✅ Correctly Display the Recipient's Name */}
-                    <h2 className="text-lg font-semibold">
-                        {selectedChat?.participants?.find(p => p?._id !== currentUser?._id)?.fullname}
-                    </h2>
+                    <Avatar className="w-12 h-12">
+                        <AvatarImage src={recipient?.profile?.profilePhoto} />
+                        <AvatarFallback className="bg-indigo-100 text-indigo-600">
+                            {recipient?.fullname?.charAt(0).toUpperCase() || recipient?.username?.charAt(0).toUpperCase() || "U"}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div>
+                        <h2 className="text-lg font-semibold text-gray-900">
+                            {recipient?.fullname || recipient?.username || "Unknown User"}
+                        </h2>
+                        <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${recipientStatus === "online" ? "bg-green-500" : "bg-gray-400"}`}></div>
+                            <span className="text-sm text-gray-500">
+                                {recipientStatus === "online" ? "Online" : 
+                                 recipient?.lastSeen ? 
+                                 `Last seen ${new Date(recipient.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 
+                                 "Offline"}
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                <p className="text-xs text-gray-400 font-medium tracking-wide">
-                    {recipientStatus === "online" ? (
-                        <span className="text-green-500 font-semibold">● Online</span>
-                    ) : recipient?.lastSeen ? (
-                        <span className="text-[10px]  text-white font-thin">
-                            last seen: {new Date(recipient.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                    ) : (
-                        <span className="text-xs text-gray-400">Last seen: Unknown</span>
-                    )}
-                </p>
-
-
+                
+                <div className="flex items-center gap-2">
+                    <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="hover:bg-green-100 hover:text-green-600"
+                        onClick={async () => recipient && await initiateCall(recipient)}
+                        title="Audio Call"
+                    >
+                        <Phone size={18} />
+                    </Button>
+                    <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="hover:bg-blue-100 hover:text-blue-600"
+                        onClick={() => toast.info("Video calls coming soon!")}
+                        title="Video Call"
+                    >
+                        <Video size={18} />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="hover:bg-gray-100">
+                        <Search size={18} />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="hover:bg-gray-100">
+                        <MoreVertical size={18} />
+                    </Button>
+                </div>
             </div>
 
-
-            {/* ✅ Messages List */}
-            <div className="flex-grow overflow-y-auto p-2 space-y-2" ref={messageListRef}>
-                {messages.length === 0 ? (
-                    <p className="text-center text-gray-500">No messages yet.</p>
-                ) : (
-                    messages.map((msg) => (
-                        <div
-                            key={msg._id}
-                            className={`flex items-center gap-2 p-3 rounded-md max-w-[75%] relative group ${msg.sender?._id === currentUser?._id
-                                ? 'bg-blue-500 text-white ml-auto'
-                                : 'bg-gray-200 text-black mr-auto'
-                                }`}
-                        >
-                            <div>
-                                <p className="break-words">{msg.content}</p>
-                                <div
-                                    className="message-container"
-                                    onClick={() => setShowSeen(true)} // ✅ Show seen icon when clicked
-                                >
-                                    <div className="flex items-center text-xs mt-1">
-                                        {/* ✅ Display hours & minutes only (HH:MM AM/PM) */}
-                                        <small className="text-xs opacity-70">
-                                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </small>
-                                    </div>
-
-                                    {/* ✅ Show Seen Icon ONLY when message is clicked */}
-                                    {msg.sender?._id === currentUser?._id && showSeen && (
-                                        <div className="ml-2">
-                                            {msg.isRead ? (
-                                                <Eye className="h-4 w-4 text-green-500" />
-                                            ) : (
-                                                <CheckCircle className="text-green-400 mr-1" />
-                                            )}
-                                        </div>
-                                    )}
+            {/* Messages Area - Scrollable, takes remaining space */}
+            <div className="flex-1 overflow-y-auto bg-gray-50 p-4" ref={messageListRef}>
+                <div className="space-y-4">
+                    {messages.length === 0 ? (
+                        <div className="text-center py-8">
+                            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Search className="text-gray-400" size={24} />
+                            </div>
+                            <p className="text-gray-500 text-sm">No messages yet</p>
+                            <p className="text-gray-400 text-xs mt-1">Start the conversation by sending a message</p>
+                        </div>
+                    ) : (
+                        messages.map((msg, index) => {
+                            const isCurrentUser = msg.sender?._id === currentUser?._id || msg.sender === currentUser?._id;
+                            return (
+                                <ChatMessage
+                                    key={msg._id || `${msg.createdAt}-${index}`}
+                                    message={msg}
+                                    isCurrentUser={isCurrentUser}
+                                    recipient={recipient}
+                                    onDelete={handleDeleteMessage}
+                                />
+                            );
+                        })
+                    )}
+                    
+                    {/* Typing indicator */}
+                    {isTyping && (
+                        <div className="flex items-end gap-2 justify-start">
+                            <Avatar className="w-8 h-8 flex-shrink-0">
+                                <AvatarImage src={recipient?.profile?.profilePhoto} />
+                                <AvatarFallback className="bg-indigo-100 text-indigo-600 text-xs">
+                                    {recipient?.fullname?.charAt(0).toUpperCase() || recipient?.username?.charAt(0).toUpperCase() || "U"}
+                                </AvatarFallback>
+                            </Avatar>
+                            <div className="bg-white p-3 rounded-2xl rounded-bl-md shadow-sm border border-gray-200">
+                                <div className="flex items-center gap-1">
+                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                                 </div>
                             </div>
-
-                            {/* ✅ Delete Message Button */}
-                            {msg.sender?._id === currentUser?._id && (
-                                <button
-                                    onClick={() => deleteMessage(msg._id)}
-                                    className="absolute top-1 right-1 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
-                            )}
                         </div>
-                    ))
-                )}
+                    )}
+                </div>
             </div>
 
-            {/* ✅ Message Input */}
-            <div className="flex items-center mt-2">
-                <input
-                    type="text"
-                    placeholder="Type your message..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-indigo-500 mr-2"
-                />
-                <button
-                    onClick={() => {
-                        if (newMessage.trim() !== "") {
-                            sendMessage(newMessage);
-                            setNewMessage("");  // ✅ Clear input after sending
-                        }
-                    }}
-                    className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
-                    Send
-                </button>
+            {/* Message Input - Fixed at bottom */}
+            <div className="p-4 border-t border-gray-200 bg-white flex-shrink-0">
+                <div className="flex items-end gap-3">
+                    <div className="flex-1 relative">
+                        <Input
+                            ref={inputRef}
+                            type="text"
+                            placeholder="Type a message..."
+                            value={newMessage}
+                            onChange={(e) => {
+                                setNewMessage(e.target.value);
+                                handleTyping();
+                            }}
+                            onKeyPress={handleKeyPress}
+                            className="pr-12 py-3 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 resize-none"
+                            style={{ minHeight: '44px', maxHeight: '120px' }}
+                        />
+                        <div className="absolute right-2 bottom-2 flex items-center gap-1">
+                            <FileUpload onFileSelect={handleFileSelect} />
+                            <EmojiPicker onEmojiSelect={handleEmojiSelect} />
+                        </div>
+                    </div>
+                    <Button
+                        onClick={handleSendMessage}
+                        disabled={!newMessage.trim()}
+                        className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <Send size={18} />
+                    </Button>
+                </div>
             </div>
         </div>
     );

@@ -1,7 +1,6 @@
 import { Project } from "../Models/project.model.js";
 import { Client } from "../Models/client.model.js";
-import cloudinary from "../utils/cloudinary.js";
-import getDataUri from "../utils/dataUri.js";
+import { uploadToS3 } from "../utils/s3Upload.js";
 import { Notification } from "../Models/notification.model.js";
 
 // Register Project Controller
@@ -127,9 +126,7 @@ export const updateProject = async (req, res) => {
         let updateData = { name, description, website, location, client };
 
         if (file) {
-            const fileUri = getDataUri(file);
-            const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-            updateData.logo = cloudResponse.secure_url;
+            updateData.logo = await uploadToS3(file, 'projects');
         }
 
         const project = await Project.findByIdAndUpdate(req.params.id, updateData, { new: true });

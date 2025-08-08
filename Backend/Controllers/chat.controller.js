@@ -1,6 +1,7 @@
 import { Chat } from "../Models/chat.model.js";
 import { User } from "../Models/user.model.js";
 import { io } from "../index.js";
+import { uploadToS3 } from "../utils/s3Upload.js";
 
 export const createChat = async (req, res) => {
     try {
@@ -74,6 +75,45 @@ export const sendMessage = async (req, res) => {
     } catch (error) {
         console.error("Error in sendMessage:", error);
         res.status(500).json({ message: "Server error", success: false });
+    }
+};
+
+export const uploadFile = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: "No file uploaded" });
+        }
+
+        const { chatId } = req.body;
+        const userId = req.user._id;
+
+        if (!chatId) {
+            return res.status(400).json({ success: false, message: "Chat ID is required" });
+        }
+
+        // Check if chat exists and user is a participant
+        const chat = await Chat.findById(chatId);
+        if (!chat) {
+            return res.status(404).json({ success: false, message: "Chat not found" });
+        }
+
+        if (!chat.participants.includes(userId)) {
+            return res.status(403).json({ success: false, message: "You are not a participant in this chat" });
+        }
+
+        // Upload file to S3
+        const fileUrl = await uploadToS3(req.file, 'chat-files');
+
+        res.json({
+            success: true,
+            fileUrl: fileUrl,
+            fileName: req.file.originalname,
+            fileType: req.file.mimetype,
+            fileSize: req.file.size
+        });
+    } catch (error) {
+        console.error("Error uploading file:", error);
+        res.status(500).json({ success: false, message: "Failed to upload file", error: error.message });
     }
 };
 

@@ -5,16 +5,19 @@ import FeaturesSection from "./FeaturesSection";
 import CTASection from "./CTASection";
 import TestimonialsSection from "./TestimonialSection";
 import Footer from "../shared/Footer";
+import GeneralNavbar from "../shared/Navbar/GeneralNavbar";
 
 export default function LandingPage() {
   return (
     <div>
+      <GeneralNavbar/>
       <HeroSection />
       <TrustedSection />
       <HowItWorksSection />
       <FeaturesSection/>
       <CTASection />
       <TestimonialsSection/>
+      <Footer />
       
       
       

@@ -1,9 +1,10 @@
 import { User } from "../Models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import getDataUri from "../utils/dataUri.js";
-import cloudinary from "../utils/cloudinary.js";
+import { uploadToS3 } from "../utils/s3Upload.js";
 import escapeRegex from 'escape-string-regexp';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 export const register = async (req, res) => {
     try {
         const { fullname, email, phoneNumber, password, cnic, role } = req.body;
@@ -19,9 +20,7 @@ export const register = async (req, res) => {
         let profilePhoto = null; // Initialize to null
 
         if (file) { // Only process file if it exists
-            const fileUri = getDataUri(file);
-            const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-            profilePhoto = cloudResponse.secure_url;
+            profilePhoto = await uploadToS3(file, 'profiles');
         }
 
         const user = await User.findOne({ email });
@@ -62,11 +61,11 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
     try {
-        const { email, password, role } = req.body;
+        const { email, password } = req.body;
 
-        if (!email || !password || !role) {
+        if (!email || !password) {
             return res.status(400).json({
-                message: "Email, password, and role are required.", // More specific message
+                message: "Email and password are required.", // More specific message
                 success: false,
             });
         }
@@ -158,9 +157,7 @@ export const updateProfile = async (req, res) => {
         let profilePhoto = null;
 
         if (file) {
-            const fileUri = getDataUri(file);
-            const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-            profilePhoto = cloudResponse.secure_url;
+            profilePhoto = await uploadToS3(file, 'profiles');
         }
 
 
@@ -315,3 +312,180 @@ export const deleteAccount = async (req, res) => {
       res.status(500).json({ message: 'Internal server error', error: error.message });
     }
   };
+
+// Forgot Password Functions
+export const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                message: "Email is required.",
+                success: false,
+            });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found with this email.",
+                success: false,
+            });
+        }
+
+        // Generate OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+        // Save OTP to user document
+        user.resetPasswordOtp = otp;
+        user.resetPasswordOtpExpiry = otpExpiry;
+        await user.save();
+
+        // Send email with OTP
+        const transporter = nodemailer.createTransporter({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Password Reset OTP',
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #333;">Password Reset Request</h2>
+                    <p>You have requested to reset your password. Use the following OTP to proceed:</p>
+                    <div style="background-color: #f4f4f4; padding: 20px; text-align: center; margin: 20px 0;">
+                        <h1 style="color: #007bff; font-size: 32px; margin: 0;">${otp}</h1>
+                    </div>
+                    <p>This OTP will expire in 10 minutes.</p>
+                    <p>If you didn't request this, please ignore this email.</p>
+                </div>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        return res.status(200).json({
+            message: "OTP sent to your email successfully.",
+            success: true,
+        });
+    } catch (error) {
+        console.error("Error in forgot password:", error);
+        return res.status(500).json({
+            message: "An error occurred while sending OTP.",
+            success: false,
+        });
+    }
+};
+
+export const verifyOtp = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+
+        if (!email || !otp) {
+            return res.status(400).json({
+                message: "Email and OTP are required.",
+                success: false,
+            });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found.",
+                success: false,
+            });
+        }
+
+        if (user.resetPasswordOtp !== otp) {
+            return res.status(400).json({
+                message: "Invalid OTP.",
+                success: false,
+            });
+        }
+
+        if (user.resetPasswordOtpExpiry < new Date()) {
+            return res.status(400).json({
+                message: "OTP has expired.",
+                success: false,
+            });
+        }
+
+        return res.status(200).json({
+            message: "OTP verified successfully.",
+            success: true,
+        });
+    } catch (error) {
+        console.error("Error verifying OTP:", error);
+        return res.status(500).json({
+            message: "An error occurred while verifying OTP.",
+            success: false,
+        });
+    }
+};
+
+export const resetPassword = async (req, res) => {
+    try {
+        const { email, otp, newPassword } = req.body;
+
+        if (!email || !otp || !newPassword) {
+            return res.status(400).json({
+                message: "Email, OTP, and new password are required.",
+                success: false,
+            });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found.",
+                success: false,
+            });
+        }
+
+        const isPasswordMatch = await bcrypt.compare(newPassword, user.password);
+        if (isPasswordMatch) {
+            return res.status(400).json({
+                message: "New password must be different from the current password.",
+                success: false,
+            });
+        }
+
+        if (user.resetPasswordOtp !== otp) {
+            return res.status(400).json({
+                message: "Invalid OTP.",
+                success: false,
+            });
+        }
+
+        if (user.resetPasswordOtpExpiry < new Date()) {
+            return res.status(400).json({
+                message: "OTP has expired.",
+                success: false,
+            });
+        }
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        user.resetPasswordOtp = undefined;
+        user.resetPasswordOtpExpiry = undefined;
+        await user.save();
+
+        return res.status(200).json({
+            message: "Password reset successfully.",
+            success: true,
+        });
+    } catch (error) {
+        console.error("Error resetting password:", error);
+        return res.status(500).json({
+            message: "An error occurred while resetting password.",
+            success: false,
+        });
+    }
+};

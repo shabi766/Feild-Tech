@@ -194,7 +194,7 @@ const NavbarBase = ({ children, user }) => {
 
                     {!user ? (
                         <div className='flex items-center gap-3'>
-                            <Link to="/Login">
+                            <Link to="/login">
                                 <Button 
                                     variant="ghost" 
                                     className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/50 transition-all duration-300 font-medium"
@@ -202,7 +202,7 @@ const NavbarBase = ({ children, user }) => {
                                     Login
                                 </Button>
                             </Link>
-                            <Link to="/Signup">
+                            <Link to="/role-selection">
                                 <Button className='bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-medium'>
                                     Sign Up
                                 </Button>

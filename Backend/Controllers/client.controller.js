@@ -1,8 +1,7 @@
 import { Client } from "../Models/client.model.js";
 import mongoose from "mongoose";
 import { io } from "../index.js";
-import cloudinary from "../utils/cloudinary.js";
-import getDataUri from "../utils/dataUri.js";
+import { uploadToS3 } from "../utils/s3Upload.js";
 
 export const registerClient = async (req, res) => {
     try {
@@ -11,9 +10,7 @@ export const registerClient = async (req, res) => {
 
         let logo = null;
         if (file) {
-            const fileUri = getDataUri(file);
-            const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-            logo = cloudResponse.secure_url;
+            logo = await uploadToS3(file, 'clients');
         }
 
         const client = await Client.create({
@@ -114,9 +111,7 @@ export const updateClient = async (req, res) => {
 
         let logo = null;
         if (file) {
-            const fileUri = getDataUri(file);
-            const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-            logo = cloudResponse.secure_url;
+            logo = await uploadToS3(file, 'clients');
         }
 
         const updateData = { name, description, website, location, logo };

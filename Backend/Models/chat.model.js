@@ -4,7 +4,7 @@ const messageSchema = new mongoose.Schema(
     {
         sender: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
         content: { type: String, required: true },
-        type: { type: String, enum: ["text", "image", "document"], default: "text" },
+        type: { type: String, enum: ["text", "image", "video", "audio", "file", "document"], default: "text" },
         fileUrl: { type: String, default: null },
         seenBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
     },

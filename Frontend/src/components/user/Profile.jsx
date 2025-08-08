@@ -9,6 +9,7 @@ import JobTable from '../user/JobTable';
 import UpdateProfileDialog from '../user/UpdateProfileDialog';
 import { useSelector } from 'react-redux';
 import useGetAppliedJobs from '../Hooks/useGetAppliedJobs';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
     useGetAppliedJobs();
@@ -18,6 +19,7 @@ const Profile = () => {
         triggerOnce: true,
         threshold: 0.1
     });
+    const navigate = useNavigate();
 
     if (loading) return (
         <div className="flex items-center justify-center h-screen">
@@ -204,7 +206,7 @@ const Profile = () => {
                                 <div className="flex items-center gap-4 mb-4">
                                     <h1 className="text-3xl font-bold text-gray-900">{user?.fullname || 'N/A'}</h1>
                                     <motion.button
-                                        onClick={() => setOpen(true)}
+                                        onClick={() => navigate('/profile/update')}
                                         className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
                                         whileHover={{ scale: 1.1 }}
                                         whileTap={{ scale: 0.9 }}

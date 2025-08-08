@@ -2,8 +2,37 @@ import React from "react";
 import { Badge } from "../../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { Button } from "../../ui/button";
-import { Textarea } from "../../ui/textarea";
 import { Paperclip, Image as ImageIcon } from "lucide-react";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+
+const sanitizeHtml = (html) => {
+    if (!html) return '';
+    // Remove script/style tags and inline event handlers
+    let safe = html.replace(/<\/(script|style)>/gi, '')
+                   .replace(/<\s*(script|style)[\s\S]*?>[\s\S]*?<\s*\/\s*(script|style)\s*>/gi, '')
+                   .replace(/ on\w+="[^"]*"/gi, '')
+                   .replace(/ on\w+='[^']*'/gi, '')
+                   .replace(/javascript:/gi, '');
+    return safe;
+};
+
+const quillModules = {
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ header: [1, 2, 3, 4, false] }],
+      [{ align: [] }],
+      ['link'],
+      ['clean'],
+    ],
+};
+
+const quillFormats = [
+    'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet',
+    'header', 'align', 'link', 'clean'
+];
 
 const JobDetails = ({
     singleJob,
@@ -27,7 +56,10 @@ const JobDetails = ({
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-gray-700 leading-relaxed">{singleJob?.description}</p>
+                    <div
+                        className="prose max-w-none text-gray-800"
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(singleJob?.description) }}
+                    />
                 </CardContent>
             </Card>
 
@@ -148,7 +180,10 @@ const JobDetails = ({
                     </CardHeader>
                     <CardContent>
                         <div className="p-4 bg-blue-50 rounded-lg">
-                            <p className="text-gray-700 leading-relaxed">{singleJob.workOrderNotes}</p>
+                            <div
+                                className="prose max-w-none text-gray-800"
+                                dangerouslySetInnerHTML={{ __html: sanitizeHtml(singleJob.workOrderNotes) }}
+                            />
                             {singleJob.doneTime && (
                                 <p className="text-sm text-gray-500 mt-2">
                                     Completed on: {new Date(singleJob.doneTime).toLocaleString()}
@@ -257,11 +292,12 @@ const JobDetails = ({
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-3">
-                            <Textarea
+                            <ReactQuill
                                 value={notes}
                                 onChange={onNotesChange}
-                                placeholder="Add notes about your work progress..."
-                                className="min-h-[100px]"
+                                modules={quillModules}
+                                formats={quillFormats}
+                                theme="snow"
                             />
                             <div className="flex justify-end">
                                 <Button
@@ -273,7 +309,7 @@ const JobDetails = ({
                                 </Button>
                             </div>
                             <p className="text-sm text-gray-500">
-                                Add notes about your work progress. These will be included in the final work order notes.
+                                Add rich-text notes about your progress. These will be included in the final work order notes.
                             </p>
                         </div>
                     </CardContent>

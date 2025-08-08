@@ -1,33 +1,33 @@
 // LogsDialog.jsx
 import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 const LogsDialog = ({ job, showLogsDialog, setShowLogsDialog, formatDate, calculateTotalTime }) => {
     if (!showLogsDialog) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-                <h2 className="text-lg font-semibold mb-4">Tech Logs</h2>
-                {job?.checkinTime ? (
-                    <p>Check-in: {formatDate(job.checkinTime)}</p>
-                ) : (
-                    <p>Check-in: N/A</p>
-                )}
-                {job?.checkoutTime ? (
-                    <p>Check-out: {formatDate(job.checkoutTime)}</p>
-                ) : (
-                    <p>Check-out: N/A</p>
-                )}
-                {job?.checkinTime && job?.checkoutTime ? (
-                    <p>Total Time: {calculateTotalTime(job.checkinTime, job.checkoutTime)}</p>
-                ) : (
-                    <p>Total Time: N/A</p>
-                )}
-                <button onClick={() => setShowLogsDialog(false)} className="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold pyx-2 rounded">
-                    Close
-                </button>
-            </div>
-        </div>
+        <Card>
+            <CardHeader>
+                <CardTitle>Tech Logs</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-2 text-sm text-gray-700">
+                    <p>
+                        <span className="font-medium">Check-in:</span> {job?.checkinTime ? formatDate(job.checkinTime) : 'N/A'}
+                    </p>
+                    <p>
+                        <span className="font-medium">Check-out:</span> {job?.checkoutTime ? formatDate(job.checkoutTime) : 'N/A'}
+                    </p>
+                    <p>
+                        <span className="font-medium">Total Time:</span> {job?.checkinTime && job?.checkoutTime ? calculateTotalTime(job.checkinTime, job.checkoutTime) : 'N/A'}
+                    </p>
+                </div>
+                <div className="flex justify-end pt-4">
+                    <Button variant="outline" onClick={() => setShowLogsDialog(false)}>Hide</Button>
+                </div>
+            </CardContent>
+        </Card>
     );
 };
 

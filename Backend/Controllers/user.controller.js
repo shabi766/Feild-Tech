@@ -11,15 +11,15 @@ export const register = async (req, res) => {
 
         if (!fullname || !email || !phoneNumber || !password || !cnic || !role) {
             return res.status(400).json({
-                message: "All fields are required.", // More specific message
+                message: "All fields are required.",
                 success: false,
             });
         }
 
         const file = req.file;
-        let profilePhoto = null; // Initialize to null
+        let profilePhoto = null;
 
-        if (file) { // Only process file if it exists
+        if (file) {
             profilePhoto = await uploadToS3(file, 'profiles');
         }
 
@@ -41,7 +41,7 @@ export const register = async (req, res) => {
             cnic,
             role,
             profile: {
-                profilePhoto: profilePhoto, // Use the variable, may be null
+                profilePhoto: profilePhoto,
             },
         });
 
@@ -50,11 +50,11 @@ export const register = async (req, res) => {
             success: true,
         });
     } catch (error) {
-        console.error("Error registering user:", error); // Log the error with more context
+        console.error("Error registering user:", error);
         return res.status(500).json({
             message: "An error occurred during registration.",
             success: false,
-            error: error.message, // Send the error message to the client
+            error: error.message,
         });
     }
 };
@@ -65,7 +65,7 @@ export const login = async (req, res) => {
 
         if (!email || !password) {
             return res.status(400).json({
-                message: "Email and password are required.", // More specific message
+                message: "Email and password are required.",
                 success: false,
             });
         }
@@ -91,7 +91,6 @@ export const login = async (req, res) => {
         };
         const token = await jwt.sign(tokenData, process.env.SECRET_KEY, { expiresIn: '1d' });
 
-        // Create user object for response (more efficient)
         const userForResponse = {
             _id: user._id,
             fullname: user.fullname,
@@ -105,8 +104,8 @@ export const login = async (req, res) => {
         return res.status(200)
             .cookie("token", token, { 
                 maxAge: 1 * 24 * 60 * 60 * 1000, 
-                httpOnly: true, // Important for security!
-                sameSite: 'strict' // Important for security!
+                httpOnly: true,
+                sameSite: 'strict'
             })
             .json({
                 message: `Welcome back ${user.fullname}`,
@@ -118,14 +117,14 @@ export const login = async (req, res) => {
         return res.status(500).json({
             message: "An error occurred during login.",
             success: false,
-            error: error.message, // Send the error message to the client
+            error: error.message,
         });
     }
 };
 
 export const logout = async (req, res) => {
     try {
-        if (!req.user) {  // Check if req.user is defined
+        if (!req.user) {
             console.error("User not found in request");
             return res.status(401).json({ 
                 message: "Unauthorized: User not logged in", 
@@ -152,50 +151,99 @@ export const logout = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
     try {
-        const { fullname, email, phoneNumber, bio, skills } = req.body;
-        const file = req.file;
-        let profilePhoto = null;
+        const { fullname, email, phoneNumber, bio, skills, age, gender, addressLine1, addressLine2, city, state, country, postalCode, achievements, certifications } = req.body;
 
-        if (file) {
-            profilePhoto = await uploadToS3(file, 'profiles');
-        }
-
-
-        let skillsArray;
-        if (skills) {
-            skillsArray = skills.split(",");
-        }
-
-        const userId = req.user._id; // Use req.user._id (consistent)
+        const userId = req.user._id;
         let user = await User.findById(userId);
-
         if (!user) {
-            return res.status(400).json({
-                message: "User not found.",
-                success: false,
-            });
+            return res.status(400).json({ message: "User not found.", success: false });
         }
 
-        // Update user data (more efficient)
         if (fullname) user.fullname = fullname;
         if (email) user.email = email;
         if (phoneNumber) user.phoneNumber = phoneNumber;
         if (bio) user.profile.bio = bio;
-        if (skills) user.profile.skills = skillsArray;
-        if (profilePhoto) user.profile.profilePhoto = profilePhoto; // Update profilePhoto
-
-        await user.save();
-
-        // Create user object for response (more efficient)
-        const userForResponse = {
-            _id: user._id,
-            fullname: user.fullname,
-            email: user.email,
-            phoneNumber: user.phoneNumber,
-            cnic: user.cnic,
-            profile: user.profile,
+        if (skills) user.profile.skills = Array.isArray(skills) ? skills : String(skills).split(',').map(s => s.trim()).filter(Boolean);
+        if (age) user.age = Number(age);
+        if (gender) user.gender = gender;
+        user.address = {
+            addressLine1: addressLine1 || user.address?.addressLine1,
+            addressLine2: addressLine2 || user.address?.addressLine2,
+            city: city || user.address?.city,
+            state: state || user.address?.state,
+            country: country || user.address?.country,
+            postalCode: postalCode || user.address?.postalCode,
         };
 
+        // Handle achievements (text array)
+        if (achievements !== undefined) {
+            if (Array.isArray(achievements)) {
+                user.achievements = achievements.filter(Boolean);
+            } else if (typeof achievements === 'string') {
+                // Accept comma or newline separated
+                const list = achievements.split(/\n|,/).map(s => s.trim()).filter(Boolean);
+                user.achievements = list;
+            }
+        }
+
+        // Prepare map of files grouped by fieldname
+        const filesMap = new Map();
+        if (req.files && Array.isArray(req.files)) {
+            for (const f of req.files) {
+                if (!filesMap.has(f.fieldname)) filesMap.set(f.fieldname, []);
+                filesMap.get(f.fieldname).push(f);
+            }
+        }
+
+        // Profile photo
+        if (filesMap.has('profilePhoto')) {
+            const url = await uploadToS3(filesMap.get('profilePhoto')[0], 'profiles');
+            user.profile.profilePhoto = url;
+        }
+        // Resume
+        if (filesMap.has('resume')) {
+            const url = await uploadToS3(filesMap.get('resume')[0], 'profiles');
+            user.profile.resume = url;
+            user.profile.resumeOriginalName = filesMap.get('resume')[0].originalname;
+        }
+        // CNIC images (optional legacy)
+        if (filesMap.has('cnicImages')) {
+            for (const file of filesMap.get('cnicImages')) {
+                const url = await uploadToS3(file, 'profiles');
+                user.cnicImages = [...(user.cnicImages || []), url];
+            }
+        }
+
+        // Certifications: expect parallel arrays: certificationsTitles[] and certificationsImages[]
+        // Titles come via body as JSON string or repeated fields
+        let certificationTitles = [];
+        if (certifications) {
+            try {
+                const parsed = JSON.parse(certifications);
+                if (Array.isArray(parsed)) certificationTitles = parsed.map(t => String(t));
+            } catch {
+                // fallback to comma/newline split
+                certificationTitles = String(certifications).split(/\n|,/).map(s => s.trim()).filter(Boolean);
+            }
+        }
+        const certificationFiles = filesMap.get('certificationImages') || [];
+        // Build certifications array aligning images to titles by index
+        if (certificationTitles.length || certificationFiles.length) {
+            const maxLen = Math.max(certificationTitles.length, certificationFiles.length);
+            const built = [];
+            for (let i = 0; i < maxLen; i++) {
+                let imageUrl = undefined;
+                if (certificationFiles[i]) {
+                    imageUrl = await uploadToS3(certificationFiles[i], 'profiles');
+                }
+                built.push({ title: certificationTitles[i] || '', imageUrl });
+            }
+            // Merge with existing
+            user.certifications = [...(user.certifications || []), ...built];
+        }
+
+        await user.save();
+        const userForResponse = await User.findById(userId).select('-password');
 
         return res.status(200).json({
             message: "Profile updated successfully.",
@@ -207,16 +255,16 @@ export const updateProfile = async (req, res) => {
         return res.status(500).json({
             message: "An error occurred during profile update.",
             success: false,
-            error: error.message, // Send the error message to the client
+            error: error.message,
         });
     }
 };
+
 export const getUsersForChat = async (req, res) => {
     try {
-        // Add any filtering or exclusion logic here if needed
         const users = await User.find({}) 
-          .select('fullname email phoneNumber profile') // Select only necessary fields
-          .sort({ fullname: 1 }); // Sort alphabetically by fullname
+          .select('fullname email phoneNumber profile')
+          .sort({ fullname: 1 });
 
         res.status(200).json({ success: true, users });
     } catch (error) {

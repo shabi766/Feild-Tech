@@ -5,8 +5,10 @@ import { APPLICATION_API_END_POINT, NOTIFICATION_API_END_POINT} from "@/componen
 import { toast } from "sonner";
 import { MessageCircle } from "lucide-react";
 import { ChatContext } from "@/context/ChatContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
-const ProviderRequests = ({ onJobAssigned }) => {
+const ProviderRequests = ({ pools = [], selectedPoolId, onSelectPool, onAddToPool, onJobAssigned }) => {
   const { id: jobId } = useParams();
   const navigate = useNavigate();
   const [applicants, setApplicants] = useState([]);
@@ -106,8 +108,26 @@ const ProviderRequests = ({ onJobAssigned }) => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="bg-white p-6 shadow-md rounded-md">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Applicants</h2>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span>Applicants</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Add to:</span>
+            <select
+              className="h-9 border rounded px-2"
+              value={selectedPoolId || ''}
+              onChange={(e) => onSelectPool?.(e.target.value)}
+            >
+              <option value="" disabled>Select pool</option>
+              {pools.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
       {applicants.length === 0 ? (
         <p>No applicants for this job.</p>
       ) : assignedApplicant ? (
@@ -180,30 +200,20 @@ const ProviderRequests = ({ onJobAssigned }) => {
                 </div>
               </div>
               {/* Show buttons only if no one is assigned */}
-              <div className="flex items-center gap-3 ml-auto">
-                <button
-                  onClick={() => updateStatus(applicant._id, "assigned")}
-                  className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
-                >
-                  Assign
-                </button>
-                <button
-                  onClick={() => updateStatus(applicant._id, "rejected")}
-                  className="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600"
-                >
-                  Reject
-                </button>
-                
-                <button onClick={() => handleStartChat(applicant.applicant)}  className="p-2 rounded-full hover:bg-gray-200 transition ml-auto">
-                  <MessageCircle className="w-6 h-6 text-indigo-500 hover:text-indigo-700 transition" />
-                </button>
-                
+              <div className="flex items-center gap-2 ml-auto">
+                <Button onClick={() => updateStatus(applicant._id, "assigned")} size="sm">Assign</Button>
+                <Button onClick={() => updateStatus(applicant._id, "rejected")} size="sm" variant="destructive">Reject</Button>
+                <Button onClick={() => selectedPoolId && onAddToPool?.(selectedPoolId, applicant.applicant)} size="sm" variant="outline" disabled={!selectedPoolId}>Add to Pool</Button>
+                <Button onClick={() => handleStartChat(applicant.applicant)} size="icon" variant="ghost">
+                  <MessageCircle className="w-5 h-5 text-indigo-600" />
+                </Button>
               </div>
             </li>
           ))}
         </ul>
       )}
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

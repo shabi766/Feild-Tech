@@ -8,8 +8,9 @@ import JobStatusBar from "./JobStatusBar";
 import AssignedProvider from "./AssignedProvider";
 import JobDetails from "./JobDetails";
 import ProviderTabs from "./ProviderTabs";
-import LogsDialog from "./LogsDialog";
-import ActionButtons from "./ActionButtons";
+import JobActivity from "./JobActivity";
+import JobSidebar from "@/components/user/JobDescription/JobSidebar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ViewJob = () => {
     const { id } = useParams();
@@ -24,7 +25,6 @@ const ViewJob = () => {
     const [mainTab, setMainTab] = useState("Job Details");
     const [providerTab, setProviderTab] = useState("Requests");
     const [assignedApplicant, setAssignedApplicant] = useState(null);
-    const [showLogsDialog, setShowLogsDialog] = useState(false);
     const [payableHours, setPayableHours] = useState(0);
     const [payableSalary, setPayableSalary] = useState(0);
 
@@ -146,27 +146,65 @@ const ViewJob = () => {
         }
     };
 
-    if (loading) return <p>Loading job details...</p>;
+    const formatCurrency = (amount) => {
+        if (!amount && amount !== 0) return "N/A";
+        try {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+        } catch {
+            return `${amount}`;
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Loading job details...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div>
-            <div className="bg-gray-50 min-h-screen p-8">
+        <div className="min-h-screen bg-gray-50 py-8">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <JobStatusBar job={job} status={status} handlePay={handlePay} formatDate={formatDate} />
-                <ActionButtons job={job} assignedApplicant={assignedApplicant} status={status} setShowLogsDialog={setShowLogsDialog} />
-                <div className="mt-0">
-                    <AssignedProvider assignedApplicant={assignedApplicant} handleStartChat={handleStartChat} navigate={navigate} />
-                </div>
-                <div className="bg-white p-8 shadow-lg rounded-lg">
-                    <div className="border-b border-gray-300 flex justify-around mb-4">
-                        <button onClick={() => setMainTab("Job Details")} className={`flex-1 py-2 px-4 ${mainTab === "Job Details" ? "border-b-2 border-blue-600 text-blue-600" : ""}`}> Job Details </button>
-                        <button onClick={() => setMainTab("Provider")} className={`flex-1 py-2 px-4 ${mainTab === "Provider" ? "border-b-2 border-blue-600 text-blue-600" : ""}`}>
-                            Provider
-                        </button>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Main column */}
+                    <div className="lg:col-span-2 space-y-6">
+                        {/* Provider Section - directly under status bar */}
+                        <Card className="overflow-hidden">
+                            <CardHeader>
+                                <CardTitle>Providers</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <ProviderTabs providerTab={providerTab} setProviderTab={setProviderTab} />
+                            </CardContent>
+                        </Card>
+
+                        {/* Assigned Provider - prominent */}
+                        <AssignedProvider assignedApplicant={assignedApplicant} handleStartChat={handleStartChat} navigate={navigate} />
+
+                        {/* Activity / Logs */}
+                        <JobActivity job={job} formatDate={formatDate} calculateTotalTime={calculateTotalTime} />
+
+                        {/* Job Details */}
+                        <JobDetails
+                            job={job}
+                            clientName={clientName}
+                            projectName={projectName}
+                            jobType={jobType}
+                            formatDate={formatDate}
+                        />
                     </div>
-                    {mainTab === "Job Details" && <JobDetails job={job} clientName={clientName} projectName={projectName} jobType={jobType} formatDate={formatDate} />}
-                    {mainTab === "Provider" && <ProviderTabs providerTab={providerTab} setProviderTab={setProviderTab} />}
+
+                    {/* Sidebar */}
+                    <div className="space-y-6">
+                        <JobSidebar singleJob={job} isAssignedTechnician={false} formatCurrency={formatCurrency} />
+                    </div>
                 </div>
-                <LogsDialog job={job} showLogsDialog={showLogsDialog} setShowLogsDialog={setShowLogsDialog} formatDate={formatDate} calculateTotalTime={calculateTotalTime} />
             </div>
         </div>
     );

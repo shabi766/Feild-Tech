@@ -1,14 +1,14 @@
 import express from "express";
 import { deleteAccount, getChatUsers, getProfile, getUsersForChat, login, logout, register, searchUsers, updateProfile, updateUserSettings, forgotPassword, verifyOtp, resetPassword } from "../Controllers/user.controller.js";
 import isAuthenticated from "../middleware/isAuthenticated.js";
-import { singleUpload } from "../middleware/multer.js";
+import { singleUpload, multipleUpload } from "../middleware/multer.js";
 
 const router = express.Router();
 
 router.route("/register").post(singleUpload,register);
 router.route("/login").post(login);
 router.route("/logout").get(isAuthenticated,logout);
-router.route("/profile/update").post(singleUpload,isAuthenticated,updateProfile);
+router.route("/profile/update").post(multipleUpload,isAuthenticated,updateProfile);
 router.route("/users").get(isAuthenticated, getUsersForChat);
 router.route("/chat-users").get(isAuthenticated, getChatUsers);
 router.route("/search-users").get(isAuthenticated, searchUsers);

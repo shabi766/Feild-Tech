@@ -4,8 +4,11 @@ import { TECHNICIAN_API_END_POINT } from "@/components/utils/constant";
 import { useNavigate } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 import { ChatContext } from "@/context/ChatContext"; // ✅ Import Chat Context
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
-const AllTechnicians = () => {
+const AllTechnicians = ({ pools = [], selectedPoolId, onSelectPool, onAddToPool }) => {
   const [technicians, setTechnicians] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
@@ -61,54 +64,72 @@ const AllTechnicians = () => {
   );
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="container mx-auto p-4 flex-grow">
-        <h1 className="text-2xl font-bold mb-4">Technicians</h1>
-        <input
-          type="text"
-          placeholder="Search technicians by name or skills..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="border rounded p-2 w-full mb-4"
-        />
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>Technicians</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Add to:</span>
+              <select
+                className="h-9 border rounded px-2"
+                value={selectedPoolId || ''}
+                onChange={(e) => onSelectPool?.(e.target.value)}
+              >
+                <option value="" disabled>Select pool</option>
+                {pools.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Input
+            type="text"
+            placeholder="Search technicians by name or skills..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="mb-4"
+          />
 
-        {loading ? (
-          <p>Loading technicians...</p>
-        ) : error ? (
-          <p className="text-red-500">{error}</p>
-        ) : filteredTechnicians.length > 0 ? (
-          <ul className="list-disc list-inside">
-            {filteredTechnicians.map((technician) => (
-              <li key={technician._id} className="mb-4 p-4 border rounded shadow flex justify-between items-center">
-                {/* ✅ Technician Info */}
-                <div>
-                  <h2 className="text-xl font-semibold">{technician.fullname}</h2>
-                  <p>Email: {technician.email}</p>
-                  <p>Phone: {technician.phoneNumber}</p>
-                  <p>Skills: {technician.profile?.skills.join(", ") || "N/A"}</p>
-                </div>
-
-                {/* ✅ Buttons Aligned Properly */}
-                <div className="flex items-center gap-4 ml-auto">
-                  <button onClick={() => handleAddToTalentPool(technician)} className="bg-blue-500 text-white px-4 py-2 rounded">
-                    Add to Talent Pool
-                  </button>
-                  <button onClick={() => handleShowProfile(technician)} className="bg-green-500 text-white px-4 py-2 rounded">
-                    Show Profile
-                  </button>
-                  
-                  {/* ✅ Chat Icon (Rightmost) */}
-                  <button onClick={() => handleStartChat(technician)} className="p-2 rounded-full hover:bg-gray-200 transition">
-                    <MessageCircle className="w-6 h-6 text-indigo-500 hover:text-indigo-700 transition" />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No technicians found</p>
-        )}
-      </div>
+          {loading ? (
+            <p>Loading technicians...</p>
+          ) : error ? (
+            <p className="text-red-500">{error}</p>
+          ) : filteredTechnicians.length > 0 ? (
+            <ul className="space-y-3">
+              {filteredTechnicians.map((technician) => (
+                <li key={technician._id} className="p-4 border rounded flex justify-between items-start">
+                  <div>
+                    <h2 className="text-base font-semibold">{technician.fullname}</h2>
+                    <p className="text-sm text-gray-600">{technician.email}</p>
+                    <p className="text-sm text-gray-600">{technician.phoneNumber}</p>
+                    <p className="text-sm text-gray-600">Skills: {technician.profile?.skills.join(", ") || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2 ml-4">
+                    <Button
+                      onClick={() => selectedPoolId && onAddToPool?.(selectedPoolId, technician)}
+                      disabled={!selectedPoolId}
+                      size="sm"
+                    >
+                      Add to Pool
+                    </Button>
+                    <Button onClick={() => handleShowProfile(technician)} size="sm" variant="outline">
+                      Profile
+                    </Button>
+                    <Button onClick={() => handleStartChat(technician)} size="icon" variant="ghost">
+                      <MessageCircle className="w-5 h-5 text-indigo-600" />
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No technicians found</p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

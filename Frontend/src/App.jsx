@@ -52,6 +52,7 @@ import FindWork from "./components/LandingPage/info/FindWork";
 import ServiceCoverage from "./components/LandingPage/info/ServiceCoverage";
 import Resources from "./components/LandingPage/info/Resources";
 import About from "./components/LandingPage/info/About";
+import UpdateProfilePage from "./components/user/UpdateProfilePage";
 
 // Component to handle role-based redirects
 const RoleBasedRedirect = () => {
@@ -118,6 +119,7 @@ function App() {
             <Route path="description/:id" element={<JobDescription />} />
             <Route path="browse" element={<Browse />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="profile/update" element={<UpdateProfilePage />} />
             <Route path="calender" element={<JobCalendar />} />
             <Route path="chat" element={<Chat />} />
             <Route path="settings" element={<Settings/>} />

@@ -270,11 +270,6 @@ const JobDescription = () => {
     }
 
     const isAssignedTechnician = singleJob.assignedApplicant?._id === user?._id;
-    const canApply = !isAssignedTechnician && !isApplied;
-    // Button visibility logic:
-    // - Show "Apply Now" button if user is not assigned and hasn't applied
-    // - Show "Already Applied" button if user is not assigned but has applied
-    // - Show technician action buttons if user is assigned
     const showApplyButton = !isAssignedTechnician && !isApplied;
     const showAlreadyApplied = !isAssignedTechnician && isApplied;
 
@@ -322,7 +317,7 @@ const JobDescription = () => {
                         notes={notes}
                         deliverables={deliverables}
                         uploadLoading={uploadLoading}
-                        onNotesChange={(e) => setNotes(e.target.value)}
+                        onNotesChange={(value) => setNotes(value)}
                         onFileUpload={handleFileInputChange}
                         onSaveNotes={handleSaveNotes}
                         fileInputRef={fileInputRef}

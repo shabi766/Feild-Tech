@@ -1,4 +1,7 @@
 import React, { useEffect } from 'react';
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MapPin, Briefcase, DollarSign } from 'lucide-react';
 import { useSelector } from 'react-redux';
 
 const JobStatusBar = ({ job, status, handlePay, formatDate }) => {
@@ -25,62 +28,52 @@ const JobStatusBar = ({ job, status, handlePay, formatDate }) => {
     }, [job]);
 
     return (
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between bg-blue-100 p-4 mb-6 rounded-lg shadow-md">
-            <div>
-                <h2 className="text-lg font-semibold">Job ID: {job?._id?.slice(-6) || "---"}</h2>
-                <p>Status: <span className="font-bold">{status}</span></p>
-                {checkStatus && (
-                    <div className="mt-2">
-                        <div className={`font-semibold bg-green-200 p-1 rounded`}>
-                            {checkStatus}
-                            {displayTime && (
-                                <p className="text-xs text-gray-600 mt-1">
-                                    {displayTime}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                )}
-            </div>
-            <div className="md:text-right mt-2 md:mt-0">
-                <div>
-                    <p className="text-gray-700 mt-2"><strong>Job Type:</strong> {job?.jobType}</p>
-                    {job?.jobType === "part-time" && job?.partTimeOptions && (
-                        <>
-                            <p className="text-gray-700"><strong>Base:</strong> {job?.partTimeOptions?.base}</p>
-                            {job?.salary?.partTime?.hourlyRate && <p className="text-gray-700"><strong>Hourly Rate:</strong> ${job?.salary?.partTime?.hourlyRate}</p>}
-                            {job?.salary?.partTime?.dailyRate && <p className="text-gray-700"><strong>Daily Rate:</strong> ${job?.salary?.partTime?.dailyRate}</p>}
-                            {job?.salary?.partTime?.weeklyRate && <p className="text-gray-700"><strong>Weekly Rate:</strong> ${job?.salary?.partTime?.weeklyRate}</p>}
-                            {job?.salary?.partTime?.monthlyRate && <p className="text-gray-700"><strong>Monthly Rate:</strong> ${job?.salary?.partTime?.monthlyRate}</p>}
-                        </>
+        <Card className="mb-8">
+            <CardHeader className="pb-3">
+                <CardTitle className="text-2xl font-bold text-gray-900">{job?.title || 'Job'}</CardTitle>
+                <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="outline">ID: {job?._id?.slice(-6) || '---'}</Badge>
+                    <Badge className="capitalize">{status || '---'}</Badge>
+                    {job?.jobType && (
+                        <Badge variant="outline" className="capitalize flex items-center gap-1"><Briefcase className="w-3 h-3" />{job.jobType}</Badge>
                     )}
-                    {job?.jobType === "full-time" && job?.fullTimeOptions && (
-                        <>
-                            {job?.salary?.fullTime?.contractRate && <p className="text-gray-700"><strong>Contract Rate:</strong> ${job?.salary?.fullTime?.contractRate}</p>}
-                            <p className="text-gray-700"><strong>Contract Duration:</strong> {job?.fullTimeOptions?.contractMonths} Months</p>
-                        </>
+                    {job?.location?.city && (
+                        <Badge variant="outline" className="flex items-center gap-1"><MapPin className="w-3 h-3" />{job.location.city}</Badge>
+                    )}
+                    {job?.salary?.partTime?.hourlyRate && (
+                        <Badge variant="outline" className="flex items-center gap-1"><DollarSign className="w-3 h-3" />{job.salary.partTime.hourlyRate}/hr</Badge>
                     )}
                 </div>
-                {status === "Done" && job?.jobType === "part-time" && job?.partTimeOptions?.base === "hourly" && (
-                    <>
-                        <p className="text-sm text-green-500">
-                            Payable Salary: {job.payableSalary}
-                        </p>
-                        <p className="text-sm text-green-500">
-                            Payable Hours: {job.payableHours}
-                        </p>
-                    </>
-                )}
-                {status === "Done" && (
-                    <button
-                        onClick={handlePay}
-                        className="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-2 rounded text-xs"
-                    >
-                        Pay ${job.payableSalary}
-                    </button>
-                )}
-            </div>
-        </div>
+            </CardHeader>
+            <CardContent className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                <div>
+                    {checkStatus && (
+                        <div className="inline-flex items-center space-x-2 rounded-md bg-green-50 px-3 py-1 text-green-700 border border-green-100">
+                            <span className="font-medium">{checkStatus}</span>
+                            {displayTime && (
+                                <span className="text-xs text-green-600">{displayTime}</span>
+                            )}
+                        </div>
+                    )}
+                </div>
+                <div className="md:text-right space-y-1">
+                    {status === "Done" && job?.jobType === "part-time" && job?.partTimeOptions?.base === "hourly" && (
+                        <div className="pt-2">
+                            <p className="text-sm text-green-600">Payable Salary: {job.payableSalary}</p>
+                            <p className="text-sm text-green-600">Payable Hours: {job.payableHours}</p>
+                        </div>
+                    )}
+                    {status === "Done" && (
+                        <button
+                            onClick={handlePay}
+                            className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-3 rounded text-sm"
+                        >
+                            Pay ${job.payableSalary}
+                        </button>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
     );
 };
 

@@ -89,6 +89,17 @@ const Footer = () => {
     
           <div style={footerBottomStyle}>
             <p>&copy; {new Date().getFullYear()} YourCompany. All rights reserved.</p>
+            {/* Hidden Admin Access Hint - Very subtle */}
+            <div style={{
+              fontSize: '10px',
+              color: '#333',
+              marginTop: '5px',
+              opacity: '0.3',
+              cursor: 'default',
+              userSelect: 'none'
+            }} title="Administrator Access Available">
+              A
+            </div>
           </div>
         </footer>
       );

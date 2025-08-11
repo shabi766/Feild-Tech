@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { JOB_API_END_POINT } from "@/components/utils/constant";
+import { JOB_API_END_POINT, WALLET_API_END_POINT } from "@/components/utils/constant";
+import { loadStripe } from "@stripe/stripe-js";
 import { ChatContext } from "@/context/ChatContext";
 
 import JobStatusBar from "./JobStatusBar";
@@ -137,12 +138,23 @@ const ViewJob = () => {
 
     const handlePay = async () => {
         try {
-            await axios.put(`${JOB_API_END_POINT}/update/${id}`, { status: "Complete" }, { withCredentials: true });
-            setStatus("Complete");
-            alert("Payment processed and job marked as completed.");
+            // Create Stripe Checkout session
+            const resp = await axios.post(`${WALLET_API_END_POINT}/checkout/${id}`, {}, { withCredentials: true });
+            if (resp.data?.url) {
+                window.location.href = resp.data.url;
+                return;
+            }
+            // Fallback to Payment Intent flow if no URL
+            const piResp = await axios.post(`${WALLET_API_END_POINT}/pay/${id}`, {}, { withCredentials: true });
+            const clientSecret = piResp.data?.clientSecret;
+            if (!clientSecret) throw new Error("No client secret from server");
+            const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+            if (!stripe) throw new Error("Stripe failed to load");
+            // Use Payment Element elsewhere; for now just inform
+            alert("Payment initialized. Implement card element to confirm payment.");
         } catch (error) {
-            console.error("Error updating job status:", error);
-            alert("Failed to update job status.");
+            console.error("Error starting payment:", error);
+            alert(error?.response?.data?.message || error.message || "Payment failed to start");
         }
     };
 

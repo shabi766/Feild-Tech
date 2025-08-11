@@ -7,18 +7,19 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'sonner';
 import { USER_API_END_POINT, CHAT_API_END_POINT } from '@/components/utils/constant';
-import { setuser } from '@/redux/authSlice';
+import { logout } from '@/redux/authSlice';
 import axios from 'axios';
 import NotificationComponent from '@/components/shared/NotificationComponent';
 import { ChatContext } from "@/context/ChatContext";
 import socket from "@/components/shared/socket";
 import logo from "@/assets/logo.png"
 
-const NavbarBase = ({ children, user }) => {
+const NavbarBase = ({ children, leftContent, centerContent, user }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const [showAdminIcon, setShowAdminIcon] = useState(false);
     const { unreadMessages, setUnreadMessages, chats, setSelectedChat } = useContext(ChatContext);
 
     // Handle scroll effect for navbar transparency
@@ -84,15 +85,22 @@ const NavbarBase = ({ children, user }) => {
     const LogoutHandler = async () => {
         setLoading(true);
         try {
+            // Try to call logout endpoint, but don't fail if it returns 401
             const res = await axios.get(`${USER_API_END_POINT}/Logout`, { withCredentials: true });
             if (res.data.success) {
-                dispatch(setuser(null));
-                navigate("/");
                 toast.success(res.data.message);
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || "Logout failed");
+            // Don't show error for 401 (token expired) as this is expected during logout
+            if (error.response?.status !== 401) {
+                toast.error(error.response?.data?.message || "Logout failed");
+            }
         } finally {
+            // Always clear all authentication state and redirect regardless of API response
+            dispatch(logout());
+            
+            // Force redirect to login page to avoid any routing issues
+            navigate("/login", { replace: true });
             setLoading(false);
         }
     };
@@ -100,32 +108,39 @@ const NavbarBase = ({ children, user }) => {
     return (
         <div className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 ${
             isScrolled 
-                ? 'bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-200/50' 
-                : 'bg-transparent'
+                ? 'bg-white/90 backdrop-blur-md shadow-lg border-b border-gray-200/60' 
+                : 'bg-white/95 backdrop-blur-sm shadow-sm'
         }`}>
-            <div className='flex items-center mx-auto max-w-7xl h-20 w-full px-6'>
-                <div className="flex items-center gap-6">
+            <div className='flex items-center justify-between h-16 w-full px-4 lg:px-6'>
+                {/* Left side - Logo and Navigation */}
+                <div className="flex items-center gap-4 lg:gap-6">
                     <div className="flex items-center gap-2 group">
                         <img 
                             src={logo} 
                             alt="ShiftsMate Logo" 
-                            className="h-12 transition-transform duration-300 group-hover:scale-105" 
+                            className="h-10 w-auto transition-transform duration-300 group-hover:scale-105" 
                         />
                     </div>
                     <nav className="hidden md:flex items-center gap-1">
-                        {children}
+                        {leftContent || children}
                     </nav>
                 </div>
 
-                <div className='flex items-center gap-4 ml-auto'>
+                {/* Center - Content area */}
+                <div className="flex-1 flex justify-center px-4">
+                    {centerContent}
+                </div>
+
+                {/* Right side - User actions and menu */}
+                <div className='flex items-center gap-3 lg:gap-4'>
                     {user && (
                         <>
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <div className="relative cursor-pointer group">
-                                        <div className="p-2 rounded-full transition-all duration-300 group-hover:bg-gray-100/50 group-hover:scale-110">
+                                        <div className="p-2 rounded-full transition-all duration-300 group-hover:bg-gray-100/60 group-hover:scale-105">
                                             <MessageSquareCodeIcon 
-                                                size={22} 
+                                                size={20} 
                                                 className="text-gray-700 group-hover:text-blue-600 transition-colors duration-300" 
                                             />
                                         </div>
@@ -177,9 +192,9 @@ const NavbarBase = ({ children, user }) => {
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <div className="relative cursor-pointer group">
-                                        <div className="p-2 rounded-full transition-all duration-300 group-hover:bg-gray-100/50 group-hover:scale-110">
+                                        <div className="p-2 rounded-full transition-all duration-300 group-hover:bg-gray-100/60 group-hover:scale-105">
                                             <Bell 
-                                                size={22} 
+                                                size={20} 
                                                 className="text-gray-700 group-hover:text-blue-600 transition-colors duration-300" 
                                             />
                                         </div>
@@ -193,26 +208,41 @@ const NavbarBase = ({ children, user }) => {
                     )}
 
                     {!user ? (
-                        <div className='flex items-center gap-3'>
+                        <div className='flex items-center gap-3 relative group'>
                             <Link to="/login">
                                 <Button 
                                     variant="ghost" 
-                                    className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/50 transition-all duration-300 font-medium"
+                                    className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/60 transition-all duration-300 font-medium px-4 py-2"
                                 >
                                     Login
                                 </Button>
                             </Link>
                             <Link to="/role-selection">
-                                <Button className='bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-medium'>
+                                <Button className='bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-medium px-4 py-2'>
                                     Sign Up
                                 </Button>
                             </Link>
+                            
+                            {/* Hidden Admin Access Icon - Only appears on hover */}
+                            <div 
+                                className="absolute -right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out"
+                                onMouseEnter={() => setShowAdminIcon(true)}
+                                onMouseLeave={() => setShowAdminIcon(false)}
+                            >
+                                <Link 
+                                    to="/admin-login"
+                                    className="inline-flex items-center justify-center w-6 h-6 bg-gray-100 hover:bg-gray-200 rounded-full transition-all duration-200 hover:scale-110"
+                                    title="Administrator Access"
+                                >
+                                    <Settings size={12} className="text-gray-500 hover:text-gray-700" />
+                                </Link>
+                            </div>
                         </div>
                     ) : (
                         <Popover>
                             <PopoverTrigger asChild>
                                 <div className="cursor-pointer group">
-                                    <Avatar className='cursor-pointer ring-2 ring-gray-200 group-hover:ring-blue-300 transition-all duration-300 group-hover:scale-105'>
+                                    <Avatar className='cursor-pointer ring-2 ring-gray-200 group-hover:ring-blue-300 transition-all duration-300 group-hover:scale-105 w-9 h-9'>
                                         <AvatarImage 
                                             src={user?.profile?.profilePhoto || '/path/to/default-avatar.png'} 
                                             alt={user.fullname} 

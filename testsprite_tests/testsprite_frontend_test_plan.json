@@ -1,0 +1,542 @@
+[
+  {
+    "id": "TC001",
+    "title": "User Registration with Valid Role Selection and Multi-Factor Authentication",
+    "description": "Verify that users can register with valid data, select their role appropriately, and complete multi-factor authentication for account activation.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the registration page"
+      },
+      {
+        "type": "action",
+        "description": "Fill in valid user details including username, email, and password"
+      },
+      {
+        "type": "action",
+        "description": "Select an appropriate user role (Technician, Client, Company, or Administrator)"
+      },
+      {
+        "type": "action",
+        "description": "Submit the registration form"
+      },
+      {
+        "type": "action",
+        "description": "Receive multi-factor authentication challenge (e.g., email/SMS code)"
+      },
+      {
+        "type": "action",
+        "description": "Enter the correct multi-factor authentication code"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm registration success and that the user can log in with their credentials"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Login Failure with Incorrect Credentials",
+    "description": "Verify that the system denies login attempts with incorrect username or password and displays appropriate error messages.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the login page"
+      },
+      {
+        "type": "action",
+        "description": "Input incorrect username or password"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to log in"
+      },
+      {
+        "type": "assertion",
+        "description": "Check the login is rejected with an informative error message"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Role-Based Access Control Verification",
+    "description": "Verify that users can access only features and pages appropriate to their assigned roles and unauthorized access is prevented.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in as a Technician"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that Technician-specific features are accessible"
+      },
+      {
+        "type": "assertion",
+        "description": "Attempt to access Admin Panel features and confirm access is denied"
+      },
+      {
+        "type": "action",
+        "description": "Log in as an Administrator"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify full access to Admin Panel and management interfaces"
+      },
+      {
+        "type": "action",
+        "description": "Log in as a Client"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify only client-related features such as job posting and project tracking are accessible"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Multi-Step Job Posting with Valid Data and Intelligent Matching",
+    "description": "Verify that Clients can successfully complete multi-step job posting forms and that the system triggers AI-powered smart matching of jobs to suitable technicians.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in as a Client"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to the Post Job section"
+      },
+      {
+        "type": "action",
+        "description": "Complete Step 1: Enter job details (title, description)"
+      },
+      {
+        "type": "action",
+        "description": "Complete Step 2: Specify job type and requirements"
+      },
+      {
+        "type": "action",
+        "description": "Complete Step 3: Set salary and payment details"
+      },
+      {
+        "type": "action",
+        "description": "Complete Step 4: Provide job location details"
+      },
+      {
+        "type": "action",
+        "description": "Complete remaining steps with attachments and contact information"
+      },
+      {
+        "type": "action",
+        "description": "Submit the job posting"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm job is listed and AI matching process initiates"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify matched technicians receive appropriate notifications about job opportunity"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Job Application Flow for Technicians Including Status Tracking",
+    "description": "Verify that Technicians can browse available jobs, apply correctly, and track application status throughout the process.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in as a Technician"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to job browsing interface"
+      },
+      {
+        "type": "action",
+        "description": "Search and view the details of a job"
+      },
+      {
+        "type": "action",
+        "description": "Submit an application for the selected job"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm application is accepted and status updates are displayed"
+      },
+      {
+        "type": "action",
+        "description": "Check application status updates over time (e.g., Pending, Accepted, Rejected)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify status changes trigger appropriate notifications"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Real-Time Chat Functionality including File Sharing and Audio Calls",
+    "description": "Test real-time chat features for sending and receiving messages, sharing files successfully, and conducting audio calls without significant delay or loss.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in as User A and User B in parallel sessions"
+      },
+      {
+        "type": "action",
+        "description": "User A opens chat with User B"
+      },
+      {
+        "type": "action",
+        "description": "User A sends a text message"
+      },
+      {
+        "type": "assertion",
+        "description": "User B receives the text message instantly"
+      },
+      {
+        "type": "action",
+        "description": "User A uploads and sends a supported file type"
+      },
+      {
+        "type": "assertion",
+        "description": "User B receives and can open/download the file"
+      },
+      {
+        "type": "action",
+        "description": "User A initiates an audio call to User B"
+      },
+      {
+        "type": "assertion",
+        "description": "User B receives and accepts the call, audio is clear and stable"
+      },
+      {
+        "type": "action",
+        "description": "User A ends the call"
+      },
+      {
+        "type": "assertion",
+        "description": "Call ends and appropriate chat history updates are logged"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Digital Wallet Top-Up with KYC Verification",
+    "description": "Ensure that users can successfully perform wallet top-ups and that KYC (Know Your Customer) verification rules are enforced before enabling wallet transactions.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in as a User with an unverified KYC status"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to perform a wallet top-up"
+      },
+      {
+        "type": "assertion",
+        "description": "Transaction is blocked and user is prompted to complete KYC verification"
+      },
+      {
+        "type": "action",
+        "description": "Submit valid KYC documents and complete verification process"
+      },
+      {
+        "type": "assertion",
+        "description": "KYC status updates to verified"
+      },
+      {
+        "type": "action",
+        "description": "Perform wallet top-up with valid payment method"
+      },
+      {
+        "type": "assertion",
+        "description": "Top-up transaction is successful and wallet balance updates accordingly"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Project Management: Creation, Task Assignment, and Status Tracking",
+    "description": "Verify that users with appropriate roles can create projects, assign tasks to team members, and that project and task statuses update correctly and are visible to stakeholders.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in as a Client or Company Manager"
+      },
+      {
+        "type": "action",
+        "description": "Create a new project with valid information"
+      },
+      {
+        "type": "assertion",
+        "description": "Project is listed in the dashboard and visible to assigned users"
+      },
+      {
+        "type": "action",
+        "description": "Assign tasks to technicians or team members"
+      },
+      {
+        "type": "assertion",
+        "description": "Assigned users receive task notifications or alerts"
+      },
+      {
+        "type": "action",
+        "description": "Technician updates task status (e.g., In Progress, Completed)"
+      },
+      {
+        "type": "assertion",
+        "description": "Project dashboard reflects task status changes in real-time"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Audit Logs Capture Critical System Actions with Traceability",
+    "description": "Verify that all critical actions within the system are logged properly with required details for traceability and can be retrieved via admin audit log interfaces.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Perform key actions such as user login, job postings, payments, and profile updates"
+      },
+      {
+        "type": "action",
+        "description": "Log in as an Administrator and navigate to the audit logs section"
+      },
+      {
+        "type": "assertion",
+        "description": "Audit logs reflect all performed actions with accurate timestamps, user IDs, and operation details"
+      },
+      {
+        "type": "assertion",
+        "description": "Audit logs support filtering by date, user, and action type"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "File Upload Handling with Format and Size Validation on Chat and Job Attachments",
+    "description": "Ensure that file uploads conform to accepted formats and size limits on chat messages and job postings, and errors are handled gracefully when requirements are violated.",
+    "category": "error handling",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt to upload a valid file within size limits in chat and job posting components"
+      },
+      {
+        "type": "assertion",
+        "description": "File uploads successfully and is accessible by recipients or job details"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to upload a file exceeding size limits and/or unsupported format"
+      },
+      {
+        "type": "assertion",
+        "description": "Upload is rejected with an informative error message and no data corruption occurs"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Notification System Sends Real-Time Alerts for Job Updates, Messages, and Payments",
+    "description": "Verify that users receive real-time notifications for important events such as job status changes, new chat messages, and payment confirmations on supported devices.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Trigger a job update event (e.g., status change)"
+      },
+      {
+        "type": "assertion",
+        "description": "Relevant users receive real-time notifications"
+      },
+      {
+        "type": "action",
+        "description": "Send a chat message from one user to another"
+      },
+      {
+        "type": "assertion",
+        "description": "Recipient receives instant notification"
+      },
+      {
+        "type": "action",
+        "description": "Complete a wallet payment transaction"
+      },
+      {
+        "type": "assertion",
+        "description": "User receives payment confirmation notification promptly"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Advanced Search Feature Returns Accurate and Filtered Results",
+    "description": "Verify that the advanced search functionality delivers accurate and relevant data for queries including job listings, users, companies, and projects with appropriate filters applied.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the search page"
+      },
+      {
+        "type": "action",
+        "description": "Input search criteria with various filters (e.g., job type, location, date)"
+      },
+      {
+        "type": "assertion",
+        "description": "Search results match the criteria and are relevant"
+      },
+      {
+        "type": "action",
+        "description": "Perform empty or invalid search queries"
+      },
+      {
+        "type": "assertion",
+        "description": "System handles gracefully without errors and displays appropriate messages"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Security Mechanisms Prevent Unauthorized Data Access and Data Leakage",
+    "description": "Test system security by attempting to access restricted data or perform unauthorized operations ensuring compliance with data protection regulations.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt unauthorized API access using invalid or expired JWT tokens"
+      },
+      {
+        "type": "assertion",
+        "description": "Access is denied and appropriate error codes returned"
+      },
+      {
+        "type": "action",
+        "description": "Try to view or manipulate data outside user role permissions"
+      },
+      {
+        "type": "assertion",
+        "description": "Operation is prohibited and logged for auditing"
+      },
+      {
+        "type": "action",
+        "description": "Check that sensitive user data is masked or encrypted in responses"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Public Landing Page Displays Marketing Content and Call-to-Action Correctly",
+    "description": "Verify that the public facing landing page loads successfully, shows marketing features, testimonials, and call-to-action buttons, and is responsive across devices.",
+    "category": "ui",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the public landing page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify marketing sections including features, how it works, testimonials, and trusted clients are present and formatted correctly"
+      },
+      {
+        "type": "assertion",
+        "description": "Call-to-action buttons respond with expected navigation or modal dialogs"
+      },
+      {
+        "type": "action",
+        "description": "Resize browser or view on mobile device"
+      },
+      {
+        "type": "assertion",
+        "description": "Page layout adjusts appropriately and remains user friendly"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Scheduling & Calendar Job Planning and Management Accuracy",
+    "description": "Ensure that the scheduling and calendar system allows users to plan, edit, and view job timelines accurately and reflects real-time updates.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open the scheduling calendar view"
+      },
+      {
+        "type": "action",
+        "description": "Create a new job event with required details"
+      },
+      {
+        "type": "assertion",
+        "description": "Job appears correctly on the intended date and time slot"
+      },
+      {
+        "type": "action",
+        "description": "Modify or delete the scheduled job"
+      },
+      {
+        "type": "assertion",
+        "description": "Calendar updates reflect changes instantly"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Testimonial Submission and Display Functionality",
+    "description": "Verify that authenticated users can submit testimonials and that these testimonials are displayed accurately on the public landing page's testimonial section.",
+    "category": "functional",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in as a verified user"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to testimonial submission form"
+      },
+      {
+        "type": "action",
+        "description": "Submit a valid testimonial with rating and comments"
+      },
+      {
+        "type": "assertion",
+        "description": "Submission is accepted and confirmed"
+      },
+      {
+        "type": "action",
+        "description": "Visit the public landing page testimonial section"
+      },
+      {
+        "type": "assertion",
+        "description": "Newly submitted testimonial appears correctly with user details and rating"
+      }
+    ]
+  }
+]

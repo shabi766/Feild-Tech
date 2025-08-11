@@ -4,6 +4,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import http from "http";
 import { Server } from "socket.io";
+import walletRoute from "./Routes/wallet.route.js";
+import { stripeWebhook } from "./Controllers/wallet.controller.js";
 import connectDB from "./utils/db.js";
 import { User } from "./Models/user.model.js";
 import userRoute from "./Routes/user.route.js";
@@ -17,6 +19,9 @@ import searchRoute from "./Routes/search.route.js";
 import dashboardRoute from "./Routes/dashboard.route.js";
 import notificationRoute from "./Routes/notification.route.js";
 import chatRoute from "./Routes/chat.route.js";
+import administratorRoute from "./Routes/administrator.route.js";
+import auditRoute from "./Routes/audit.route.js";
+import { auditMiddleware } from "./middleware/auditMiddleware.js";
 
 dotenv.config();
 
@@ -27,10 +32,19 @@ const server = http.createServer(app);
 const BACKEND_PORT = process.env.BACKEND_PORT || 8000;
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
+// CORS configuration
+const corsOptions = {
+  origin: [FRONTEND_URL, "http://localhost:3000", "http://127.0.0.1:5173"],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Set-Cookie']
+};
+
 // Initialize Socket.io with CORS settings
 const io = new Server(server, {
   cors: {
-    origin: FRONTEND_URL,
+    origin: corsOptions.origin,
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -39,16 +53,16 @@ const io = new Server(server, {
 // Track online users in a Map
 const onlineUsers = new Map();
 
+// Stripe webhook must be registered BEFORE express.json
+app.post("/api/v1/wallet/webhook", express.raw({ type: "application/json" }), stripeWebhook);
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: FRONTEND_URL,
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
+
+// Apply audit middleware to all routes
+app.use(auditMiddleware);
 
 // Connect to Database
 connectDB().catch(err => {
@@ -192,9 +206,12 @@ app.use("/api/v1/client", clientRoute);
 app.use("/api/v1/project", projectRoute);
 app.use("/api/v1/technician", technicianRoute);
 app.use("/api/v1/search", searchRoute);
+app.use("/api/v1/administration", administratorRoute);
+app.use("/api/v1/audit", auditRoute);
 app.use("/api/v1/dashboard", dashboardRoute);
 app.use("/api/v1/notification", notificationRoute);
 app.use("/api/v1/chat", chatRoute);
+app.use("/api/v1/wallet", walletRoute);
 
 // Export io for use in controllers
 export { io };

@@ -1,0 +1,390 @@
+{
+  "meta": {
+    "project": "Alpha Project - Technician Recruitment & Job Management Platform",
+    "date": "2025-08-08",
+    "prepared_by": "Software Development Manager"
+  },
+  "product_overview": "Alpha Project is a comprehensive full-stack web application designed to connect skilled technicians with job opportunities while enabling clients and companies to manage projects efficiently. It incorporates robust job management, communication, financial services, and administrative oversight into a unified platform.",
+  "core_goals": [
+    "Provide technicians with verified job opportunities, professional profile management, and secure payment processing",
+    "Enable clients to post jobs, oversee projects, and communicate effectively with technical teams",
+    "Allow companies to manage workforce, projects, and perform business analytics",
+    "Equip administrators with comprehensive system oversight, user management, and security monitoring capabilities"
+  ],
+  "key_features": [
+    "User Authentication & Authorization with multi-factor login, role-based access, and JWT token management",
+    "Admin Panel for detailed user, company, project, and system management",
+    "Job Management System with multi-step job posting, AI-powered smart matching, and workflow tracking",
+    "Project Management tools for creation, tracking, resource allocation, and quality assurance",
+    "Client and Company Management including onboarding and relationship maintenance",
+    "Real-time Chat and Communication System with file sharing and audio call capabilities",
+    "Digital Wallet and Payment System integrated with PayMob for secure transactions and KYC verification",
+    "Audit & Security Systems including comprehensive logging and real-time threat detection",
+    "File upload management via Cloudinary and AWS S3",
+    "Notification System for real-time user alerts",
+    "Advanced Search and Dashboard for data insights and usability",
+    "Public Landing Page with marketing and informational content",
+    "User Profile & Settings with role-based navigation and personalization",
+    "Application Management for job applications and status tracking",
+    "Testimonial System for user reviews and feedback",
+    "Map & Location Services for geolocation of jobs",
+    "Scheduling & Calendar for job planning and management"
+  ],
+  "user_flow_summary": [
+    "User registration and authentication with role selection and multi-factor verification",
+    "Clients post jobs using multi-step forms; jobs are matched with technicians via AI algorithms",
+    "Technicians browse, apply, and are assigned to jobs; track project status and submit deliverables",
+    "Real-time communication between users with chat, file sharing, and audio calls",
+    "Users manage finances through wallet top-ups, withdrawals, and transaction histories with KYC compliance",
+    "Admins monitor platform activities via dashboards, audit logs, user and content management interfaces",
+    "Notifications alert users about job updates, messages, payments, and tasks",
+    "Clients and companies oversee projects, assign tasks, track progress, and handle approvals"
+  ],
+  "validation_criteria": [
+    "All roles able to register, authenticate, and access authorized features only",
+    "Job posting and application processes completed with valid data and proper state management",
+    "Real-time chat features delivering messages, files, and calls without loss or delay",
+    "Secure payment transactions processed correctly via integrated gateways with KYC verification",
+    "Project management tasks created, assigned, updated, and tracked accurately",
+    "Audit logs capturing all critical system actions with traceability",
+    "File uploads completed successfully with valid format and size constraints",
+    "Notifications dispatched and received promptly across platform users",
+    "UI/UX adhering to accessibility, responsiveness, and performance benchmarks",
+    "System security mechanisms tested for vulnerabilities and compliance with data protection regulations"
+  ],
+  "code_summary": {
+    "tech_stack": [
+      "JavaScript",
+      "React",
+      "Node.js",
+      "Express.js",
+      "MongoDB",
+      "Socket.io",
+      "Redux",
+      "Tailwind CSS",
+      "Vite",
+      "Docker",
+      "Cloudinary",
+      "AWS S3",
+      "JWT Authentication",
+      "Multer",
+      "Paymob Integration"
+    ],
+    "features": [
+      {
+        "name": "User Authentication & Authorization",
+        "description": "Complete authentication system with login, signup, role-based access control, and JWT tokens",
+        "files": [
+          "Frontend/src/components/Auth/Login.jsx",
+          "Frontend/src/components/Auth/Signup.jsx",
+          "Frontend/src/components/Auth/AdminLogin.jsx",
+          "Frontend/src/components/Auth/ForgotPassword.jsx",
+          "Frontend/src/components/Auth/ProfileSetup.jsx",
+          "Frontend/src/components/Auth/RoleSelection.jsx",
+          "Frontend/src/context/UserContext.jsx",
+          "Frontend/src/redux/authSlice.js",
+          "Backend/middleware/isAuthenticated.js",
+          "Backend/middleware/isAdmin.js",
+          "Backend/Controllers/user.controller.js",
+          "Backend/Models/user.model.js"
+        ]
+      },
+      {
+        "name": "Admin Panel & Management",
+        "description": "Comprehensive admin dashboard for managing users, companies, projects, and system settings",
+        "files": [
+          "Frontend/src/components/admin/AdminDashboard.jsx",
+          "Frontend/src/components/admin/AdminPanel.jsx",
+          "Frontend/src/components/admin/AdminSidebar.jsx",
+          "Frontend/src/components/admin/AdminStats.jsx",
+          "Frontend/src/components/admin/UserManagement.jsx",
+          "Frontend/src/components/admin/Companies.jsx",
+          "Frontend/src/components/admin/Projects.jsx",
+          "Frontend/src/components/admin/AllTechnicians.jsx",
+          "Frontend/src/components/admin/Applicants.jsx",
+          "Frontend/src/components/admin/Clients.jsx",
+          "Frontend/src/components/admin/KYCManagement.jsx",
+          "Frontend/src/components/admin/SmartAudit.jsx",
+          "Backend/Controllers/administrator.controller.js",
+          "Backend/Routes/administrator.route.js"
+        ]
+      },
+      {
+        "name": "Job Management System",
+        "description": "Complete job posting, application, and management system with multi-step forms",
+        "files": [
+          "Frontend/src/components/admin/PostJobcomps/PostJob.jsx",
+          "Frontend/src/components/admin/PostJobcomps/JobDetailsStep.jsx",
+          "Frontend/src/components/admin/PostJobcomps/JobDescriptionStep.jsx",
+          "Frontend/src/components/admin/PostJobcomps/JobTypeStep.jsx",
+          "Frontend/src/components/admin/PostJobcomps/SalaryStep.jsx",
+          "Frontend/src/components/admin/PostJobcomps/AddressStep.jsx",
+          "Frontend/src/components/admin/PostJobcomps/Contacts.jsx",
+          "Frontend/src/components/admin/PostJobcomps/Attachements.jsx",
+          "Frontend/src/components/admin/PostJobcomps/CustomFields.jsx",
+          "Frontend/src/components/admin/PostJobcomps/SelectionRule.jsx",
+          "Frontend/src/components/admin/PostJobcomps/Shipments.jsx",
+          "Frontend/src/components/admin/ViewJobs/ViewJob.jsx",
+          "Frontend/src/components/admin/ViewJobs/JobDetails.jsx",
+          "Frontend/src/components/admin/ViewJobs/JobStatusBar.jsx",
+          "Frontend/src/components/admin/ViewJobs/JobActivity.jsx",
+          "Frontend/src/components/admin/ViewJobs/LogsDialog.jsx",
+          "Frontend/src/components/admin/ViewJobs/ActionButtons.jsx",
+          "Frontend/src/components/admin/ViewJobs/AssignedProvider.jsx",
+          "Frontend/src/components/admin/ViewJobs/ProviderTabs.jsx",
+          "Frontend/src/redux/jobPostSlice.js",
+          "Frontend/src/redux/jobSlice.js",
+          "Backend/Controllers/workorder.controller.js",
+          "Backend/Models/workorder.model.js",
+          "Backend/Routes/workorder.route.js"
+        ]
+      },
+      {
+        "name": "Project Management",
+        "description": "Project creation, management, and tracking system for clients and technicians",
+        "files": [
+          "Frontend/src/components/admin/Projects.jsx",
+          "Frontend/src/components/admin/ProjectsCreate.jsx",
+          "Frontend/src/components/admin/ProjectSetup.jsx",
+          "Frontend/src/components/admin/ProjectDetail.jsx",
+          "Frontend/src/components/admin/ProjectTable.jsx",
+          "Frontend/src/redux/projectSlice.js",
+          "Frontend/src/Hooks/useGetAllProjects.jsx",
+          "Frontend/src/Hooks/useGetAllProjectById.jsx",
+          "Frontend/src/Hooks/useFetchProjectsByClient.jsx",
+          "Backend/Controllers/project.controller.js",
+          "Backend/Models/project.model.js",
+          "Backend/Routes/project.route.js"
+        ]
+      },
+      {
+        "name": "Client & Company Management",
+        "description": "Client onboarding, company setup, and relationship management system",
+        "files": [
+          "Frontend/src/components/admin/Clients.jsx",
+          "Frontend/src/components/admin/ClientsCreate.jsx",
+          "Frontend/src/components/admin/ClientSetup.jsx",
+          "Frontend/src/components/admin/ClientDetail.jsx",
+          "Frontend/src/components/admin/ClientsTable.jsx",
+          "Frontend/src/components/admin/Companies.jsx",
+          "Frontend/src/components/admin/CompanyCreate.jsx",
+          "Frontend/src/components/admin/CompanySetup.jsx",
+          "Frontend/src/components/admin/CompaniesTable.jsx",
+          "Frontend/src/redux/clientSlice.js",
+          "Frontend/src/redux/companySlice.js",
+          "Frontend/src/Hooks/useGetAllClients.jsx",
+          "Frontend/src/Hooks/useGetAllClientsbyId.jsx",
+          "Frontend/src/Hooks/useGetAllCompanies.jsx",
+          "Frontend/src/Hooks/useGetAllCompanybyId.jsx",
+          "Backend/Controllers/client.controller.js",
+          "Backend/Controllers/company.controller.js",
+          "Backend/Models/client.model.js",
+          "Backend/Models/company.model.js",
+          "Backend/Routes/client.route.js",
+          "Backend/Routes/company.route.js"
+        ]
+      },
+      {
+        "name": "Chat & Communication System",
+        "description": "Real-time chat system with file sharing, audio calls, and search functionality",
+        "files": [
+          "Frontend/src/components/shared/Chat/chat.jsx",
+          "Frontend/src/components/shared/Chat/ChatWindow.jsx",
+          "Frontend/src/components/shared/Chat/ChatSidebar.jsx",
+          "Frontend/src/components/shared/Chat/ChatHeader.jsx",
+          "Frontend/src/components/shared/Chat/ChatMessage.jsx",
+          "Frontend/src/components/shared/Chat/ChatSearch.jsx",
+          "Frontend/src/components/shared/Chat/ChatFileUpload.jsx",
+          "Frontend/src/components/shared/Chat/FileUpload.jsx",
+          "Frontend/src/components/shared/Chat/EmojiPicker.jsx",
+          "Frontend/src/components/shared/Chat/AudioCallModal.jsx",
+          "Frontend/src/components/shared/Chat/ChatLoading.jsx",
+          "Frontend/src/context/ChatContext.jsx",
+          "Frontend/src/context/AudioCallContext.jsx",
+          "Frontend/src/Hooks/useChatSocket.jsx",
+          "Frontend/src/Hooks/useChatSearch.jsx",
+          "Frontend/src/Hooks/useSocket.jsx",
+          "Frontend/src/components/shared/socket.jsx",
+          "Backend/Controllers/chat.controller.js",
+          "Backend/Models/chat.model.js",
+          "Backend/Routes/chat.route.js"
+        ]
+      },
+      {
+        "name": "Wallet & Payment System",
+        "description": "Digital wallet system with KYC verification, top-up, and withdrawal functionality",
+        "files": [
+          "Frontend/src/components/wallet/WalletDashboard.jsx",
+          "Frontend/src/components/wallet/RecruiterWallet.jsx",
+          "Frontend/src/components/wallet/TechnicianWalletOverview.jsx",
+          "Frontend/src/components/wallet/TechnicianOnboarding.jsx",
+          "Frontend/src/components/wallet/KYCForm.jsx",
+          "Frontend/src/components/wallet/KYCStatusBanner.jsx",
+          "Frontend/src/components/wallet/AddCardModal.jsx",
+          "Frontend/src/components/wallet/TopupModal.jsx",
+          "Frontend/src/components/wallet/WithdrawModal.jsx",
+          "Frontend/src/components/wallet/Wallets.jsx",
+          "Backend/Controllers/wallet.controller.js",
+          "Backend/Models/transaction.model.js",
+          "Backend/Routes/wallet.route.js"
+        ]
+      },
+      {
+        "name": "Audit & Security System",
+        "description": "Comprehensive audit logging, security monitoring, and system settings management",
+        "files": [
+          "Frontend/src/components/admin/SmartAudit.jsx",
+          "Frontend/src/components/administrator/AuditLogs.jsx",
+          "Frontend/src/components/administrator/SecurityMiddleware.jsx",
+          "Frontend/src/components/administrator/SystemMonitoring.jsx",
+          "Frontend/src/components/administrator/SystemSettings.jsx",
+          "Frontend/src/components/administrator/KYCManagement.jsx",
+          "Frontend/src/Hooks/useAuditLogs.jsx",
+          "Frontend/src/components/administrator/services/auditService.js",
+          "Backend/middleware/auditMiddleware.js",
+          "Backend/Controllers/audit.controller.js",
+          "Backend/Models/auditLog.model.js",
+          "Backend/Models/systemSettings.model.js",
+          "Backend/Routes/audit.route.js",
+          "Backend/Routes/settings.route.js",
+          "Backend/utils/auditService.js",
+          "Backend/migrateAuditLogs.js",
+          "Backend/testAuditLog.js"
+        ]
+      },
+      {
+        "name": "File Management & Uploads",
+        "description": "File upload system with Cloudinary and S3 integration for attachments and documents",
+        "files": [
+          "Backend/middleware/multer.js",
+          "Backend/utils/cloudinary.js",
+          "Backend/utils/s3Upload.js",
+          "Backend/utils/dataUri.js",
+          "Backend/uploads/",
+          "Frontend/src/components/shared/Chat/ChatFileUpload.jsx",
+          "Frontend/src/components/shared/Chat/FileUpload.jsx"
+        ]
+      },
+      {
+        "name": "Notification System",
+        "description": "Real-time notifications for users across the platform",
+        "files": [
+          "Frontend/src/components/shared/NotificationComponent.jsx",
+          "Backend/Controllers/notification.controller.js",
+          "Backend/Models/notification.model.js",
+          "Backend/Routes/notification.route.js"
+        ]
+      },
+      {
+        "name": "Search & Dashboard",
+        "description": "Advanced search functionality and comprehensive dashboard views",
+        "files": [
+          "Frontend/src/components/admin/AdminDashboard.jsx",
+          "Frontend/src/components/admin/AdminStats.jsx",
+          "Frontend/src/components/user/Home.jsx",
+          "Frontend/src/components/user/Browse.jsx",
+          "Frontend/src/components/user/Jobs.jsx",
+          "Frontend/src/components/user/JobTable.jsx",
+          "Frontend/src/components/user/LatestJobs.jsx",
+          "Frontend/src/components/user/LatestJobCards.jsx",
+          "Frontend/src/components/user/CategoryCarousel.jsx",
+          "Frontend/src/components/user/Filtercard.jsx",
+          "Backend/Controllers/search.controller.js",
+          "Backend/Controllers/dashboard.controller.js",
+          "Backend/Routes/search.route.js",
+          "Backend/Routes/dashboard.route.js"
+        ]
+      },
+      {
+        "name": "Landing Page & Marketing",
+        "description": "Public landing page with features, testimonials, and call-to-action sections",
+        "files": [
+          "Frontend/src/components/LandingPage/LandingPage.jsx",
+          "Frontend/src/components/LandingPage/HeroSection.jsx",
+          "Frontend/src/components/LandingPage/FeaturesSection.jsx",
+          "Frontend/src/components/LandingPage/HowItWorksSection.jsx",
+          "Frontend/src/components/LandingPage/CTASection.jsx",
+          "Frontend/src/components/LandingPage/TestimonialSection.jsx",
+          "Frontend/src/components/LandingPage/TrustedSection.jsx",
+          "Frontend/src/components/LandingPage/info/About.jsx",
+          "Frontend/src/components/LandingPage/info/FindTech.jsx",
+          "Frontend/src/components/LandingPage/info/FindWork.jsx",
+          "Frontend/src/components/LandingPage/info/Resources.jsx",
+          "Frontend/src/components/LandingPage/info/ServiceCoverage.jsx"
+        ]
+      },
+      {
+        "name": "User Profile & Settings",
+        "description": "User profile management, settings, and role-based navigation",
+        "files": [
+          "Frontend/src/components/user/Profile.jsx",
+          "Frontend/src/components/user/UpdateProfileDialog.jsx",
+          "Frontend/src/components/user/UpdateProfilePage.jsx",
+          "Frontend/src/components/shared/Settings.jsx",
+          "Frontend/src/components/shared/Sidebar.jsx",
+          "Frontend/src/components/shared/Navbar/NavbarBase.jsx",
+          "Frontend/src/components/shared/Navbar/GeneralNavbar.jsx",
+          "Frontend/src/components/shared/Navbar/TechnicianNavbar.jsx",
+          "Frontend/src/components/shared/Navbar/RecruiterNavbar.jsx",
+          "Frontend/src/components/shared/Navbar/AdministratorNavbar.jsx",
+          "Frontend/src/components/shared/Navbar/Navbars.jsx"
+        ]
+      },
+      {
+        "name": "Application Management",
+        "description": "Job application system with status tracking and management",
+        "files": [
+          "Frontend/src/components/admin/Applicants.jsx",
+          "Frontend/src/components/admin/ApplicantsTable.jsx",
+          "Frontend/src/components/admin/ShowApplicantProfile.jsx",
+          "Frontend/src/components/user/JobDescription/CompletionForm.jsx",
+          "Frontend/src/components/user/JobDescription/JobDescription.jsx",
+          "Frontend/src/components/user/JobDescription/JobDetails.jsx",
+          "Frontend/src/components/user/JobDescription/JobHeader.jsx",
+          "Frontend/src/components/user/JobDescription/JobSidebar.jsx",
+          "Frontend/src/components/user/JobDescription/index.jsx",
+          "Frontend/src/redux/applicationSlice.js",
+          "Frontend/src/Hooks/useGetAppliedJobs.jsx",
+          "Frontend/src/Hooks/useGetJobbyProject.jsx",
+          "Backend/Controllers/application.controller.js",
+          "Backend/Models/application.model.js",
+          "Backend/Routes/application.route.js"
+        ]
+      },
+      {
+        "name": "Testimonial System",
+        "description": "User testimonial and review management system",
+        "files": [
+          "Frontend/src/components/LandingPage/TestimonialSection.jsx",
+          "Backend/Controllers/Testimonial.controller.js",
+          "Backend/Models/testimonial.model.js",
+          "Backend/Routes/testimonial.route.js"
+        ]
+      },
+      {
+        "name": "Map & Location Services",
+        "description": "Geolocation and mapping functionality for job locations",
+        "files": [
+          "Frontend/src/components/MapComponent/MapComponent.jsx"
+        ]
+      },
+      {
+        "name": "Scheduling & Calendar",
+        "description": "Job scheduling and calendar management system",
+        "files": [
+          "Frontend/src/components/Schedueler/JobCalender.jsx"
+        ]
+      },
+      {
+        "name": "Database & Utilities",
+        "description": "Database connection, utilities, and helper functions",
+        "files": [
+          "Backend/utils/db.js",
+          "Backend/utils/utils.js",
+          "Frontend/src/lib/utils.js",
+          "Frontend/src/utils/constant.js"
+        ]
+      }
+    ]
+  }
+}

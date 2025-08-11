@@ -7,7 +7,7 @@ import axios from 'axios';
 import { USER_API_END_POINT } from '../utils/constant';
 import { toast } from 'sonner';
 import { useDispatch, useSelector } from 'react-redux';
-import { setloading } from '@/redux/authSlice';
+import { setLoading } from '@/redux/authSlice';
 import { Loader2, Eye, EyeOff, User, Mail, Phone, CreditCard, Lock, ArrowLeft, Users, Wrench, AlertCircle } from 'lucide-react';
 
 const Signup = () => {
@@ -23,7 +23,7 @@ const Signup = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [errors, setErrors] = useState({});
-    const { Loading, user } = useSelector(store => store.auth);
+    const { loading, user } = useSelector(store => store.auth);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
@@ -121,7 +121,7 @@ const Signup = () => {
         formData.append("role", input.role);
 
         try {
-            dispatch(setloading(true));
+            dispatch(setLoading(true));
             const res = await axios.post(`${USER_API_END_POINT}/register`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data"
@@ -136,7 +136,7 @@ const Signup = () => {
             console.log(error);
             toast.error(error.response?.data?.message || "An error occurred during registration.");
         } finally {
-            dispatch(setloading(false));
+            dispatch(setLoading(false));
         }
     };
 
@@ -340,9 +340,9 @@ const Signup = () => {
                         <Button 
                             type="submit" 
                             className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02]" 
-                            disabled={Loading}
+                            disabled={loading}
                         >
-                            {Loading ? (
+                            {loading ? (
                                 <>
                                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                                     Creating Account...

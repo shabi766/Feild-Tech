@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import axios from 'axios';
 import { USER_API_END_POINT } from '@/components/utils/constant';
-import { setuser } from '@/redux/authSlice';
+import { setUser } from '@/redux/authSlice';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 
 const UpdateProfilePage = () => {
@@ -102,7 +102,7 @@ const UpdateProfilePage = () => {
       });
 
       if (res.data.success) {
-        dispatch(setuser(res.data.user));
+                    dispatch(setUser(res.data.user));
         toast.success('Profile updated');
       }
     } catch (err) {

@@ -1,0 +1,16 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:5173",
+  "executionArgs": {
+    "projectName": "Alpha Project",
+    "projectPath": "C:\\Users\\W10\\Desktop\\Alpha Project",
+    "testIds": [],
+    "additionalInstruction": "Please run comprehensive frontend tests focusing on authentication, user flows, and API communication to verify that the recent fixes have resolved the previous issues.",
+    "envs": {
+      "API_KEY": "sk-user-ZFrZd-U4E1qy-il-hY4DvbDOj3fJJx_hHlRAS4d44u5--i7KX3qXd-vK8b0He7ycm4BCLIaURcBFPjPucRYDnYljvSeHZ7Nvkxb926k0xlDlForQkTSVaFKxUEKuWvO8iG8"
+    }
+  },
+  "proxy": "http://506ccf7d-762b-4dc9-81eb-0ffc80d68a5c:V0vSINSQAAMlpfFf17LFYp1Fo57pTVS6@tun.testsprite.com:8080"
+}

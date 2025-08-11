@@ -89,7 +89,7 @@ export const login = async (req, res) => {
         const tokenData = {
             userId: user._id,
         };
-        const token = await jwt.sign(tokenData, process.env.SECRET_KEY, { expiresIn: '1d' });
+        const token = await jwt.sign(tokenData, process.env.SECRET_KEY, { expiresIn: '7d' });
 
         const userForResponse = {
             _id: user._id,
@@ -103,13 +103,14 @@ export const login = async (req, res) => {
 
         return res.status(200)
             .cookie("token", token, { 
-                maxAge: 1 * 24 * 60 * 60 * 1000, 
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
                 httpOnly: true,
                 sameSite: 'strict'
             })
             .json({
                 message: `Welcome back ${user.fullname}`,
                 user: userForResponse,
+                token: token, // Include token in response for frontend
                 success: true,
             });
     } catch (error) {

@@ -1,43 +1,63 @@
 // useAuthCheck.js
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode';
-import { useDispatch } from 'react-redux';
-import { setuser } from '@/redux/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser } from '@/redux/authSlice';
 import { toast } from 'sonner';
+import axios from 'axios';
+import { USER_API_END_POINT } from '@/components/utils/constant';
 
 const useAuthCheck = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [isLoading, setIsLoading] = useState(false);
+  const { user, isAuthenticated } = useSelector(store => store.auth);
 
-  const checkAuth = () => {
-    const token = localStorage.getItem('token'); // Adjust storage if needed
-    if (token) {
-      try {
-        const decodedToken = jwtDecode(token);
-        if (decodedToken.exp * 1000 < Date.now()) {
-          // Token expired
-          localStorage.removeItem('token');
-          dispatch(setuser(null));
-          navigate('/login');
-          toast.info('Your session has expired. Please log in again.');
-        }
-      } catch (error) {
-        // Invalid token
-        localStorage.removeItem('token');
-        dispatch(setuser(null));
-        navigate('/login');
-      }
+  const checkAuth = async () => {
+    // Don't check if already authenticated
+    if (isAuthenticated && user) {
+      setIsLoading(false);
+      return;
     }
-    setIsLoading(false); // Set loading to false after check
+
+    try {
+      setIsLoading(true);
+      console.log('useAuthCheck - Checking authentication...');
+      // Check authentication status by calling the getProfile endpoint
+      const response = await axios.get(`${USER_API_END_POINT}/me`, { 
+        withCredentials: true 
+      });
+      
+      console.log('useAuthCheck - Response:', response.data);
+      
+      if (response.data.success) {
+        // User is authenticated, set user data
+        console.log('useAuthCheck - Setting user:', response.data.user);
+        dispatch(setUser(response.data.user));
+      } else {
+        // Authentication failed
+        console.log('useAuthCheck - Authentication failed');
+        dispatch(setUser(null));
+      }
+    } catch (error) {
+      // Authentication failed (401, 403, etc.)
+      console.log('useAuthCheck - Error:', error.response?.status, error.response?.data);
+      dispatch(setUser(null));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
-    checkAuth();
-  }, [navigate, dispatch]);
+    // Only check auth if not already authenticated
+    if (!isAuthenticated && !user) {
+      checkAuth();
+    } else {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated, user]);
 
-  return { isLoading, checkAuth }; // Return loading state
+  return { isLoading, checkAuth };
 };
 
 export default useAuthCheck;

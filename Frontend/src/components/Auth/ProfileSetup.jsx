@@ -8,7 +8,7 @@ import axios from 'axios';
 import { USER_API_END_POINT } from '../utils/constant';
 import { toast } from 'sonner';
 import { useDispatch, useSelector } from 'react-redux';
-import { setloading, setuser } from '@/redux/authSlice';
+import { setLoading, setUser } from '@/redux/authSlice';
 import { Loader2, User, Mail, Phone, MapPin, Upload, X, Plus, AlertCircle, Camera, Save, ArrowLeft } from 'lucide-react';
 
 const ProfileSetup = () => {
@@ -129,9 +129,13 @@ const ProfileSetup = () => {
             });
 
             if (response.data.success) {
-                dispatch(setuser(response.data.user));
+                dispatch(setUser(response.data.user));
                 toast.success('Profile updated successfully!');
-                navigate(user.role === 'Recruiter' || user.role === 'Admin' ? '/dashboard' : '/home');
+                
+                // Add a small delay to ensure state is properly set
+                setTimeout(() => {
+                    navigate(user.role === 'Admin' ? '/app/administrator' : user.role === 'Recruiter' ? '/app/dashboard' : '/app/home');
+                }, 100);
             }
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to update profile');
@@ -159,7 +163,7 @@ const ProfileSetup = () => {
             <div className="max-w-2xl mx-auto px-4">
                 <div className="text-center mb-8">
                     <Link 
-                        to={user.role === 'Recruiter' || user.role === 'Admin' ? '/dashboard' : '/home'}
+                        to={user.role === 'Admin' ? '/app/administrator' : user.role === 'Recruiter' ? '/app/dashboard' : '/app/home'}
                         className="inline-flex items-center text-gray-600 hover:text-gray-800 transition-colors mb-6"
                     >
                         <ArrowLeft className="w-4 h-4 mr-2" />

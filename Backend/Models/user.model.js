@@ -76,6 +76,17 @@ const userSchema = new mongoose.Schema(
         achievements: [{ type: String }],
         certifications: [certificationSchema],
 
+        // KYC fields for in-app onboarding
+        kyc: {
+            fatherName: { type: String },
+            cnicFrontUrl: { type: String },
+            cnicBackUrl: { type: String },
+            cnicNumber: { type: String },
+            dateOfBirth: { type: Date },
+            kycStatus: { type: String, enum: ['unverified', 'pending', 'verified', 'rejected'], default: 'unverified' },
+            remarks: { type: String },
+        },
+
         // Preferences
         darkMode: { type: Boolean, default: false },
         notifications: { type: Boolean, default: true },
@@ -83,6 +94,16 @@ const userSchema = new mongoose.Schema(
         // Password Reset Fields
         resetPasswordOtp: { type: String },
         resetPasswordOtpExpiry: { type: Date },
+
+        // Stripe / Wallet fields
+        stripe: {
+            customerId: { type: String, default: null }, // Recruiters store customer for charging
+            connectAccountId: { type: String, default: null }, // Technicians receive payouts
+            connectChargesEnabled: { type: Boolean, default: false },
+            detailsSubmitted: { type: Boolean, default: false },
+        },
+        // Optional local wallet balance cache (authoritative balance is on Stripe)
+        walletBalance: { type: Number, default: 0 },
     },
     { timestamps: true }
 );

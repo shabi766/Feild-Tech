@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC001",
+    "title": "user authentication and authorization",
+    "description": "Test user registration, login, multi-factor authentication, role-based access control, and JWT token management to ensure secure and proper access to the platform."
+  },
+  {
+    "id": "TC002",
+    "title": "admin panel and management",
+    "description": "Verify admin dashboard functionalities including user, company, project management, and system settings to ensure comprehensive administrative control."
+  },
+  {
+    "id": "TC003",
+    "title": "job management system",
+    "description": "Test job posting with multi-step forms, AI-powered job matching, application process, and workflow tracking to ensure smooth job lifecycle management."
+  },
+  {
+    "id": "TC004",
+    "title": "project management",
+    "description": "Validate project creation, tracking, resource allocation, and quality assurance features for clients and technicians."
+  },
+  {
+    "id": "TC005",
+    "title": "client and company management",
+    "description": "Test client onboarding, company setup, and relationship management functionalities to ensure proper data handling and user experience."
+  },
+  {
+    "id": "TC006",
+    "title": "chat and communication system",
+    "description": "Verify real-time chat, file sharing, audio call capabilities, and message delivery without loss or delay."
+  },
+  {
+    "id": "TC007",
+    "title": "wallet and payment system",
+    "description": "Test digital wallet operations including KYC verification, top-up, withdrawal, and secure payment processing via PayMob integration."
+  },
+  {
+    "id": "TC008",
+    "title": "audit and security system",
+    "description": "Validate audit logging, security monitoring, and system settings management to ensure traceability and compliance."
+  },
+  {
+    "id": "TC009",
+    "title": "file management and uploads",
+    "description": "Test file upload functionalities with Cloudinary and AWS S3 integration ensuring valid format, size constraints, and successful uploads."
+  },
+  {
+    "id": "TC010",
+    "title": "notification system",
+    "description": "Verify real-time notification dispatch and receipt across platform users for job updates, messages, payments, and tasks."
+  }
+]

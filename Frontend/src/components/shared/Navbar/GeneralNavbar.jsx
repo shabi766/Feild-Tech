@@ -15,17 +15,17 @@ const GeneralNavbar = () => {
 
     return (
         <NavbarBase>
-            <ul className='flex items-center gap-1'>
+            <ul className='flex items-center gap-2'>
                 {navItems.map((item) => {
                     const isActive = location.pathname === item.path;
                     return (
                         <li key={item.path}>
                             <Link 
                                 to={item.path}
-                                className={`relative px-4 py-2 rounded-lg font-medium transition-all duration-300 group ${
+                                className={`relative px-3 py-2 rounded-lg font-medium transition-all duration-300 group text-sm ${
                                     isActive 
                                         ? 'text-blue-600 bg-blue-50/80' 
-                                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50/50'
+                                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50/60'
                                 }`}
                             >
                                 <span className="relative z-10">{item.label}</span>

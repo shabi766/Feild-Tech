@@ -3,11 +3,11 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { USER_API_END_POINT } from '../utils/constant';
+import api from '@/lib/axios';
+import { API_ENDPOINTS } from '@/config/environment';
 import { toast } from 'sonner';
 import { useDispatch, useSelector } from 'react-redux';
-import { setloading, setuser } from '@/redux/authSlice';
+import { setLoading, setUser, setToken, setError } from '@/redux/authSlice';
 import { Loader2, Eye, EyeOff, Mail, Lock, ArrowLeft, AlertCircle } from 'lucide-react';
 
 const Login = () => {
@@ -19,7 +19,7 @@ const Login = () => {
     const [errors, setErrors] = useState({});
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { Loading, user } = useSelector((store) => store.auth);
+    const { loading, user, isAuthenticated } = useSelector((store) => store.auth);
 
     const changeEventHandler = (e) => {
         const { name, value } = e.target;
@@ -60,33 +60,40 @@ const Login = () => {
         }
 
         try {
-            dispatch(setloading(true));
-            const res = await axios.post(`${USER_API_END_POINT}/Login`, input, {
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                withCredentials: true,
-            });
+            dispatch(setLoading(true));
+            dispatch(setError(null));
+            
+            const res = await api.post(`${API_ENDPOINTS.USER}/login`, input);
+            
             if (res.data.success) {
-                dispatch(setuser(res.data.user));
+                // Store user data and token
+                dispatch(setUser(res.data.user));
+                dispatch(setToken(res.data.token || res.data.user.token));
                 
-                // Redirect based on user role
-                if (res.data.user.role === 'Recruiter' || res.data.user.role === 'Admin') {
-                    navigate("/dashboard");
-                } else if (res.data.user.role === 'Technician') {
-                    navigate("/home");
-                } else {
-                    // Default fallback
-                    navigate("/home");
-                }
+                // Add a small delay to ensure state is properly set
+                setTimeout(() => {
+                    // Redirect based on user role
+                    if (res.data.user.role === 'Admin') {
+                        navigate("/app/administrator");
+                    } else if (res.data.user.role === 'Recruiter') {
+                        navigate("/app/dashboard");
+                    } else if (res.data.user.role === 'Technician') {
+                        navigate("/app/home");
+                    } else {
+                        // Default fallback
+                        navigate("/app/home");
+                    }
+                }, 100);
                 
                 toast.success(res.data.message);
             }
         } catch (error) {
-            console.log(error);
-            toast.error(error.response?.data?.message || "An unexpected error occurred.");
+            console.error('Login error:', error);
+            const errorMessage = error.response?.data?.message || "An unexpected error occurred.";
+            dispatch(setError(errorMessage));
+            toast.error(errorMessage);
         } finally {
-            dispatch(setloading(false));
+            dispatch(setLoading(false));
         }
     };
 
@@ -102,12 +109,14 @@ const Login = () => {
     useEffect(() => {
         if (user) {
             // If user is already logged in, redirect based on role
-            if (user.role === 'Recruiter' || user.role === 'Admin') {
-                navigate("/dashboard");
+            if (user.role === 'Admin') {
+                navigate("/app/administrator");
+            } else if (user.role === 'Recruiter') {
+                navigate("/app/dashboard");
             } else if (user.role === 'Technician') {
-                navigate("/home");
+                navigate("/app/home");
             } else {
-                navigate("/home");
+                navigate("/app/home");
             }
         }
     }, [user, navigate]);
@@ -205,9 +214,9 @@ const Login = () => {
                         <Button 
                             type="submit" 
                             className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02]" 
-                            disabled={Loading}
+                            disabled={loading}
                         >
-                            {Loading ? (
+                            {loading ? (
                                 <>
                                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                                     Signing In...

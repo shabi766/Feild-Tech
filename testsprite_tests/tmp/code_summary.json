@@ -1,0 +1,151 @@
+{
+  "tech_stack": [
+    "JavaScript",
+    "React",
+    "Node.js",
+    "Express.js",
+    "MongoDB",
+    "Socket.io",
+    "Redux",
+    "Tailwind CSS",
+    "Vite",
+    "Docker",
+    "Cloudinary",
+    "AWS S3",
+    "JWT Authentication",
+    "Multer",
+    "Paymob Integration"
+  ],
+  "features": [
+    {
+      "name": "User Authentication System",
+      "description": "Complete JWT-based authentication with login, logout, and role-based access control",
+      "files": [
+        "Frontend/src/components/Auth/Login.jsx",
+        "Frontend/src/components/Auth/Register.jsx",
+        "Frontend/src/redux/authSlice.js",
+        "Frontend/src/lib/axios.js",
+        "Frontend/src/components/shared/ProtectedRoute.jsx",
+        "Frontend/src/components/shared/LogoutButton.jsx",
+        "Backend/Controllers/user.controller.js",
+        "Backend/middleware/isAuthenticated.js"
+      ]
+    },
+    {
+      "name": "Protected Route System",
+      "description": "Client-side route protection with authentication validation and role-based access",
+      "files": [
+        "Frontend/src/components/shared/ProtectedRoute.jsx",
+        "Frontend/src/App.jsx"
+      ]
+    },
+    {
+      "name": "Error Handling & Loading States",
+      "description": "Global error boundaries, loading spinners, and comprehensive error management",
+      "files": [
+        "Frontend/src/components/shared/ErrorBoundary.jsx",
+        "Frontend/src/components/ui/LoadingSpinner.jsx",
+        "Frontend/src/main.jsx"
+      ]
+    },
+    {
+      "name": "API Communication Layer",
+      "description": "Centralized API configuration with automatic token handling and error interceptors",
+      "files": [
+        "Frontend/src/lib/axios.js",
+        "Frontend/src/config/environment.js",
+        "Frontend/vite.config.js"
+      ]
+    },
+    {
+      "name": "State Management",
+      "description": "Redux store with persistent authentication state and user management",
+      "files": [
+        "Frontend/src/redux/authSlice.js",
+        "Frontend/src/redux/store.js"
+      ]
+    },
+    {
+      "name": "Work Order Management",
+      "description": "Complete work order lifecycle management for technicians and recruiters",
+      "files": [
+        "Frontend/src/components/WorkOrder/WorkOrderList.jsx",
+        "Frontend/src/components/WorkOrder/WorkOrderForm.jsx",
+        "Backend/Controllers/workorder.controller.js",
+        "Backend/Models/workorder.model.js"
+      ]
+    },
+    {
+      "name": "User Management",
+      "description": "User registration, profile management, and role-based permissions",
+      "files": [
+        "Frontend/src/components/User/UserProfile.jsx",
+        "Frontend/src/components/User/UserDashboard.jsx",
+        "Backend/Controllers/user.controller.js",
+        "Backend/Models/user.model.js"
+      ]
+    },
+    {
+      "name": "Real-time Communication",
+      "description": "Socket.io integration for real-time chat and notifications",
+      "files": [
+        "Frontend/src/components/Chat/ChatInterface.jsx",
+        "Backend/index.js",
+        "Backend/Controllers/chat.controller.js"
+      ]
+    },
+    {
+      "name": "Payment Integration",
+      "description": "Paymob payment gateway integration for wallet and transactions",
+      "files": [
+        "Frontend/src/components/Wallet/WalletInterface.jsx",
+        "Backend/Controllers/wallet.controller.js",
+        "Backend/Models/wallet.model.js"
+      ]
+    },
+    {
+      "name": "File Upload System",
+      "description": "Cloudinary and AWS S3 integration for file management",
+      "files": [
+        "Frontend/src/components/FileUpload/FileUpload.jsx",
+        "Backend/middleware/multer.js",
+        "Backend/Controllers/upload.controller.js"
+      ]
+    },
+    {
+      "name": "Search and Filtering",
+      "description": "Advanced search functionality with filters for work orders and users",
+      "files": [
+        "Frontend/src/components/Search/SearchInterface.jsx",
+        "Backend/Controllers/search.controller.js"
+      ]
+    },
+    {
+      "name": "Dashboard and Analytics",
+      "description": "Comprehensive dashboard with analytics and reporting",
+      "files": [
+        "Frontend/src/components/Dashboard/Dashboard.jsx",
+        "Frontend/src/components/Dashboard/Analytics.jsx",
+        "Backend/Controllers/dashboard.controller.js"
+      ]
+    },
+    {
+      "name": "Notification System",
+      "description": "Real-time notifications for work order updates and messages",
+      "files": [
+        "Frontend/src/components/Notification/NotificationCenter.jsx",
+        "Backend/Controllers/notification.controller.js",
+        "Backend/Models/notification.model.js"
+      ]
+    },
+    {
+      "name": "Audit and Logging",
+      "description": "Comprehensive audit trail and system logging",
+      "files": [
+        "Backend/middleware/auditMiddleware.js",
+        "Backend/Controllers/audit.controller.js",
+        "Backend/Models/audit.model.js"
+      ]
+    }
+  ]
+}

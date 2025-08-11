@@ -88,21 +88,21 @@ const RecruiterNavbar = ({ user }) => {
     ];
 
     return (
-        <NavbarBase user={user}>
-            <div className="flex items-center w-full">
-                {/* Create Menu */}
+        <NavbarBase 
+            user={user}
+            leftContent={
                 <div className="flex items-center gap-2">
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button 
                                 variant="ghost" 
-                                className="flex items-center gap-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50/50 transition-all duration-300 font-medium"
+                                className="flex items-center gap-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50/60 transition-all duration-300 font-medium text-sm px-3 py-2"
                             >
-                                <Plus size={20} />
+                                <Plus size={18} />
                                 <span>Create</span>
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className='w-56 bg-white/95 backdrop-blur-md shadow-xl rounded-xl border border-gray-200/50 z-50 p-2'>
+                        <PopoverContent className='w-56 bg-white/95 backdrop-blur-md shadow-xl rounded-xl border border-gray-200/60 z-50 p-2'>
                             <ul className="space-y-1">
                                 {createMenuItems.map((item) => {
                                     const IconComponent = item.icon;
@@ -127,13 +127,13 @@ const RecruiterNavbar = ({ user }) => {
                         <PopoverTrigger asChild>
                             <Button 
                                 variant="ghost" 
-                                className="flex items-center gap-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50/50 transition-all duration-300 font-medium"
+                                className="flex items-center gap-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50/60 transition-all duration-300 font-medium text-sm px-3 py-2"
                             >
-                                <Briefcase size={20} />
+                                <Briefcase size={18} />
                                 <span>Work</span>
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className='w-56 bg-white/95 backdrop-blur-md shadow-xl rounded-xl border border-gray-200/50 z-50 p-2'>
+                        <PopoverContent className='w-56 bg-white/95 backdrop-blur-md shadow-xl rounded-xl border border-gray-200/60 z-50 p-2'>
                             <ul className="space-y-1">
                                 {workMenuItems.map((item) => {
                                     const IconComponent = item.icon;
@@ -158,13 +158,13 @@ const RecruiterNavbar = ({ user }) => {
                         <PopoverTrigger asChild>
                             <Button 
                                 variant="ghost" 
-                                className="flex items-center gap-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50/50 transition-all duration-300 font-medium"
+                                className="flex items-center gap-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50/60 transition-all duration-300 font-medium text-sm px-3 py-2"
                             >
-                                <Users size={20} />
+                                <Users size={18} />
                                 <span>Workforce</span>
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className='w-56 bg-white/95 backdrop-blur-md shadow-xl rounded-xl border border-gray-200/50 z-50 p-2'>
+                        <PopoverContent className='w-56 bg-white/95 backdrop-blur-md shadow-xl rounded-xl border border-gray-200/60 z-50 p-2'>
                             <ul className="space-y-1">
                                 {workforceMenuItems.map((item) => {
                                     const IconComponent = item.icon;
@@ -184,29 +184,29 @@ const RecruiterNavbar = ({ user }) => {
                         </PopoverContent>
                     </Popover>
                 </div>
-
-                {/* Search Bar */}
-                <div className="relative flex-grow mx-8 flex items-center" ref={searchRef}>
-                    <div className="relative w-full max-w-md">
+            }
+            centerContent={
+                <div className="relative w-full max-w-2xl flex items-center" ref={searchRef}>
+                    <div className="relative w-full">
                         <input
                             type="text"
-                            className="w-full px-4 py-2.5 pl-12 pr-12 bg-white/80 backdrop-blur-sm border border-gray-200/50 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 placeholder-gray-500 text-gray-700 shadow-sm hover:shadow-md"
+                            className="w-full px-4 py-2 pl-10 pr-4 bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/60 focus:border-blue-500/60 transition-all duration-300 placeholder-gray-500 text-gray-700 shadow-sm hover:shadow-md text-sm"
                             placeholder="Search jobs, clients, projects..."
                             value={query}
                             onChange={handleSearchChange}
                         />
-                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                         {showSuggestions && suggestions.length > 0 && (
-                            <div className="absolute mt-2 w-full bg-white/95 backdrop-blur-md border border-gray-200/50 rounded-xl shadow-xl max-h-64 overflow-auto z-50">
+                            <div className="absolute mt-2 w-full bg-white/95 backdrop-blur-md border border-gray-200/60 rounded-xl shadow-xl max-h-64 overflow-auto z-50">
                                 <ul className="py-2">
                                     {suggestions.map((suggestion, index) => (
                                         <li
                                             key={suggestion.id || suggestion.name || index}
-                                            className="px-4 py-3 cursor-pointer hover:bg-gray-50/80 transition-all duration-200 border-b border-gray-100/50 last:border-b-0"
+                                            className="px-4 py-2.5 cursor-pointer hover:bg-gray-50/80 transition-all duration-200 border-b border-gray-100/60 last:border-b-0"
                                             onClick={() => handleSuggestionClick(suggestion)}
                                         >
                                             <div className="flex items-center justify-between">
-                                                <span className="text-gray-700 font-medium">{suggestion.name}</span>
+                                                <span className="text-gray-700 font-medium text-sm">{suggestion.name}</span>
                                                 {suggestion.type !== "none" && (
                                                     <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">
                                                         {suggestion.type}
@@ -220,8 +220,8 @@ const RecruiterNavbar = ({ user }) => {
                         )}
                     </div>
                 </div>
-            </div>
-        </NavbarBase>
+            }
+        />
     );
 };
 

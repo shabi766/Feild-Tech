@@ -74,7 +74,16 @@ const Sidebar = () => {
             </li>
             <li>
               <Link
-                to="/dashboard"
+                to="/wallets"
+                className="block p-2 rounded-md hover:bg-gray-700 transition"
+                onClick={closeSidebar}
+              >
+                💳 Wallets
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/app/dashboard"
                 className="block p-2 rounded-md hover:bg-gray-700 transition"
                 onClick={closeSidebar} // ✅ Closes sidebar when clicked
               >
@@ -83,7 +92,7 @@ const Sidebar = () => {
             </li>
             <li>
               <Link
-                to="/settings"
+                to="/app/settings"
                 className="block p-2 rounded-md hover:bg-gray-700 transition"
                 onClick={closeSidebar} // ✅ Closes sidebar when clicked
               >
@@ -92,7 +101,7 @@ const Sidebar = () => {
             </li>
             <li>
               <Link
-                to="/profile"
+                to="/app/profile"
                 className="block p-2 rounded-md hover:bg-gray-700 transition"
                 onClick={closeSidebar} // ✅ Closes sidebar when clicked
               >

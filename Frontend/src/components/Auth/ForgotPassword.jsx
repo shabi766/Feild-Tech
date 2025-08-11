@@ -7,7 +7,7 @@ import axios from 'axios';
 import { USER_API_END_POINT } from '../utils/constant';
 import { toast } from 'sonner';
 import { useDispatch } from 'react-redux';
-import { setloading } from '@/redux/authSlice';
+import { setLoading } from '@/redux/authSlice';
 import { Loader2, Mail, ArrowLeft, AlertCircle, CheckCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 const ForgotPassword = () => {

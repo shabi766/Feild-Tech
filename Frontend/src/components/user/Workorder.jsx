@@ -64,7 +64,7 @@ const Workorder = ({ job }) => {
       transition={{ duration: 0.3 }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      onClick={() => navigate(`/description/${job._id}`)}
+      onClick={() => navigate(`/app/technician/description/${job._id}`)}
     >
       {/* Gradient Background on Hover */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 to-purple-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>

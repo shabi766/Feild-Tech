@@ -19,7 +19,8 @@ import {
     Sparkles,
     Target,
     Award,
-    Zap
+    Zap,
+    Search
 } from 'lucide-react';
 
 const Home = () => {
@@ -56,31 +57,24 @@ const Home = () => {
 
     const quickActions = [
         {
-            title: "Browse All Jobs",
-            description: "Explore thousands of opportunities",
-            icon: <Briefcase className="w-8 h-8" />,
-            color: "from-blue-500 to-indigo-600",
-            action: () => navigate('/jobs')
-        },
-        {
-            title: "Advanced Search",
-            description: "Find jobs with specific criteria",
-            icon: <Target className="w-8 h-8" />,
+            title: "Browse Jobs",
+            description: "Find your next opportunity",
+            icon: <Search className="w-8 h-8" />,
             color: "from-green-500 to-emerald-600",
-            action: () => navigate('/browse')
+            action: () => navigate('/app/technician/browse')
         },
         {
             title: "My Applications",
             description: "Track your job applications",
             icon: <Award className="w-8 h-8" />,
-            action: () => navigate('/profile')
+            action: () => navigate('/app/technician/profile')
         },
         {
             title: "Profile Setup",
             description: "Complete your professional profile",
             icon: <Users className="w-8 h-8" />,
             color: "from-purple-500 to-pink-600",
-            action: () => navigate('/profile')
+            action: () => navigate('/app/technician/profile')
         }
     ];
 

@@ -46,7 +46,7 @@ const ProjectDetail = () => {
                                                 <td className="py-3 px-6">{job.salary || 'N/A'}</td>
                                                 <td className="py-3 px-6">
                                                     <button
-                                                        onClick={() => navigate(`/admin/job/detail/${job._id}`)}
+                                                        onClick={() => navigate(`/app/recruiter/job/detail/${job._id}`)}
                                                         className="text-blue-500 hover:text-blue-700"
                                                     >
                                                         View Details

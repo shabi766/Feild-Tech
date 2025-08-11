@@ -58,7 +58,7 @@ const CompaniesTable = () => {
                                             </PopoverTrigger>
                                             <PopoverContent className="w-32">
                                                 <div
-                                                    onClick={() => navigate(`/admin/companies/${company._id}`)}
+                                                    onClick={() => navigate(`/app/recruiter/companies/${company._id}`)}
                                                     className='flex items-center gap-2 w-fit cursor-pointer'
                                                     aria-label={`Edit ${company.name}`}
                                                 >

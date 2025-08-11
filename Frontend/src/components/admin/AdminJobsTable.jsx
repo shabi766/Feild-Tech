@@ -41,9 +41,9 @@ const AdminJobsTable = () => {
 
     const handleJobClick = (jobId, status) => {
         if (status === 'Draft') {
-            navigate(`/admin/jobs/create?jobId=${jobId}`);
+            navigate(`/app/recruiter/jobs/create?jobId=${jobId}`);
         } else {
-            navigate(`/viewjob/${jobId}`);
+            navigate(`/app/recruiter/viewjob/${jobId}`);
         }
     };
 
@@ -214,7 +214,7 @@ const AdminJobsTable = () => {
                                                 <div className="space-y-1">
                                                     <motion.button
                                                         whileHover={{ backgroundColor: "rgba(59, 130, 246, 0.1)" }}
-                                                        onClick={() => navigate(`/admin/jobs/${job._id}`)}
+                                                        onClick={() => navigate(`/app/recruiter/jobs/${job._id}`)}
                                                         className='flex items-center gap-3 w-full p-3 rounded-lg hover:bg-blue-50 transition-colors duration-200 text-left'
                                                     >
                                                         <Edit2 className='w-4 h-4 text-blue-600' />
@@ -222,7 +222,7 @@ const AdminJobsTable = () => {
                                                     </motion.button>
                                                     <motion.button
                                                         whileHover={{ backgroundColor: "rgba(59, 130, 246, 0.1)" }}
-                                                        onClick={() => navigate(`/admin/jobs/${job._id}/applicants`)}
+                                                        onClick={() => navigate(`/app/recruiter/jobs/${job._id}/applicants`)}
                                                         className='flex items-center gap-3 w-full p-3 rounded-lg hover:bg-blue-50 transition-colors duration-200 text-left'
                                                     >
                                                         <Users className='w-4 h-4 text-green-600' />
@@ -230,7 +230,7 @@ const AdminJobsTable = () => {
                                                     </motion.button>
                                                     <motion.button
                                                         whileHover={{ backgroundColor: "rgba(59, 130, 246, 0.1)" }}
-                                                        onClick={() => navigate(`/viewjob/${job._id}`)}
+                                                        onClick={() => navigate(`/app/recruiter/viewjob/${job._id}`)}
                                                         className='flex items-center gap-3 w-full p-3 rounded-lg hover:bg-blue-50 transition-colors duration-200 text-left'
                                                     >
                                                         <Eye className='w-4 h-4 text-purple-600' />

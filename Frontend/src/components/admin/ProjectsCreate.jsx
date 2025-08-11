@@ -80,12 +80,12 @@ const ProjectsCreate = () => {
                     userId: res.data.project._id,
                 }, { withCredentials: true }); 
 
-                navigate(`/admin/projects`);
+                navigate(`/app/recruiter/projects`);
         const projectId = res.data.project._id;
 
         
         await sendProjectCreatedNotification(projectId); 
-        navigate(`/admin/projects`);
+        navigate(`/app/recruiter/projects`);
       } else {
         toast.error(res.data.message || "Failed to create project.");
       }
@@ -185,7 +185,7 @@ const ProjectsCreate = () => {
 
                 {/* Submit Button */}
                 <div className='flex items-center gap-2 my-10'>
-                    <Button variant="outline" onClick={() => navigate("/admin/projects")}>Cancel</Button>
+                    <Button variant="outline" onClick={() => navigate("/app/recruiter/projects")}>Cancel</Button>
                     <Button onClick={registerNewProject} disabled={loading}>
                         {loading ? 'Creating...' : 'Create Project'}
                     </Button>

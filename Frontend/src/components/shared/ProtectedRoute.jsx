@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { setUser, logout } from '@/redux/authSlice';
 import api from '@/lib/axios';
 import LoadingSpinner from '../ui/LoadingSpinner';
 
-const ProtectedRoute = ({ children, requiredRole = null }) => {
+const ProtectedRoute = ({ requiredRole = null, children }) => {
   const { user, isAuthenticated, loading } = useSelector((store) => store.auth);
   const [isValidating, setIsValidating] = useState(false);
   const dispatch = useDispatch();
@@ -78,15 +78,22 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
     if (user.role === 'Admin') {
       return <Navigate to="/app/administrator" replace />;
     } else if (user.role === 'Recruiter') {
-      return <Navigate to="/app/dashboard" replace />;
+      return <Navigate to="/app/recruiter/dashboard" replace />;
     } else if (user.role === 'Technician') {
-      return <Navigate to="/app/home" replace />;
+      return <Navigate to="/app/technician/home" replace />;
     } else {
-      return <Navigate to="/app/home" replace />;
+      return <Navigate to="/app/technician/home" replace />;
     }
   }
 
+  // If this is a route group (has children), render the Outlet
+  if (children === undefined) {
+    return <Outlet />;
+  }
+
+  // Otherwise render the children
   return children;
 };
 
 export default ProtectedRoute;
+

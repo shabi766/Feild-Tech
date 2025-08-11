@@ -14,8 +14,8 @@ const TechnicianNavbar = ({ user }) => {
     const searchRef = useRef(null);
 
     const navItems = [
-        { path: '/browse', label: 'Latest Jobs', icon: Briefcase },
-        { path: '/Myjobs', label: 'My Jobs', icon: Clock }
+        { path: '/app/technician/browse', label: 'Latest Jobs', icon: Briefcase },
+        { path: '/app/technician/Myjobs', label: 'My Jobs', icon: Clock }
     ];
 
     const fetchSuggestions = async (searchTerm) => {
@@ -45,13 +45,13 @@ const TechnicianNavbar = ({ user }) => {
     const handleSuggestionClick = (suggestion) => {
         switch (suggestion.type) {
             case 'job':
-                navigate(`/admin/jobs/${suggestion.id}`);
+                navigate(`/app/technician/description/${suggestion.id}`);
                 break;
             case 'client':
-                navigate(`/admin/client/details/${suggestion.id}`);
+                navigate(`/app/technician/browse`);
                 break;
             case 'project':
-                navigate(`/admin/project/detail/${suggestion.id}`);
+                navigate(`/app/technician/browse`);
                 break;
             default:
                 console.error('Unknown suggestion type:', suggestion.type);
@@ -70,7 +70,7 @@ const TechnicianNavbar = ({ user }) => {
     useEffect(() => {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
-    },);
+    }, []);
 
     return (
         <NavbarBase 

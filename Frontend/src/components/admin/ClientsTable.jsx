@@ -21,7 +21,7 @@ const ClientsTable = () => {
     }, [clients, searchClientByText]);
 
     const handleRowClick = (clientId) => {
-        navigate(`/admin/client/details/${clientId}`);
+        navigate(`/app/recruiter/client/details/${clientId}`);
     };
 
     return (
@@ -70,7 +70,7 @@ const ClientsTable = () => {
                                             </PopoverTrigger>
                                             <PopoverContent className="w-32 p-2 border border-gray-300 rounded-lg shadow-lg">
                                                 <div
-                                                    onClick={() => navigate(`/admin/clients/${client._id}`)}
+                                                    onClick={() => navigate(`/app/recruiter/clients/${client._id}`)}
                                                     className='flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-200 rounded'
                                                     aria-label={`Edit ${client.name}`}
                                                 >

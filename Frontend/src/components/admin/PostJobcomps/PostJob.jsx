@@ -198,7 +198,7 @@ const PostJobs = () => {
                 setJobId(newJobId);
                 await sendJobCreatedNotification(newJobId);
                 setStatus('Active');
-                navigate(`/viewjob/${newJobId}`);
+                navigate(`/app/recruiter/viewjob/${newJobId}`);
             } else {
                 console.error('Job creation failed:', res.data?.message || 'Unknown error');
                 toast.error(res.data?.message || 'Job creation failed.');

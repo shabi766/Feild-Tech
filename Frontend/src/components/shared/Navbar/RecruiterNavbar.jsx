@@ -41,13 +41,13 @@ const RecruiterNavbar = ({ user }) => {
     const handleSuggestionClick = (suggestion) => {
         switch (suggestion.type) {
             case 'job':
-                navigate(`/admin/jobs/${suggestion.id}`);
+                navigate(`/app/recruiter/jobs/${suggestion.id}`);
                 break;
             case 'client':
-                navigate(`/admin/client/details/${suggestion.id}`);
+                navigate(`/app/recruiter/client/details/${suggestion.id}`);
                 break;
             case 'project':
-                navigate(`/admin/project/detail/${suggestion.id}`);
+                navigate(`/app/recruiter/project/detail/${suggestion.id}`);
                 break;
             default:
                 console.error('Unknown suggestion type:', suggestion.type);
@@ -69,22 +69,22 @@ const RecruiterNavbar = ({ user }) => {
     }, []);
 
     const createMenuItems = [
-        { path: '/admin/clients/create', label: 'Post Client', icon: UserPlus },
-        { path: '/admin/projects/create', label: 'Post Project', icon: FileText },
-        { path: '/admin/jobs/create', label: 'Post Jobs', icon: Briefcase },
-        { path: '/admin/companies/create', label: 'Post Companies', icon: Building }
+        { path: '/app/recruiter/clients/create', label: 'Post Client', icon: UserPlus },
+        { path: '/app/recruiter/projects/create', label: 'Post Project', icon: FileText },
+        { path: '/app/recruiter/jobs/create', label: 'Post Jobs', icon: Briefcase },
+        { path: '/app/recruiter/companies/create', label: 'Post Companies', icon: Building }
     ];
 
     const workMenuItems = [
-        { path: '/admin/companies', label: 'Companies', icon: Building2 },
-        { path: '/admin/jobs', label: 'Jobs', icon: Briefcase },
-        { path: '/admin/clients', label: 'Clients', icon: UserPlus },
-        { path: '/admin/projects', label: 'Projects', icon: FileText }
+        { path: '/app/recruiter/companies', label: 'Companies', icon: Building2 },
+        { path: '/app/recruiter/jobs', label: 'Jobs', icon: Briefcase },
+        { path: '/app/recruiter/clients', label: 'Clients', icon: UserPlus },
+        { path: '/app/recruiter/projects', label: 'Projects', icon: FileText }
     ];
 
     const workforceMenuItems = [
-        { path: '/technicians/techs', label: 'All Technicians', icon: Users },
-        { path: '/admin/talentpool', label: 'Talent Pool', icon: Users }
+        { path: '/app/recruiter/technicians/techs', label: 'All Technicians', icon: Users },
+        { path: '/app/recruiter/talentpool', label: 'Talent Pool', icon: Users }
     ];
 
     return (

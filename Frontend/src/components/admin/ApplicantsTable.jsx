@@ -30,7 +30,7 @@ const ApplicantsTable = () => {
 
     // Handle row click to navigate to applicant profile
     const handleRowClick = (applicantId) => {
-        navigate(`/applicantprofile/${applicantId}`);
+        navigate(`/app/recruiter/applicantprofile/${applicantId}`);
     };
 
     return (

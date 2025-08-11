@@ -63,7 +63,7 @@ const ClientDetail = () => {
                                         <li 
                                             key={project._id} 
                                             className="p-4 bg-white shadow-md rounded-md border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors" 
-                                            onClick={() => navigate(`/admin/project/detail/${project._id}`)} // Navigate to project detail
+                                            onClick={() => navigate(`/app/recruiter/project/detail/${project._id}`)} // Navigate to project detail
                                         >
                                             <span className="text-lg font-bold text-blue-500">{project.name}</span>
                                             <p className="text-gray-600">{project.description || 'No description available.'}</p>

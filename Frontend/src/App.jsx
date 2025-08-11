@@ -21,6 +21,7 @@ import AdminJobs from "./components/admin/AdminJobs";
 
 import Applicants from "./components/admin/Applicants";
 import JobCalendar from "./components/Schedueler/JobCalender";
+import EnhancedJobCalendar from "./components/Schedueler/EnhancedJobCalendar";
 import ClientSetup from "./components/admin/ClientSetup";
 import ClientsCreate from "./components/admin/ClientsCreate";
 import Clients from "./components/admin/Clients";
@@ -89,20 +90,19 @@ const RoleBasedRedirect = () => {
   if (user.role === 'Admin') {
     return <Navigate to="/app/administrator" replace />;
   } else if (user.role === 'Recruiter') {
-    return <Navigate to="/app/dashboard" replace />;
+    return <Navigate to="/app/recruiter/dashboard" replace />;
   } else if (user.role === 'Technician') {
-    return <Navigate to="/app/home" replace />;
+    return <Navigate to="/app/technician/home" replace />;
   }
   
   // Default fallback
-  return <Navigate to="/app/home" replace />;
+  return <Navigate to="/app/technician/home" replace />;
 };
 
-// Component to handle authenticated user landing
+// Component to handle authenticated landing with profile setup check
 const AuthenticatedLanding = () => {
   const { user, loading } = useSelector(store => store.auth);
   
-  // Show loading while authentication state is being determined
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -118,13 +118,18 @@ const AuthenticatedLanding = () => {
     return <LandingPage />;
   }
   
-  // If user is logged in, redirect based on role
+  // Check if user needs to complete profile setup
+  if (!user.profileCompleted && (!user.profile || !user.profile.bio || !user.profile.skills || user.profile.skills.length === 0)) {
+    return <Navigate to="/app/profile-setup" replace />;
+  }
+  
+  // Redirect based on user role
   if (user.role === 'Admin') {
     return <Navigate to="/app/administrator" replace />;
   } else if (user.role === 'Recruiter') {
-    return <Navigate to="/app/dashboard" replace />;
+    return <Navigate to="/app/recruiter/dashboard" replace />;
   } else if (user.role === 'Technician') {
-    return <Navigate to="/app/home" replace />;
+    return <Navigate to="/app/technician/home" replace />;
   }
   
   return <LandingPage />;
@@ -142,7 +147,6 @@ function App() {
             <Route path="/role-selection" element={<RoleSelection />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="/admin-login" element={<AdminLogin />} />
 
             {/* Info pages routes */}
@@ -154,53 +158,86 @@ function App() {
 
             {/* Protected routes with Layout */}
             <Route path="/app" element={<Layout />}>
-              {/* Technician routes */}
-              <Route path="home" element={<Home />} />
-              <Route path="jobs" element={<Jobs />} />
-              <Route path="description/:id" element={<JobDescription />} />
-              <Route path="browse" element={<Browse />} />
-              <Route path="profile" element={<Profile />} />
-              <Route path="profile/update" element={<UpdateProfilePage />} />
-              <Route path="calender" element={<JobCalendar />} />
-              <Route path="chat" element={<Chat />} />
-              <Route path="settings" element={<Settings/>} />
-              <Route path="wallets" element={<Wallets/>} />
-              <Route path="Myjobs" element={<JobTable/>} />
               
-              {/* Admin/Recruiter routes */}
-              <Route path="dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-              <Route path="technicians/techs" element={<ProtectedRoute><AllTechnicians /></ProtectedRoute>} />
-              <Route path="technicians/:id" element={<ProtectedRoute><TechnicianProfile /></ProtectedRoute>} />
-              <Route path="admin/companies" element={<ProtectedRoute>< Companies /></ProtectedRoute>} />
-              <Route path="admin/companies/:id" element={<ProtectedRoute><CompanySetup /></ProtectedRoute>} />
-              <Route path="admin/project/detail/:projectId" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>} />
-              <Route path="admin/client/details/:clientId" element={<ProtectedRoute><ClientDetail /></ProtectedRoute>} />
-              <Route path="admin/talentpool" element={<ProtectedRoute><TalentPool /></ProtectedRoute>} />
-              <Route path="admin/companies/create" element={<ProtectedRoute><CompanyCreate /></ProtectedRoute>} />
-              <Route path="admin/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
-              <Route path="admin/clients/:id" element={<ProtectedRoute><ClientSetup /></ProtectedRoute>} />
-              <Route path="admin/clients/create" element={<ProtectedRoute><ClientsCreate /></ProtectedRoute>} />
-              <Route path="admin/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
-              <Route path="admin/projects/:id" element={<ProtectedRoute><ProjectSetup /></ProtectedRoute>} />
-              <Route path="admin/projects/create" element={<ProtectedRoute><ProjectsCreate /></ProtectedRoute>} />
-              <Route path="admin/jobs" element={<ProtectedRoute><AdminJobs /></ProtectedRoute>} />
-              <Route path="admin/jobs/create" element={<ProtectedRoute><PostJobs /></ProtectedRoute>} />
-              <Route path="admin/jobs/:id/applicants" element={<ProtectedRoute><Applicants /></ProtectedRoute>} />
-              <Route path="viewjob/:id" element={<ProtectedRoute><ViewJob /></ProtectedRoute>} />
-              <Route path="applicantprofile/:id" element={<ProtectedRoute><ShowApplicantProfile /></ProtectedRoute>} />
-              <Route path="admin/jobs/:id" element={<ProtectedRoute><ShowJob /></ProtectedRoute>} />
-              <Route path="jobcalender" element={<ProtectedRoute><JobCalendarPage /></ProtectedRoute>} />
+              {/* Profile Setup Route - accessible to all authenticated users */}
+              <Route path="profile-setup" element={<ProtectedRoute />}>
+                <Route index element={<ProfileSetup />} />
+              </Route>
               
-              {/* Administrator routes */}
-              <Route path="administrator" element={<ProtectedRoute><AdministratorPanel /></ProtectedRoute>} />
+              {/* Recruiter Routes */}
+              <Route path="recruiter" element={<ProtectedRoute requiredRole="Recruiter" />}>
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="technicians/techs" element={<AllTechnicians />} />
+                <Route path="technicians/:id" element={<TechnicianProfile />} />
+                <Route path="companies" element={<Companies />} />
+                <Route path="companies/:id" element={<CompanySetup />} />
+                <Route path="project/detail/:projectId" element={<ProjectDetail />} />
+                <Route path="client/details/:clientId" element={<ClientDetail />} />
+                <Route path="talentpool" element={<TalentPool />} />
+                <Route path="companies/create" element={<CompanyCreate />} />
+                <Route path="clients" element={<Clients />} />
+                <Route path="clients/:id" element={<ClientSetup />} />
+                <Route path="clients/create" element={<ClientsCreate />} />
+                <Route path="projects" element={<Projects />} />
+                <Route path="projects/:id" element={<ProjectSetup />} />
+                <Route path="projects/create" element={<ProjectsCreate />} />
+                <Route path="jobs" element={<AdminJobs />} />
+                <Route path="jobs/create" element={<PostJobs />} />
+                <Route path="jobs/:id/applicants" element={<Applicants />} />
+                <Route path="viewjob/:id" element={<ViewJob />} />
+                <Route path="applicantprofile/:id" element={<ShowApplicantProfile />} />
+                <Route path="jobs/:id" element={<ShowJob />} />
+                <Route path="jobcalender" element={<EnhancedJobCalendar />} />
+                <Route path="chat" element={<Chat />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="wallets" element={<Wallets />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="profile/update" element={<UpdateProfilePage />} />
+              </Route>
+
+              {/* Technician Routes */}
+              <Route path="technician" element={<ProtectedRoute requiredRole="Technician" />}>
+                <Route path="home" element={<Home />} />
+                <Route path="jobs" element={<Jobs />} />
+                <Route path="description/:id" element={<JobDescription />} />
+                <Route path="browse" element={<Browse />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="profile/update" element={<UpdateProfilePage />} />
+                <Route path="calender" element={<EnhancedJobCalendar />} />
+                <Route path="chat" element={<Chat />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="wallets" element={<Wallets />} />
+                <Route path="Myjobs" element={<JobTable />} />
+              </Route>
+
+              {/* Administrator Routes */}
+              <Route path="administrator" element={<ProtectedRoute requiredRole="Admin" />}>
+                <Route index element={<AdministratorPanel />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="profile/update" element={<UpdateProfilePage />} />
+              </Route>
+
+              {/* Legacy routes - redirect to appropriate role-based routes */}
+              <Route path="dashboard" element={<Navigate to="/app/recruiter/dashboard" replace />} />
+              <Route path="home" element={<Navigate to="/app/technician/home" replace />} />
+              <Route path="jobs" element={<Navigate to="/app/technician/jobs" replace />} />
+              <Route path="description/:id" element={<Navigate to="/app/technician/description/:id" replace />} />
+              <Route path="browse" element={<Navigate to="/app/technician/browse" replace />} />
+              <Route path="profile" element={<Navigate to="/app/technician/profile" replace />} />
+              <Route path="profile/update" element={<Navigate to="/app/technician/profile/update" replace />} />
+              <Route path="calender" element={<Navigate to="/app/technician/calender" replace />} />
+              <Route path="chat" element={<Navigate to="/app/recruiter/chat" replace />} />
+              <Route path="settings" element={<Navigate to="/app/recruiter/settings" replace />} />
+              <Route path="wallets" element={<Navigate to="/app/recruiter/wallets" replace />} />
+              <Route path="Myjobs" element={<Navigate to="/app/technician/Myjobs" replace />} />
             </Route>
 
             {/* Catch all route - redirect to role-based page */}
             <Route path="*" element={<RoleBasedRedirect />} />
           </Routes>
-          </ChatProvider>
-        </UserProvider>
-      </BrowserRouter>
+        </ChatProvider>
+      </UserProvider>
+    </BrowserRouter>
   );
 }
 

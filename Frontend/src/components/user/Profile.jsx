@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Avatar, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
-import { Contact, Mail, Pen, MapPin, Calendar, Award, Star, Download, Edit3, User, Phone, FileText, Sparkles, CheckCircle, TrendingUp } from 'lucide-react';
+import { Contact, Mail, Pen, MapPin, Calendar, Award, Star, Download, Edit3, User, Phone, FileText, Sparkles, CheckCircle, TrendingUp, Briefcase, Users, Building2, Plus, Shield } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import JobTable from '../user/JobTable';
 import UpdateProfileDialog from '../user/UpdateProfileDialog';
@@ -206,7 +206,7 @@ const Profile = () => {
                                 <div className="flex items-center gap-4 mb-4">
                                     <h1 className="text-3xl font-bold text-gray-900">{user?.fullname || 'N/A'}</h1>
                                     <motion.button
-                                        onClick={() => navigate('/profile/update')}
+                                        onClick={() => navigate(`/app/${user?.role === 'Admin' ? 'administrator' : user?.role === 'Recruiter' ? 'recruiter' : 'technician'}/profile/update`)}
                                         className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
                                         whileHover={{ scale: 1.1 }}
                                         whileTap={{ scale: 0.9 }}
@@ -330,18 +330,162 @@ const Profile = () => {
                         )}
                     </motion.div>
 
-                    {/* Applied Jobs Section */}
-                    <motion.div 
-                        className={`bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-100/50 p-8 ${inView ? 'animate-slideInUp delay-400' : 'opacity-0'}`}
-                    >
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-3 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl">
-                                <TrendingUp className="w-6 h-6 text-white" />
+                    {/* Applied Jobs Section - Only for Technicians */}
+                    {user?.role === 'Technician' && (
+                        <motion.div 
+                            className={`bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-100/50 p-8 ${inView ? 'animate-slideInUp delay-400' : 'opacity-0'}`}
+                        >
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="p-3 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl">
+                                    <TrendingUp className="w-6 h-6 text-white" />
+                                </div>
+                                <h2 className="text-2xl font-bold text-gray-900">My Applications</h2>
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900">My Applications</h2>
-                        </div>
-                        <JobTable />
-                    </motion.div>
+                            <JobTable />
+                        </motion.div>
+                    )}
+
+                    {/* Recruiter Dashboard Stats - Only for Recruiters */}
+                    {user?.role === 'Recruiter' && (
+                        <motion.div 
+                            className={`bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-100/50 p-8 ${inView ? 'animate-slideInUp delay-400' : 'opacity-0'}`}
+                        >
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="p-3 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl">
+                                    <TrendingUp className="w-6 h-6 text-white" />
+                                </div>
+                                <h2 className="text-2xl font-bold text-gray-900">Recruiter Dashboard</h2>
+                            </div>
+                            
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <motion.div 
+                                    className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100"
+                                    whileHover={{ scale: 1.02, y: -2 }}
+                                    transition={{ type: "spring", stiffness: 300 }}
+                                >
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="p-2 bg-blue-500 rounded-lg">
+                                            <Briefcase className="w-5 h-5 text-white" />
+                                        </div>
+                                        <h3 className="font-semibold text-gray-900">Posted Jobs</h3>
+                                    </div>
+                                    <p className="text-3xl font-bold text-blue-600">0</p>
+                                    <p className="text-sm text-gray-600">Active job postings</p>
+                                </motion.div>
+
+                                <motion.div 
+                                    className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-100"
+                                    whileHover={{ scale: 1.02, y: -2 }}
+                                    transition={{ type: "spring", stiffness: 300 }}
+                                >
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="p-2 bg-green-500 rounded-lg">
+                                            <Users className="w-5 h-5 text-white" />
+                                        </div>
+                                        <h3 className="font-semibold text-gray-900">Applicants</h3>
+                                    </div>
+                                    <p className="text-3xl font-bold text-green-600">0</p>
+                                    <p className="text-sm text-gray-600">Total applications</p>
+                                </motion.div>
+
+                                <motion.div 
+                                    className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl border border-purple-100"
+                                    whileHover={{ scale: 1.02, y: -2 }}
+                                    transition={{ type: "spring", stiffness: 300 }}
+                                >
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="p-2 bg-purple-500 rounded-lg">
+                                            <Building2 className="w-5 h-5 text-white" />
+                                        </div>
+                                        <h3 className="font-semibold text-gray-900">Companies</h3>
+                                    </div>
+                                    <p className="text-3xl font-bold text-purple-600">0</p>
+                                    <p className="text-sm text-gray-600">Managed companies</p>
+                                </motion.div>
+                            </div>
+
+                            <div className="mt-6 text-center">
+                                <Button 
+                                    onClick={() => navigate('/app/recruiter/jobs/create')}
+                                    className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold"
+                                >
+                                    <Plus className="w-5 h-5 mr-2" />
+                                    Post New Job
+                                </Button>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* Admin Dashboard Stats - Only for Admins */}
+                    {user?.role === 'Admin' && (
+                        <motion.div 
+                            className={`bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-100/50 p-8 ${inView ? 'animate-slideInUp delay-400' : 'opacity-0'}`}
+                        >
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="p-3 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl">
+                                    <Shield className="w-6 h-6 text-white" />
+                                </div>
+                                <h2 className="text-2xl font-bold text-gray-900">Admin Dashboard</h2>
+                            </div>
+                            
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <motion.div 
+                                    className="p-6 bg-gradient-to-br from-red-50 to-pink-50 rounded-2xl border border-red-100"
+                                    whileHover={{ scale: 1.02, y: -2 }}
+                                    transition={{ type: "spring", stiffness: 300 }}
+                                >
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="p-2 bg-red-500 rounded-lg">
+                                            <Users className="w-5 h-5 text-white" />
+                                        </div>
+                                        <h3 className="font-semibold text-gray-900">Total Users</h3>
+                                    </div>
+                                    <p className="text-3xl font-bold text-red-600">0</p>
+                                    <p className="text-sm text-gray-600">Registered users</p>
+                                </motion.div>
+
+                                <motion.div 
+                                    className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100"
+                                    whileHover={{ scale: 1.02, y: -2 }}
+                                    transition={{ type: "spring", stiffness: 300 }}
+                                >
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="p-2 bg-blue-500 rounded-lg">
+                                            <Building2 className="w-5 h-5 text-white" />
+                                        </div>
+                                        <h3 className="font-semibold text-gray-900">Companies</h3>
+                                    </div>
+                                    <p className="text-3xl font-bold text-blue-600">0</p>
+                                    <p className="text-sm text-gray-600">Registered companies</p>
+                                </motion.div>
+
+                                <motion.div 
+                                    className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-100"
+                                    whileHover={{ scale: 1.02, y: -2 }}
+                                    transition={{ type: "spring", stiffness: 300 }}
+                                >
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="p-2 bg-green-500 rounded-lg">
+                                            <Briefcase className="w-5 h-5 text-white" />
+                                        </div>
+                                        <h3 className="font-semibold text-gray-900">Active Jobs</h3>
+                                    </div>
+                                    <p className="text-3xl font-bold text-green-600">0</p>
+                                    <p className="text-sm text-gray-600">Open positions</p>
+                                </motion.div>
+                            </div>
+
+                            <div className="mt-6 text-center">
+                                <Button 
+                                    onClick={() => navigate('/app/administrator')}
+                                    className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white px-8 py-3 rounded-xl font-semibold"
+                                >
+                                    <Shield className="w-5 h-5 mr-2" />
+                                    Access Admin Panel
+                                </Button>
+                            </div>
+                        </motion.div>
+                    )}
                 </div>
             </div>
 

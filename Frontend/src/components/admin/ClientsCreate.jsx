@@ -89,7 +89,7 @@ const ClientsCreate = () => {
                     userId: res.data.client._id,
                 }, { withCredentials: true }); 
 
-                navigate(`/admin/clients`);
+                navigate(`/app/recruiter/clients`);
             } else {
                 const errorMessage = res.data.message || "Failed to create client.";
                 console.error("Failed to create client:", errorMessage);

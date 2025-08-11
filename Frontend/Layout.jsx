@@ -33,12 +33,12 @@ const Layout = () => {
       {/* Sticky navbar at top */}
       <Navbar />
       
-      {/* Sidebar */}
+      {/* Sidebar - now has its own positioning */}
       <Sidebar />
 
-      {/* Main content area */}
-      <div style={{ paddingLeft: '16px' }}>
-        <main className="min-h-screen">
+      {/* Main content area - adjusted for new sidebar */}
+      <div className="pt-20 pl-20">
+        <main className="min-h-screen p-6">
           <Outlet />
         </main>
       </div>

@@ -20,7 +20,7 @@ const ProjectTable = () => {
     }, [projects, searchProjectByText]);
 
     const handleRowClick = (projectId) => {
-        navigate(`/admin/project/detail/${projectId}`);
+        navigate(`/app/recruiter/project/detail/${projectId}`);
     };
 
     return (
@@ -46,7 +46,7 @@ const ProjectTable = () => {
                             <TableRow
                                 key={project._id}
                                 className="cursor-pointer hover:bg-gray-50 transition-colors"
-                                onClick={() => handleRowClick(project._id)}
+                                onClick={() => navigate(`/app/recruiter/projects/${project._id}`)}
                             >
                                 <TableCell>
                                     <Avatar>

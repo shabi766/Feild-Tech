@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import NavbarBase from './NavbarBase';
 
-const GeneralNavbar = () => {
+const GeneralNavbar = ({ setLogoutFlag }) => {
     const location = useLocation();
 
     const navItems = [
@@ -14,7 +14,7 @@ const GeneralNavbar = () => {
     ];
 
     return (
-        <NavbarBase>
+        <NavbarBase setLogoutFlag={setLogoutFlag}>
             <ul className='flex items-center gap-2'>
                 {navItems.map((item) => {
                     const isActive = location.pathname === item.path;

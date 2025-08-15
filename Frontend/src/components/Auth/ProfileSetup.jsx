@@ -87,7 +87,11 @@ const ProfileSetup = () => {
                 if (user.role === 'Admin') {
                     navigate('/app/administrator');
                 } else if (user.role === 'Recruiter') {
-                    navigate('/app/recruiter/dashboard');
+                    if (user.recruiterType === 'individual' || !user.companyId) {
+                        navigate('/app/recruiter/dashboard-individual');
+                    } else {
+                        navigate('/app/recruiter/dashboard');
+                    }
                 } else {
                     navigate('/app/technician/home');
                 }
@@ -255,7 +259,11 @@ const ProfileSetup = () => {
                     if (user.role === 'Admin') {
                         navigate('/app/administrator');
                     } else if (user.role === 'Recruiter') {
-                        navigate('/app/recruiter/dashboard');
+                        if (user.recruiterType === 'individual' || !user.companyId) {
+                            navigate('/app/recruiter/dashboard-individual');
+                        } else {
+                            navigate('/app/recruiter/dashboard');
+                        }
                     } else {
                         navigate('/app/technician/home');
                     }
@@ -302,7 +310,9 @@ const ProfileSetup = () => {
                     transition={{ duration: 0.6 }}
                 >
                     <Link 
-                        to={user.role === 'Admin' ? '/app/administrator' : user.role === 'Recruiter' ? '/app/recruiter/dashboard' : '/app/technician/home'}
+                        to={user.role === 'Admin' ? '/app/administrator' : user.role === 'Recruiter' ? 
+                            (user.recruiterType === 'individual' || !user.companyId ? '/app/recruiter/dashboard-individual' : '/app/recruiter/dashboard') : 
+                            '/app/technician/home'}
                         className="inline-flex items-center text-gray-600 hover:text-gray-800 transition-colors mb-6 group"
                     >
                         <motion.div

@@ -11,16 +11,18 @@ import { logout } from '@/redux/authSlice';
 import axios from 'axios';
 import NotificationComponent from '@/components/shared/NotificationComponent';
 import { ChatContext } from "@/context/ChatContext";
-import socket from "@/components/shared/socket";
+import { getSocket } from "@/components/shared/socket";
 import logo from "@/assets/logo.png"
+import { useTranslation } from '@/Hooks/useTranslation';
 
-const NavbarBase = ({ children, leftContent, centerContent, user }) => {
+const NavbarBase = ({ children, leftContent, centerContent, user, setLogoutFlag }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [showAdminIcon, setShowAdminIcon] = useState(false);
     const { unreadMessages, setUnreadMessages, chats, setSelectedChat } = useContext(ChatContext);
+    const { t } = useTranslation();
 
     // Handle scroll effect for navbar transparency
     useEffect(() => {
@@ -47,6 +49,8 @@ const NavbarBase = ({ children, leftContent, centerContent, user }) => {
 
             fetchUnreadMessages();
 
+            const socket = getSocket(); // Get socket only when needed
+            
             socket.on("new_message", (message) => {
                 if (message.sender !== user._id) {
                     setUnreadMessages((prev) => {
@@ -84,9 +88,15 @@ const NavbarBase = ({ children, leftContent, centerContent, user }) => {
 
     const LogoutHandler = async () => {
         setLoading(true);
+        
+        // Set logout flag to prevent unnecessary API calls
+        if (setLogoutFlag) {
+            setLogoutFlag();
+        }
+        
         try {
             // Try to call logout endpoint, but don't fail if it returns 401
-            const res = await axios.get(`${USER_API_END_POINT}/Logout`, { withCredentials: true });
+            const res = await axios.get(`${USER_API_END_POINT}/logout`, { withCredentials: true });
             if (res.data.success) {
                 toast.success(res.data.message);
             }
@@ -152,9 +162,9 @@ const NavbarBase = ({ children, leftContent, centerContent, user }) => {
                                     </div>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-80 bg-white/95 backdrop-blur-md shadow-xl rounded-xl border border-gray-200/50 z-50 p-4">
-                                    <h3 className="font-semibold text-gray-800 mb-3 text-lg">Unread Messages</h3>
+                                    <h3 className="font-semibold text-gray-800 mb-3 text-lg">{t('unreadMessages')}</h3>
                                     {unreadMessages.length === 0 ? (
-                                        <p className="text-gray-500 text-sm">No new messages</p>
+                                        <p className="text-gray-500 text-sm">{t('noNewMessages')}</p>
                                     ) : (
                                         <ul className="space-y-2">
                                             {chats
@@ -179,7 +189,7 @@ const NavbarBase = ({ children, leftContent, centerContent, user }) => {
                                                                 {chat.participants.find((p) => p._id !== user._id)?.fullname}
                                                             </p>
                                                             <p className="text-sm text-gray-600 truncate w-48">
-                                                                {chat.lastMessage?.content || "New message..."}
+                                                                {chat.lastMessage?.content || t('newMessage')}
                                                             </p>
                                                         </div>
                                                     </li>
@@ -214,12 +224,12 @@ const NavbarBase = ({ children, leftContent, centerContent, user }) => {
                                     variant="ghost" 
                                     className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/60 transition-all duration-300 font-medium px-4 py-2"
                                 >
-                                    Login
+                                    {t('login')}
                                 </Button>
                             </Link>
                             <Link to="/role-selection">
                                 <Button className='bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-medium px-4 py-2'>
-                                    Sign Up
+                                    {t('signUp')}
                                 </Button>
                             </Link>
                             
@@ -232,7 +242,7 @@ const NavbarBase = ({ children, leftContent, centerContent, user }) => {
                                 <Link 
                                     to="/admin-login"
                                     className="inline-flex items-center justify-center w-6 h-6 bg-gray-100 hover:bg-gray-200 rounded-full transition-all duration-200 hover:scale-110"
-                                    title="Administrator Access"
+                                    title={t('administratorAccess')}
                                 >
                                     <Settings size={12} className="text-gray-500 hover:text-gray-700" />
                                 </Link>
@@ -265,18 +275,26 @@ const NavbarBase = ({ children, leftContent, centerContent, user }) => {
                                 </div>
                                 <div className='space-y-2'>
                                     <Link 
-                                        to="/profile" 
+                                        to={user.role === 'Recruiter' ? 
+                                            (user.recruiterType === 'individual' || !user.companyId ? 
+                                                '/app/recruiter/profile' : '/app/recruiter/profile') : 
+                                            user.role === 'Technician' ? '/app/technician/profile' : 
+                                            user.role === 'Admin' ? '/app/administrator/profile' : '/profile'} 
                                         className='flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-gray-50/80 transition-all duration-200 text-gray-700 hover:text-blue-600'
                                     >
                                         <User2 size={18} /> 
-                                        <span className="font-medium">Profile</span>
+                                        <span className="font-medium">{t('profile')}</span>
                                     </Link>
                                     <Link 
-                                        to="/settings" 
+                                        to={user.role === 'Recruiter' ? 
+                                            (user.recruiterType === 'individual' || !user.companyId ? 
+                                                '/app/recruiter/settings' : '/app/recruiter/settings') : 
+                                            user.role === 'Technician' ? '/app/technician/settings' : 
+                                            user.role === 'Admin' ? '/app/administrator/settings' : '/settings'} 
                                         className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-gray-50/80 transition-all duration-200 text-gray-700 hover:text-blue-600"
                                     >
                                         <Settings size={18} /> 
-                                        <span className="font-medium">Settings</span>
+                                        <span className="font-medium">{t('settings')}</span>
                                     </Link>
                                     <button 
                                         onClick={LogoutHandler} 
@@ -284,7 +302,7 @@ const NavbarBase = ({ children, leftContent, centerContent, user }) => {
                                         className='flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-red-50/80 transition-all duration-200 text-gray-700 hover:text-red-600 w-full disabled:opacity-50'
                                     >
                                         <LogOut size={18} /> 
-                                        <span className="font-medium">{loading ? 'Logging out...' : 'Logout'}</span>
+                                        <span className="font-medium">{loading ? t('loggingOut') : t('logout')}</span>
                                     </button>
                                 </div>
                             </PopoverContent>

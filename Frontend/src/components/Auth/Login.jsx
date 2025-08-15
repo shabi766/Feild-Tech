@@ -70,15 +70,27 @@ const Login = () => {
                 dispatch(setUser(res.data.user));
                 dispatch(setToken(res.data.token || res.data.user.token));
                 
+                // Debug: Log the user data to see what we're getting
+                console.log('Login response user data:', res.data.user);
+                console.log('User role:', res.data.user.role);
+                console.log('User recruiterType:', res.data.user.recruiterType);
+                
                 // Add a small delay to ensure state is properly set
                 setTimeout(() => {
-                    // Redirect based on user role
+                    // Redirect based on user role and recruiter type
                     if (res.data.user.role === 'Admin') {
                         navigate("/app/administrator");
                     } else if (res.data.user.role === 'Recruiter') {
-                        navigate("/app/dashboard");
+                        // Check if it's a company recruiter
+                        if (res.data.user.recruiterType === 'Company') {
+                            console.log('Redirecting to company dashboard');
+                            navigate("/app/recruiter/dashboard"); // Company dashboard
+                        } else {
+                            console.log('Redirecting to individual recruiter dashboard');
+                            navigate("/app/recruiter/dashboard-individual"); // Individual recruiter dashboard
+                        }
                     } else if (res.data.user.role === 'Technician') {
-                        navigate("/app/home");
+                        navigate("/app/technician/home");
                     } else {
                         // Default fallback
                         navigate("/app/home");
@@ -108,13 +120,25 @@ const Login = () => {
     
     useEffect(() => {
         if (user) {
-            // If user is already logged in, redirect based on role
+            // Debug: Log the user data to see what we're getting
+            console.log('useEffect user data:', user);
+            console.log('User role:', user.role);
+            console.log('User recruiterType:', user.recruiterType);
+            
+            // If user is already logged in, redirect based on role and recruiter type
             if (user.role === 'Admin') {
                 navigate("/app/administrator");
             } else if (user.role === 'Recruiter') {
-                navigate("/app/dashboard");
+                // Check if it's a company recruiter
+                if (user.recruiterType === 'Company') {
+                    console.log('useEffect: Redirecting to company dashboard');
+                    navigate("/app/recruiter/dashboard"); // Company dashboard
+                } else {
+                    console.log('useEffect: Redirecting to individual recruiter dashboard');
+                    navigate("/app/recruiter/dashboard-individual"); // Individual recruiter dashboard
+                }
             } else if (user.role === 'Technician') {
-                navigate("/app/home");
+                navigate("/app/technician/home");
             } else {
                 navigate("/app/home");
             }

@@ -59,7 +59,7 @@ const AllTechnicians = () => {
   };
 
   const handleShowProfile = (technician) => {
-    navigate(`/technicians/${technician._id}`);
+    navigate(`/app/recruiter/technicians/${technician._id}`);
   };
 
   const filteredTechnicians = technicians.filter((tech) =>

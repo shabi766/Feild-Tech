@@ -12,6 +12,8 @@ import CompletionForm from "./CompletionForm";
 import JobDetails from "./JobDetails";
 import JobSidebar from "./JobSidebar";
 
+
+
 const JobDescription = () => {
     const { singleJob } = useSelector((store) => store.job);
     const { user } = useSelector((store) => store.auth);
@@ -22,6 +24,7 @@ const JobDescription = () => {
     const [notes, setNotes] = useState("");
     const [deliverables, setDeliverables] = useState([]);
     const [showCompletionForm, setShowCompletionForm] = useState(false);
+
     const fileInputRef = useRef(null);
     const params = useParams();
     const jobId = params.id;
@@ -248,6 +251,8 @@ const JobDescription = () => {
         toast.success('Notes saved locally');
     };
 
+
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex justify-center items-center">
@@ -308,6 +313,8 @@ const JobDescription = () => {
                     singleJob={singleJob}
                     fileInputRef={fileInputRef}
                 />
+
+
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Content */}

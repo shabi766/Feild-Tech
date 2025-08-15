@@ -16,7 +16,9 @@ export const API_ENDPOINTS = {
   CHAT: `${API_BASE_URL}/chat`,
   WALLET: `${API_BASE_URL}/wallet`,
   ADMINISTRATION: `${API_BASE_URL}/administration`,
-  AUDIT: `${API_BASE_URL}/audit`
+  AUDIT: `${API_BASE_URL}/audit`,
+  REVIEW: `${API_BASE_URL}/review`,
+  LEADERBOARD: `${API_BASE_URL}/leaderboard`,
 };
 
 // Legacy exports for backward compatibility
@@ -34,3 +36,5 @@ export const CHAT_API_END_POINT = API_ENDPOINTS.CHAT;
 export const WALLET_API_END_POINT = API_ENDPOINTS.WALLET;
 export const ADMINISTRATION_API_END_POINT = API_ENDPOINTS.ADMINISTRATION;
 export const AUDIT_API_END_POINT = API_ENDPOINTS.AUDIT;
+export const REVIEW_API_END_POINT = API_ENDPOINTS.REVIEW;
+export const LEADERBOARD_API_END_POINT = API_ENDPOINTS.LEADERBOARD;

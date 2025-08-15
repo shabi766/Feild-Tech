@@ -4,18 +4,20 @@ import NavbarBase from './NavbarBase';
 import { SEARCH_API_END_POINT } from '@/components/utils/constant';
 import axios from 'axios';
 import { Search, Briefcase, Clock } from 'lucide-react';
+import { useTranslation } from '@/Hooks/useTranslation';
 
-const TechnicianNavbar = ({ user }) => {
+const TechnicianNavbar = ({ user, setLogoutFlag }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [query, setQuery] = useState('');
     const [suggestions, setSuggestions] = useState();
     const [showSuggestions, setShowSuggestions] = useState(false);
     const searchRef = useRef(null);
+    const { t } = useTranslation();
 
     const navItems = [
-        { path: '/app/technician/browse', label: 'Latest Jobs', icon: Briefcase },
-        { path: '/app/technician/Myjobs', label: 'My Jobs', icon: Clock }
+        { path: '/app/technician/browse', label: t('latestJobs'), icon: Briefcase },
+        { path: '/app/technician/Myjobs', label: t('myJobs'), icon: Clock }
     ];
 
     const fetchSuggestions = async (searchTerm) => {
@@ -29,7 +31,7 @@ const TechnicianNavbar = ({ user }) => {
                 withCredentials: true,
                 params: { query: searchTerm }
             });
-            setSuggestions(res.data.length ? res.data : [{ name: "Not Found", type: "none" }]);
+            setSuggestions(res.data.length ? res.data : [{ name: t('notFound'), type: "none" }]);
         } catch (error) {
             console.error('Error fetching suggestions:', error);
         }
@@ -75,6 +77,7 @@ const TechnicianNavbar = ({ user }) => {
     return (
         <NavbarBase 
             user={user}
+            setLogoutFlag={setLogoutFlag}
             leftContent={
                 <div className="flex items-center gap-2">
                     {navItems.map((item) => {

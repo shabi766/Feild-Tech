@@ -18,6 +18,7 @@ import {
   Menu,
   Sparkles
 } from 'lucide-react';
+import { useTranslation } from '@/Hooks/useTranslation';
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,11 +27,10 @@ const Sidebar = () => {
   const [showHint, setShowHint] = useState(false);
   const location = useLocation();
   const { user } = useSelector(store => store.auth);
+  const { t } = useTranslation();
 
-  // Only show sidebar for Recruiter and Technician roles
-  if (!user || (user.role !== 'Recruiter' && user.role !== 'Technician')) {
-    return null;
-  }
+  // Check if sidebar should be shown
+  const shouldShowSidebar = user && (user.role === 'Recruiter' || user.role === 'Technician');
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
@@ -77,7 +77,8 @@ const Sidebar = () => {
       case 'Recruiter':
         return [
           { 
-            path: '/app/recruiter/dashboard', 
+            path: user.recruiterType === 'individual' || !user.companyId ? 
+                '/app/recruiter/dashboard-individual' : '/app/recruiter/dashboard', 
             label: 'Dashboard', 
             icon: Home,
             color: 'from-blue-500 to-blue-600',
@@ -128,6 +129,13 @@ const Sidebar = () => {
             icon: MessageCircle,
             color: 'from-green-500 to-green-600',
             description: 'Team communication'
+          },
+          { 
+            path: '/app/technician/leaderboard', 
+            label: 'Leaderboard', 
+            icon: Sparkles,
+            color: 'from-orange-500 to-orange-600',
+            description: 'View rankings & performance'
           },
           { 
             path: '/app/technician/wallets', 
@@ -184,6 +192,11 @@ const Sidebar = () => {
     })
   };
 
+  // Don't render sidebar if user doesn't have access
+  if (!shouldShowSidebar) {
+    return null;
+  }
+
   return (
     <>
       {/* Creative Toggle Button - Hidden by default, appears on scroll/hover */}
@@ -220,7 +233,7 @@ const Sidebar = () => {
                 initial={{ x: -10 }}
                 whileHover={{ x: 0 }}
               >
-                {isOpen ? 'Close Menu' : 'Open Menu'}
+                {isOpen ? t('closeMenu') : t('openMenu')}
                 <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-white/90 rotate-45"></div>
               </motion.div>
 
@@ -267,7 +280,7 @@ const Sidebar = () => {
             >
               <div className="flex items-center gap-2">
                 <Sparkles size={16} className="animate-pulse" />
-                <span>Scroll or hover to reveal menu</span>
+                <span>{t('scrollOrHoverToReveal')}</span>
               </div>
               
               {/* Arrow pointing left */}
@@ -320,7 +333,7 @@ const Sidebar = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  {user?.role === 'Recruiter' ? 'Recruiter Hub' : 'Technician Hub'}
+                  {user?.role === 'Recruiter' ? t('recruiterHub') : t('technicianHub')}
                 </motion.h2>
                 <motion.button
                   onClick={closeSidebar}
@@ -337,7 +350,7 @@ const Sidebar = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
               >
-                Welcome back, {user?.name || 'User'}
+                {t('welcomeBack')}, {user?.name || t('user')}
               </motion.div>
             </div>
 
@@ -419,7 +432,7 @@ const Sidebar = () => {
             >
               <div className="text-center">
                 <div className="text-gray-400 text-sm mb-2">
-                  {user?.role === 'Recruiter' ? 'Manage your recruitment workflow' : 'Track your technician journey'}
+                  {user?.role === 'Recruiter' ? t('manageRecruitmentWorkflow') : t('trackTechnicianJourney')}
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-1">
                   <motion.div 

@@ -12,7 +12,8 @@ import {
   Award,
   CheckCircle,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Building
 } from "lucide-react";
 
 // Custom hook to detect if an element is in the viewport
@@ -74,6 +75,26 @@ const features = [
     stats: "100% Secure",
     highlight: "Protection",
     gradient: "from-purple-500 to-violet-600"
+  },
+  {
+    icon: <Building className="text-white" size={28} />,
+    title: "Company Management",
+    desc: "Manage multiple clients, projects, and team collaboration.",
+    type: "Company Recruiters",
+    iconBg: "bg-gradient-to-br from-indigo-600 to-blue-700",
+    stats: "Enterprise Ready",
+    highlight: "Scale",
+    gradient: "from-indigo-500 to-blue-600"
+  },
+  {
+    icon: <TrendingUp className="text-white" size={28} />,
+    title: "Advanced Analytics",
+    desc: "Track performance metrics and optimize your hiring process.",
+    type: "Company Recruiters",
+    iconBg: "bg-gradient-to-br from-emerald-600 to-teal-700",
+    stats: "Data Driven",
+    highlight: "Insights",
+    gradient: "from-emerald-500 to-teal-600"
   },
   {
     icon: <FileSearch className="text-white" size={28} />,

@@ -594,7 +594,20 @@ const UserManagement = () => {
                     {selectedUser.profile.location && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Location</label>
-                        <p className="mt-1 text-sm text-gray-900">{selectedUser.profile.location}</p>
+                        <p className="mt-1 text-sm text-gray-900">
+                          {typeof selectedUser.profile.location === 'object' 
+                            ? (() => {
+                                const parts = [];
+                                if (selectedUser.profile.location.street) parts.push(selectedUser.profile.location.street);
+                                if (selectedUser.profile.location.city) parts.push(selectedUser.profile.location.city);
+                                if (selectedUser.profile.location.state) parts.push(selectedUser.profile.location.state);
+                                if (selectedUser.profile.location.postalCode) parts.push(selectedUser.profile.location.postalCode);
+                                if (selectedUser.profile.location.country) parts.push(selectedUser.profile.location.country);
+                                return parts.length > 0 ? parts.join(', ') : 'Location not specified';
+                              })()
+                            : selectedUser.profile.location
+                          }
+                        </p>
                       </div>
                     )}
                     {selectedUser.profile.website && (

@@ -7,7 +7,7 @@ import axios from 'axios';
 import NavbarBase from './NavbarBase';
 import { Button } from '@/components/ui/button';
 
-const RecruiterNavbar = ({ user }) => {
+const RecruiterNavbar = ({ user, setLogoutFlag }) => {
     const navigate = useNavigate();
     const [query, setQuery] = useState('');
     const [suggestions, setSuggestions] = useState([]);
@@ -90,6 +90,7 @@ const RecruiterNavbar = ({ user }) => {
     return (
         <NavbarBase 
             user={user}
+            setLogoutFlag={setLogoutFlag}
             leftContent={
                 <div className="flex items-center gap-2">
                     <Popover>

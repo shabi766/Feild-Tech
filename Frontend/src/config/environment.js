@@ -33,7 +33,8 @@ export const API_ENDPOINTS = {
   CHAT: `${API_BASE_URL}/chat`,
   WALLET: `${API_BASE_URL}/wallet`,
   ADMINISTRATION: `${API_BASE_URL}/administration`,
-  AUDIT: `${API_BASE_URL}/audit`
+  AUDIT: `${API_BASE_URL}/audit`,
+  
 };
 
 export default currentConfig;

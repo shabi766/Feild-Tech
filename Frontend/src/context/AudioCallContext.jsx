@@ -1,5 +1,5 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
-import socket from "../components/shared/socket";
+import { getSocket } from "../components/shared/socket";
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 
 const AudioCallContext = createContext();
@@ -32,7 +32,8 @@ export const AudioCallProvider = ({ children }) => {
     }, []);
 
     useEffect(() => {
-        // Socket event listeners for audio calls
+        const socket = getSocket();
+        
         socket.on('audio_call_request', handleIncomingCall);
         socket.on('audio_call_accepted', handleCallAccepted);
         socket.on('audio_call_rejected', handleCallRejected);
@@ -50,7 +51,7 @@ export const AudioCallProvider = ({ children }) => {
             socket.off('audio_call_offer');
             socket.off('audio_call_answer');
         };
-    }, []);
+    }, [currentUser]);
 
     const handleIncomingCall = async (data) => {
         setCaller(data.caller);
@@ -91,7 +92,7 @@ export const AudioCallProvider = ({ children }) => {
             // Create and send offer
             const offer = await pc.createOffer();
             await pc.setLocalDescription(offer);
-            socket.emit('audio_call_offer', {
+            getSocket().emit('audio_call_offer', {
                 offer: offer,
                 recipientId: data.caller._id
             });
@@ -133,7 +134,7 @@ export const AudioCallProvider = ({ children }) => {
             // Create and send answer
             const answer = await pc.createAnswer();
             await pc.setLocalDescription(answer);
-            socket.emit('audio_call_answer', {
+            getSocket().emit('audio_call_answer', {
                 answer: answer,
                 recipientId: data.callerId
             });
@@ -169,7 +170,7 @@ export const AudioCallProvider = ({ children }) => {
         
         pc.onicecandidate = (event) => {
             if (event.candidate) {
-                socket.emit('audio_call_ice_candidate', {
+                getSocket().emit('audio_call_ice_candidate', {
                     candidate: event.candidate,
                     recipientId: recipient?._id || caller?._id
                 });
@@ -201,10 +202,10 @@ export const AudioCallProvider = ({ children }) => {
             setLocalStream(stream);
             
             // Send call request
-            socket.emit('audio_call_request', {
+            getSocket().emit('audio_call_request', {
                 recipientId: recipientUser._id,
                 caller: {
-                    _id: currentUser?._id || socket.id,
+                    _id: currentUser?._id || getSocket().id,
                     fullname: currentUser?.fullname || 'You'
                 },
                 recipient: recipientUser
@@ -222,7 +223,7 @@ export const AudioCallProvider = ({ children }) => {
 
     const acceptCall = async (callerId) => {
         try {
-            socket.emit('audio_call_accepted', { callerId });
+            getSocket().emit('audio_call_accepted', { callerId });
             setCallType('active');
             setIsCallActive(true);
             stopRingtone();
@@ -233,7 +234,7 @@ export const AudioCallProvider = ({ children }) => {
     };
 
     const rejectCall = (callerId) => {
-        socket.emit('audio_call_rejected', { callerId });
+        getSocket().emit('audio_call_rejected', { callerId });
         setIsInCall(false);
         setCallType(null);
         setCaller(null);
@@ -260,7 +261,7 @@ export const AudioCallProvider = ({ children }) => {
         setRecipient(null);
         stopRingtone();
         
-        socket.emit('audio_call_ended', {
+        getSocket().emit('audio_call_ended', {
             recipientId: recipient?._id || caller?._id
         });
     };

@@ -10,7 +10,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { setSingleClient } from '@/redux/clientSlice';
 import Footer from '../shared/Footer';
-import socket from '../shared/socket';
+import { getSocket } from '../shared/socket';
 
 const ClientsCreate = () => {
     const navigate = useNavigate();
@@ -28,12 +28,14 @@ const ClientsCreate = () => {
     const [error, setError] = useState(null); // Add error state
 
     useEffect(() => {
+        const socket = getSocket();
+        
         socket.on('connect', () => {
-            console.log('ClientsCreate: Socket connected!');
+            console.log('Connected to server');
         });
 
         socket.on('disconnect', () => {
-            console.log('ClientsCreate: Socket disconnected!');
+            console.log('Disconnected from server');
         });
 
         return () => {

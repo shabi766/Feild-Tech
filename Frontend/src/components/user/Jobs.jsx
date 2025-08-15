@@ -8,10 +8,12 @@ import { Search, Filter, MapPin, Briefcase, DollarSign, Calendar, Sparkles, Tren
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
+import { useTranslation } from '@/Hooks/useTranslation';
 
 const Jobs = () => {
     // Accessing jobs and search query from Redux store
     const { allJobs = [], searchedQuery } = useSelector(store => store.job);
+    const { t, currentLanguage } = useTranslation();
     const [filterJobs, setFilterJobs] = useState(allJobs);
     const [ref, inView] = useInView({
         triggerOnce: true,
@@ -212,14 +214,14 @@ const Jobs = () => {
                     >
                         <div className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 font-semibold text-sm mb-6">
                             <Sparkles className="w-4 h-4 mr-2 animate-spin-slow" />
-                            Find Your Perfect Job
+                            {t('findPerfectJob', currentLanguage)}
                         </div>
                         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                            Browse
-                            <span className="gradient-text"> Opportunities</span>
+                            {t('browse', currentLanguage)}
+                            <span className="gradient-text"> {t('opportunities', currentLanguage)}</span>
                         </h1>
                         <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                            Discover amazing job opportunities that match your skills and career goals.
+                            {t('discoverJobsDesc', currentLanguage)}
                         </p>
                     </motion.div>
 
@@ -231,10 +233,10 @@ const Jobs = () => {
                             <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl">
                                 <Filter className="w-6 h-6 text-white" />
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900">Advanced Filters</h2>
+                            <h2 className="text-2xl font-bold text-gray-900">{t('advancedFilters', currentLanguage)}</h2>
                             {activeFiltersCount > 0 && (
                                 <Badge className="bg-gradient-to-r from-orange-500 to-red-600 text-white">
-                                    {activeFiltersCount} active
+                                    {activeFiltersCount} {t('active', currentLanguage)}
                                 </Badge>
                             )}
                         </div>
@@ -318,7 +320,7 @@ const Jobs = () => {
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
                                     <TrendingUp className="w-4 h-4" />
-                                    <span>{filterJobs.length} jobs found</span>
+                                    <span>{filterJobs.length} {t('jobsFound')}</span>
                                 </div>
                             </div>
                             <Button
@@ -326,7 +328,7 @@ const Jobs = () => {
                                 variant="outline"
                                 className="border-gray-300 hover:border-red-500 hover:text-red-600"
                             >
-                                Clear All Filters
+                                {t('clearAllFilters')}
                             </Button>
                         </div>
                     </motion.div>
@@ -340,15 +342,15 @@ const Jobs = () => {
                                 <div className="w-24 h-24 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center mx-auto mb-6">
                                     <Search className="w-12 h-12 text-gray-400" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-gray-900 mb-2">No jobs found</h3>
+                                <h3 className="text-2xl font-bold text-gray-900 mb-2">{t('noJobsFound')}</h3>
                                 <p className="text-gray-600 mb-6">
-                                    Try adjusting your search criteria or filters to find more opportunities.
+                                    {t('tryAdjustingFilters')}
                                 </p>
                                 <Button
                                     onClick={clearAllFilters}
                                     className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
                                 >
-                                    Clear Filters
+                                    {t('clearFilters')}
                                 </Button>
                             </div>
                         ) : (

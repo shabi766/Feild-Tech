@@ -8,6 +8,7 @@ import Footer from '../shared/Footer';
 import useGetAllJobs from '../Hooks/useGetAllJobs';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '@/Hooks/useTranslation';
 import { 
     Briefcase, 
     MapPin, 
@@ -28,6 +29,7 @@ const Home = () => {
     const { user } = useSelector(store => store.auth);
     const { allJobs = [] } = useSelector(store => store.job);
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [ref, inView] = useInView({
         triggerOnce: true,
         threshold: 0.1
@@ -49,29 +51,29 @@ const Home = () => {
     }).length;
 
     const stats = [
-        { icon: <Briefcase className="w-6 h-6" />, label: "Total Jobs", value: totalJobs, color: "from-blue-500 to-indigo-600" },
-        { icon: <MapPin className="w-6 h-6" />, label: "Remote Jobs", value: remoteJobs, color: "from-green-500 to-emerald-600" },
-        { icon: <Clock className="w-6 h-6" />, label: "Full-Time", value: fullTimeJobs, color: "from-purple-500 to-pink-600" },
-        { icon: <TrendingUp className="w-6 h-6" />, label: "Recent Jobs", value: recentJobs, color: "from-orange-500 to-red-600" }
+        { icon: <Briefcase className="w-6 h-6" />, label: t('totalJobs'), value: totalJobs, color: "from-blue-500 to-indigo-600" },
+        { icon: <MapPin className="w-6 h-6" />, label: t('remoteJobs'), value: remoteJobs, color: "from-green-500 to-emerald-600" },
+        { icon: <Clock className="w-6 h-6" />, label: t('fullTime'), value: fullTimeJobs, color: "from-purple-500 to-pink-600" },
+        { icon: <TrendingUp className="w-6 h-6" />, label: t('recentJobs'), value: recentJobs, color: "from-orange-500 to-red-600" }
     ];
 
     const quickActions = [
         {
-            title: "Browse Jobs",
-            description: "Find your next opportunity",
+            title: t('browseJobs'),
+            description: t('findNextOpportunity'),
             icon: <Search className="w-8 h-8" />,
             color: "from-green-500 to-emerald-600",
             action: () => navigate('/app/technician/browse')
         },
         {
-            title: "My Applications",
-            description: "Track your job applications",
+            title: t('myApplications'),
+            description: t('trackJobApplications'),
             icon: <Award className="w-8 h-8" />,
             action: () => navigate('/app/technician/profile')
         },
         {
-            title: "Profile Setup",
-            description: "Complete your professional profile",
+            title: t('profileSetup'),
+            description: t('completeProfessionalProfile'),
             icon: <Users className="w-8 h-8" />,
             color: "from-purple-500 to-pink-600",
             action: () => navigate('/app/technician/profile')
@@ -242,14 +244,14 @@ const Home = () => {
                         <div className={`text-center mb-16 ${inView ? 'animate-slideInUp' : 'opacity-0'}`}>
                             <div className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 font-semibold text-sm mb-6">
                                 <Sparkles className="w-4 h-4 mr-2 animate-spin-slow" />
-                                Welcome Back, {user?.fullname}!
+                                {t('welcomeBack')}, {user?.fullname}!
                             </div>
                             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                                Your Job Search
-                                <span className="gradient-text"> Dashboard</span>
+                                {t('yourJobSearch')}
+                                <span className="gradient-text"> {t('dashboard')}</span>
                             </h1>
                             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                                Discover amazing opportunities, track your applications, and take your career to the next level.
+                                {t('discoverAmazingDesc')}
                             </p>
                         </div>
 
@@ -287,7 +289,7 @@ const Home = () => {
                         {/* Quick Actions */}
                         <div className={`mb-16 ${inView ? 'animate-slideInUp delay-400' : 'opacity-0'}`}>
                             <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-                                Quick Actions
+                                {t('quickActions')}
                             </h2>
                             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                                 {quickActions.map((action, idx) => (
@@ -313,7 +315,7 @@ const Home = () => {
                                         <p className="text-gray-600 mb-4">{action.description}</p>
 
                                         <div className="flex items-center text-blue-600 font-semibold group-hover:text-blue-700 transition-colors">
-                                            <span>Get Started</span>
+                                            <span>{t('getStarted')}</span>
                                             <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                                         </div>
 
@@ -329,7 +331,7 @@ const Home = () => {
                             {/* Categories */}
                             <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-gray-100/50">
                                 <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-                                    Explore by Category
+                                    {t('exploreByCategory')}
                                 </h2>
                                 <CategoryCarousel />
                             </div>
@@ -337,7 +339,7 @@ const Home = () => {
                             {/* Latest Jobs */}
                             <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-gray-100/50">
                                 <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-                                    Latest Opportunities
+                                    {t('latestOpportunities')}
                                 </h2>
                                 <LatestJobs />
                             </div>

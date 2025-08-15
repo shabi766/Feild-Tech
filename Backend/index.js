@@ -10,17 +10,21 @@ import connectDB from "./utils/db.js";
 import { User } from "./Models/user.model.js";
 import userRoute from "./Routes/user.route.js";
 import companyRoute from "./Routes/company.route.js";
+import companyRegistrationRoute from "./Routes/companyRegistration.route.js";
+import dashboardRoute from "./Routes/dashboard.route.js";
 import workorderRoute from "./Routes/workorder.route.js";
 import applicationRoute from "./Routes/application.route.js";
 import clientRoute from "./Routes/client.route.js";
 import projectRoute from "./Routes/project.route.js";
 import technicianRoute from "./Routes/technician.route.js";
 import searchRoute from "./Routes/search.route.js";
-import dashboardRoute from "./Routes/dashboard.route.js";
 import notificationRoute from "./Routes/notification.route.js";
 import chatRoute from "./Routes/chat.route.js";
 import administratorRoute from "./Routes/administrator.route.js";
 import auditRoute from "./Routes/audit.route.js";
+import reviewRoute from "./Routes/review.route.js";
+import leaderboardRoute from "./Routes/leaderboard.route.js";
+
 import { auditMiddleware } from "./middleware/auditMiddleware.js";
 
 dotenv.config();
@@ -176,6 +180,8 @@ io.on("connection", (socket) => {
     });
   });
 
+
+
   socket.on("disconnect", async () => {
     const userId = onlineUsers.get(socket.id);
     if (userId) {
@@ -200,6 +206,8 @@ app.set("io", io);
 // API Routes
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/company", companyRoute);
+app.use("/api/v1/company-registration", companyRegistrationRoute);
+app.use("/api/v1/dashboard", dashboardRoute);
 app.use("/api/v1/workorder", workorderRoute);
 app.use("/api/v1/application", applicationRoute);
 app.use("/api/v1/client", clientRoute);
@@ -208,10 +216,12 @@ app.use("/api/v1/technician", technicianRoute);
 app.use("/api/v1/search", searchRoute);
 app.use("/api/v1/administration", administratorRoute);
 app.use("/api/v1/audit", auditRoute);
-app.use("/api/v1/dashboard", dashboardRoute);
 app.use("/api/v1/notification", notificationRoute);
 app.use("/api/v1/chat", chatRoute);
 app.use("/api/v1/wallet", walletRoute);
+app.use("/api/v1/review", reviewRoute);
+app.use("/api/v1/leaderboard", leaderboardRoute);
+
 
 // Export io for use in controllers
 export { io };

@@ -9,7 +9,7 @@ import Footer from '@/components/shared/Footer';
 import Navbar from '@/components/shared/Navbar/Navbars';
 
 const Layout = () => {
-  const { isLoading, checkAuth } = useAuthCheck();
+  const { isLoading, checkAuth, setLogoutFlag } = useAuthCheck();
   const { user, isAuthenticated } = useSelector(store => store.auth);
 
   useEffect(() => {
@@ -24,6 +24,7 @@ const Layout = () => {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader2 className="mr-2 h-8 w-8 animate-spin" />
+        <span>Loading...</span>
       </div>
     );
   }
@@ -31,7 +32,7 @@ const Layout = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sticky navbar at top */}
-      <Navbar />
+      <Navbar setLogoutFlag={setLogoutFlag} />
       
       {/* Sidebar - now has its own positioning */}
       <Sidebar />

@@ -87,9 +87,58 @@ export const getCompanyById = async (req, res) => {
     }
 };
 
+// Get company information for dashboard
+export const getCompanyInfo = async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log('Fetching company info for ID:', id);
+        
+        const company = await Company.findById(id).select('-password -__v');
+        
+        if (!company) {
+            console.log('Company not found for ID:', id);
+            return res.status(404).json({
+                success: false,
+                message: 'Company not found'
+            });
+        }
+        
+        console.log('Company data found:', {
+            name: company.name,
+            industry: company.industry,
+            description: company.description,
+            recruiters: company.recruiters?.length || 0,
+            address: company.address ? 'Present' : 'Missing',
+            contact: company.contact ? 'Present' : 'Missing'
+        });
+        
+        res.json({
+            success: true,
+            company
+        });
+    } catch (error) {
+        console.error('Error fetching company info:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: error.message
+        });
+    }
+};
+
 export const updateCompany = async (req, res) => {
     try {
-        const { name, description, website, location } = req.body;
+        const { 
+            name, 
+            industry, 
+            description, 
+            foundedYear, 
+            employeeCount, 
+            annualRevenue, 
+            website, 
+            address 
+        } = req.body;
+        
         const file = req.file;
 
         let logo = null;
@@ -97,7 +146,19 @@ export const updateCompany = async (req, res) => {
             logo = await uploadToS3(file, 'companies');
         }
 
-        const updateData = { name, description, website, location, logo };
+        const updateData = { 
+            name, 
+            industry, 
+            description, 
+            foundedYear, 
+            employeeCount, 
+            annualRevenue, 
+            website, 
+            address,
+            ...(logo && { logo })
+        };
+
+        console.log('Updating company with data:', updateData);
 
         const company = await Company.findByIdAndUpdate(req.params.id, updateData, { new: true });
 
@@ -107,16 +168,18 @@ export const updateCompany = async (req, res) => {
                 success: false,
             });
         }
+        
         return res.status(200).json({
-            message: "Company information updated.",
+            message: "Company information updated successfully.",
             success: true,
+            company
         });
     } catch (error) {
-        console.error("Error updating company:", error); // Log the error
+        console.error("Error updating company:", error);
         return res.status(500).json({
             message: "An error occurred while updating the company.",
             success: false,
-            error: error.message, // Send the error message to the client
+            error: error.message
         });
     }
 };

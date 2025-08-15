@@ -1,5 +1,6 @@
 // JobDetails.jsx
 import React from 'react';
+import VoiceNotePlayer from '@/components/shared/VoiceNotePlayer';
 
 const sanitizeHtml = (html) => {
   if (!html) return '';
@@ -31,6 +32,17 @@ const JobDetails = ({ job, clientName, projectName, jobType, formatDate }) => {
           <Section title="Job Description">
             <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtml(job?.description || '') }} />
           </Section>
+
+          {/* Voice Notes Section */}
+          {job?.voiceNotes && job.voiceNotes.length > 0 && (
+            <Section title="Voice Notes">
+              <VoiceNotePlayer 
+                voiceNotes={job.voiceNotes}
+                showTitle={false}
+                className="mt-4"
+              />
+            </Section>
+          )}
 
           <Section title="Client">
             <p>{clientName}</p>

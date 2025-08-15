@@ -1,44 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, ArrowRight, Sparkles, Zap, Target } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight, Sparkles, Zap, Target, Building } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const slides = [
-  {
-    image: '/h1.jpg',
-    heading: 'Find the Right Talent or Job – Fast.',
-    subheading: 'Connect with experienced technicians and recruiters in minutes. Your next opportunity is just a click away.',
-    accent: 'bg-blue-600',
-    icon: <Sparkles className="w-6 h-6" />
-  },
-  {
-    image: '/h2.jpg',
-    heading: 'Hire Verified Technicians Instantly',
-    subheading: 'Post your job and receive applications from trusted professionals quickly and easily.',
-    accent: 'bg-gray-700',
-    icon: <Target className="w-6 h-6" />
-  },
-  {
-    image: '/h3.jpg',
-    heading: 'Your Next Gig is Waiting',
-    subheading: 'Browse jobs tailored to your skills and get hired by top recruiters.',
-    accent: 'bg-blue-600',
-    icon: <Zap className="w-6 h-6" />
-  },
-  {
-    image: '/h4.jpg',
-    heading: 'Simplify Your Hiring Process',
-    subheading: 'Manage applications, communicate, and assign jobs — all in one place.',
-    accent: 'bg-gray-700',
-    icon: <Sparkles className="w-6 h-6" />
-  },
-  {
-    image: '/h5.jpg',
-    heading: 'Grow Your Career with Us',
-    subheading: 'Join a community of skilled technicians and unlock new opportunities daily.',
-    accent: 'bg-blue-600',
-    icon: <Target className="w-6 h-6" />
-  },
-];
+import { useTranslation } from '@/Hooks/useTranslation';
 
 // Creative morphing background shapes
 const MorphingShapes = () => {
@@ -107,6 +70,46 @@ const AnimatedText = ({ text, className, delay = 0 }) => {
 };
 
 const HeroSection = () => {
+  const { t } = useTranslation();
+  
+  const slides = [
+    {
+      image: '/h1.jpg',
+      heading: t('findRightTalentOrJob'),
+      subheading: t('connectWithExperiencedTechnicians'),
+      accent: 'bg-blue-600',
+      icon: <Sparkles className="w-6 h-6" />
+    },
+    {
+      image: '/h2.jpg',
+      heading: t('hireVerifiedTechniciansInstantly'),
+      subheading: t('postYourJobAndReceiveApplications'),
+      accent: 'bg-gray-700',
+      icon: <Target className="w-6 h-6" />
+    },
+    {
+      image: '/h3.jpg',
+      heading: t('yourNextGigIsWaiting'),
+      subheading: t('browseJobsTailoredToYourSkills'),
+      accent: 'bg-blue-600',
+      icon: <Zap className="w-6 h-6" />
+    },
+    {
+      image: '/h4.jpg',
+      heading: t('simplifyYourHiringProcess'),
+      subheading: t('manageApplicationsCommunicateAndAssign'),
+      accent: 'bg-gray-700',
+      icon: <Sparkles className="w-6 h-6" />
+    },
+    {
+      image: '/h5.jpg',
+      heading: t('growYourCareerWithUs'),
+      subheading: t('joinCommunityOfSkilledTechnicians'),
+      accent: 'bg-blue-600',
+      icon: <Target className="w-6 h-6" />
+    },
+  ];
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -372,48 +375,63 @@ const HeroSection = () => {
           delay={0.4}
         />
 
-        {/* Action Button with creative hover effect */}
-        <div className={`mt-12 ${isLoaded ? 'animate-scale-in' : 'opacity-0'}`}>
+        {/* Action Buttons with creative hover effect */}
+        <div className={`mt-12 space-y-4 ${isLoaded ? 'animate-scale-in' : 'opacity-0'}`}>
+          {/* Main CTA */}
           <Link
             to="/role-selection"
-            className="group relative bg-gradient-to-r from-blue-600 to-purple-600 text-white px-12 py-6 rounded-full font-semibold text-lg shadow-2xl transform transition-all duration-500 hover:scale-110 overflow-hidden"
+            className="group relative bg-gradient-to-r from-blue-600 to-purple-600 text-white px-12 py-6 rounded-full font-semibold text-lg shadow-2xl transform transition-all duration-500 hover:scale-110 overflow-hidden block text-center"
           >
             <span className="flex items-center justify-center relative z-10">
-              Get Started
+              {t('getStarted')}
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="absolute inset-0 bg-white/20 rounded-full scale-0 group-hover:scale-100 transition-transform duration-500"></div>
           </Link>
+          
+                        {/* Company Registration CTA */}
+              <Link
+                to="/company-registration"
+                className="group relative bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white px-8 py-4 rounded-full font-semibold text-base shadow-xl transform transition-all duration-500 hover:scale-105 hover:bg-white/20 overflow-hidden block text-center"
+              >
+                <span className="flex items-center justify-center relative z-10">
+                  <Building className="w-5 h-5 mr-2" />
+                  Register Your Company
+                </span>
+                <div className="absolute inset-0 bg-white/10 rounded-full scale-0 group-hover:scale-100 transition-transform duration-500"></div>
+              </Link>
+
+
         </div>
 
         {/* Quick Stats with staggered animation */}
         <div className={`flex flex-wrap justify-center gap-8 mt-16 ${isLoaded ? 'animate-slide-in-right' : 'opacity-0'}`}>
           <div className="text-center transform hover:scale-110 transition-transform duration-300">
             <div className="text-3xl font-bold gradient-text">15K+</div>
-            <div className="text-sm text-gray-300">Active Technicians</div>
+            <div className="text-sm text-gray-300">{t('activeTechnicians')}</div>
           </div>
           <div className="text-center transform hover:scale-110 transition-transform duration-300">
             <div className="text-3xl font-bold gradient-text">5K+</div>
-            <div className="text-sm text-gray-300">Happy Clients</div>
+            <div className="text-sm text-gray-300">{t('happyClients')}</div>
           </div>
           <div className="text-center transform hover:scale-110 transition-transform duration-300">
             <div className="text-3xl font-bold gradient-text">98%</div>
-            <div className="text-sm text-gray-300">Success Rate</div>
+            <div className="text-sm text-gray-300">{t('successRate')}</div>
           </div>
         </div>
       </div>
 
       {/* Enhanced Controls with creative styling */}
       <button
-        aria-label="Previous Slide"
+        aria-label={t('previousSlide')}
         onClick={prevSlide}
         className="absolute top-1/2 left-6 transform -translate-y-1/2 p-4 glass-effect text-white rounded-full transition-all duration-300 hover:scale-110 z-20 hover-lift group"
       >
         <ChevronLeft size={32} className="group-hover:animate-bounce" />
       </button>
       <button
-        aria-label="Next Slide"
+        aria-label={t('nextSlide')}
         onClick={nextSlide}
         className="absolute top-1/2 right-6 transform -translate-y-1/2 p-4 glass-effect text-white rounded-full transition-all duration-300 hover:scale-110 z-20 hover-lift group"
       >
@@ -431,7 +449,7 @@ const HeroSection = () => {
                 ? 'bg-gradient-to-r from-blue-400 to-purple-400 scale-125 shadow-lg' 
                 : 'bg-white/30 hover:bg-white/50'
             }`}
-            aria-label={`Go to slide ${index + 1}`}
+            aria-label={`${t('goToSlide')} ${index + 1}`}
           />
         ))}
       </div>

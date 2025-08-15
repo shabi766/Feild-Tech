@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Play, Star, Zap, Target, Users, CheckCircle, Rocket, Sparkles } from "lucide-react";
+import { ArrowRight, Play, Star, Zap, Target, Users, CheckCircle, Rocket, Sparkles, Building } from "lucide-react";
 
 // Custom hook to detect if an element is in the viewport
 const useInView = (options) => {
@@ -269,14 +269,28 @@ const App = () => {
             <p className="text-white/80 mb-6 text-lg">
               Don't wait - start connecting with top talent or finding your next opportunity today!
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-8 py-4 rounded-full font-bold hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 animate-pulse-slow">
-                <Play className="w-5 h-5" />
-                Start Free Trial
-              </button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+              <Link to="/role-selection" className="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-8 py-4 rounded-full font-bold hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 animate-pulse-slow">
+                <Rocket className="w-5 h-5" />
+                Get Started
+              </Link>
               <button className="glass-effect text-white px-8 py-4 rounded-full font-semibold hover:bg-white/10 transition-all duration-300">
                 Watch Demo
               </button>
+            </div>
+            
+            {/* Company Registration CTA */}
+            <div className={`text-center ${inView ? 'animate-fadeInUp delay-700' : 'opacity-0'}`}>
+              <p className="text-white/70 mb-4 text-base">
+                Are you a company looking to scale your hiring?
+              </p>
+              <Link to="/company-registration" className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white px-6 py-3 rounded-full font-semibold hover:bg-white/20 transition-all duration-300">
+                <Building className="w-4 h-4" />
+                Register Your Company
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              
+
             </div>
           </div>
 

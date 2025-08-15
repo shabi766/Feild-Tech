@@ -1,15 +1,147 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
-import { Users, Wrench, ArrowLeft } from 'lucide-react';
+import { Users, Wrench, ArrowLeft, Building, User } from 'lucide-react';
 
 const RoleSelection = () => {
   const navigate = useNavigate();
+  const [showRecruiterOptions, setShowRecruiterOptions] = useState(false);
 
-  const handleRoleSelect = (role) => {
-    navigate('/signup', { state: { selectedRole: role } });
+  const handleRoleSelect = (role, recruiterType = null) => {
+    if (role === 'Recruiter' && !recruiterType) {
+      setShowRecruiterOptions(true);
+    } else {
+      navigate('/signup', { 
+        state: { 
+          selectedRole: role, 
+          recruiterType: recruiterType 
+        } 
+      });
+    }
   };
+
+  const handleRecruiterTypeSelect = (recruiterType) => {
+    navigate('/signup', { 
+      state: { 
+        selectedRole: 'Recruiter', 
+        recruiterType: recruiterType 
+      } 
+    });
+  };
+
+  if (showRecruiterOptions) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-4xl">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <button 
+              onClick={() => setShowRecruiterOptions(false)}
+              className="inline-flex items-center text-gray-600 hover:text-gray-800 transition-colors mb-6"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Role Selection
+            </button>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Choose Your Recruiter Type
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Select how you'd like to operate on our platform
+            </p>
+          </div>
+
+          {/* Recruiter Type Cards */}
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Individual Recruiter Card */}
+            <Card className="p-8 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-2 border-transparent hover:border-blue-200">
+              <div className="text-center">
+                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <User className="w-10 h-10 text-blue-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Individual Recruiter</h2>
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  Post jobs for yourself and manage your own hiring needs. 
+                  Perfect for freelancers, consultants, and individual professionals.
+                </p>
+                <ul className="text-left text-gray-600 mb-8 space-y-2">
+                  <li className="flex items-center">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                    Post jobs for personal projects
+                  </li>
+                  <li className="flex items-center">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                    Direct communication with technicians
+                  </li>
+                  <li className="flex items-center">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                    Simple project management
+                  </li>
+                  <li className="flex items-center">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                    Personal wallet and payments
+                  </li>
+                </ul>
+                <Button 
+                  onClick={() => handleRecruiterTypeSelect('Individual')}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors"
+                >
+                  Sign Up as Individual
+                </Button>
+              </div>
+            </Card>
+
+            {/* Company Recruiter Card */}
+            <Card className="p-8 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-2 border-transparent hover:border-blue-200">
+              <div className="text-center">
+                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Building className="w-10 h-10 text-blue-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Company Recruiter</h2>
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  Manage multiple clients, projects, and teams. 
+                  Ideal for agencies, companies, and professional recruiters.
+                </p>
+                <ul className="text-left text-gray-600 mb-8 space-y-2">
+                  <li className="flex items-center">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                    Manage multiple clients and projects
+                  </li>
+                  <li className="flex items-center">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                    Team collaboration features
+                  </li>
+                  <li className="flex items-center">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                    Advanced project templates
+                  </li>
+                  <li className="flex items-center">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                    Company wallet and billing
+                  </li>
+                </ul>
+                <div className="space-y-3">
+                  <Button 
+                    onClick={() => handleRecruiterTypeSelect('Company')}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors"
+                  >
+                    Sign Up as Company
+                  </Button>
+                                <Link
+                to="/company-registration"
+                className="block w-full bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 py-3 px-6 rounded-lg font-semibold transition-colors"
+              >
+                Company Registration
+              </Link>
+
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50 flex items-center justify-center p-4">

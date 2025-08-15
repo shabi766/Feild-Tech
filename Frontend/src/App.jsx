@@ -17,7 +17,11 @@ import JobDescription from "./components/user/JobDescription";
 
 import CompanyCreate from "./components/admin/CompanyCreate";
 import CompanySetup from "./components/admin/CompanySetup";
+import CompanyRegistration from "./components/Auth/CompanyRegistration";
+
 import AdminJobs from "./components/admin/AdminJobs";
+import Teams from "./components/admin/Teams";
+import Templates from "./components/admin/Templates";
 
 import Applicants from "./components/admin/Applicants";
 import JobCalendar from "./components/Schedueler/JobCalender";
@@ -37,15 +41,23 @@ import ProjectDetail from "./components/admin/ProjectDetail";
 import ShowApplicantProfile from "./components/admin/ShowApplicantProfile";
 import ShowJob from "./components/admin/ShowJob";
 import AdminDashboard from "./components/admin/AdminDashboard";
+import CompanyRecruiterDashboard from "./components/recruiter/CompanyRecruiterDashboard";
 import Chat from "./components/shared/Chat/chat";
 import { ChatProvider } from "./context/ChatContext";
 import { UserProvider } from "./context/UserContext";
-import TechnicianProfile from "./components/admin/TechnicainProfile";
+import TechnicianProfile from "./components/shared/TechnicianProfile";
+import Leaderboard from "./components/shared/Leaderboard";
+import TechnicianLeaderboard from "./components/user/TechnicianLeaderboard";
 import ProtectedRoute from "./components/shared/ProtectedRoute";
 import Layout from "../Layout"; // Import Layout
-import Settings from "./components/shared/Settings";
+import { MainSettings } from "./components/shared/Settings";
+import { SettingsProvider } from "./context/SettingsContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import JobTable from "./components/user/JobTable";
+import ErrorBoundary from "./components/shared/ErrorBoundary";
 import PostJobs from "./components/admin/PostJobcomps/PostJob";
+import SimplePostJob from "./components/recruiter/SimplePostJob";
+import IndividualRecruiterDashboard from "./components/recruiter/IndividualRecruiterDashboard";
 import Wallets from "./components/wallet/Wallets";
 
 import Companies from "./components/admin/Companies";
@@ -90,7 +102,12 @@ const RoleBasedRedirect = () => {
   if (user.role === 'Admin') {
     return <Navigate to="/app/administrator" replace />;
   } else if (user.role === 'Recruiter') {
-    return <Navigate to="/app/recruiter/dashboard" replace />;
+    // Check if this is a company recruiter
+    if (user.recruiterType === 'Company') {
+      return <Navigate to="/app/recruiter/dashboard" replace />;
+    } else {
+      return <Navigate to="/app/recruiter/dashboard-individual" replace />;
+    }
   } else if (user.role === 'Technician') {
     return <Navigate to="/app/technician/home" replace />;
   }
@@ -127,7 +144,12 @@ const AuthenticatedLanding = () => {
   if (user.role === 'Admin') {
     return <Navigate to="/app/administrator" replace />;
   } else if (user.role === 'Recruiter') {
-    return <Navigate to="/app/recruiter/dashboard" replace />;
+    // Check if this is a company recruiter
+    if (user.recruiterType === 'Company') {
+      return <Navigate to="/app/recruiter/dashboard" replace />;
+    } else {
+      return <Navigate to="/app/recruiter/dashboard-individual" replace />;
+    }
   } else if (user.role === 'Technician') {
     return <Navigate to="/app/technician/home" replace />;
   }
@@ -138,13 +160,18 @@ const AuthenticatedLanding = () => {
 function App() {
   return (
     <BrowserRouter>
-      <UserProvider>
-        <ChatProvider>
-          <Routes>
+      <ErrorBoundary>
+        <UserProvider>
+          <ChatProvider>
+            <SettingsProvider>
+              <LanguageProvider>
+                <Routes>
             {/* Public routes */}
             <Route path="/" element={<AuthenticatedLanding />} />
             <Route path="/login" element={<Login />} />
             <Route path="/role-selection" element={<RoleSelection />} />
+            <Route path="/company-registration" element={<CompanyRegistration />} />
+
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/admin-login" element={<AdminLogin />} />
@@ -166,14 +193,32 @@ function App() {
               
               {/* Recruiter Routes */}
               <Route path="recruiter" element={<ProtectedRoute requiredRole="Recruiter" />}>
-                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="dashboard" element={<CompanyRecruiterDashboard />} />
+                <Route path="dashboard-individual" element={<IndividualRecruiterDashboard />} />
                 <Route path="technicians/techs" element={<AllTechnicians />} />
                 <Route path="technicians/:id" element={<TechnicianProfile />} />
+                <Route path="leaderboard" element={<Leaderboard />} />
+                <Route path="jobs" element={<AdminJobs />} />
+                <Route path="jobs/create" element={<PostJobs />} />
+                <Route path="jobs/create-simple" element={<SimplePostJob />} />
+                <Route path="jobs/:id/applicants" element={<Applicants />} />
+                <Route path="viewjob/:id" element={<ViewJob />} />
+                <Route path="applicantprofile/:id" element={<ShowApplicantProfile />} />
+                <Route path="jobs/:id" element={<ShowJob />} />
+                <Route path="jobcalender" element={<EnhancedJobCalendar />} />
+                <Route path="chat" element={<Chat />} />
+                <Route path="settings" element={<MainSettings />} />
+                <Route path="wallets" element={<Wallets />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="profile/update" element={<UpdateProfilePage />} />
+                
+                {/* Individual recruiter specific routes */}
+                <Route path="applicants" element={<Applicants />} />
+                <Route path="talentpool" element={<TalentPool />} />
+                
+                {/* Company-specific routes - only accessible to company recruiters */}
                 <Route path="companies" element={<Companies />} />
                 <Route path="companies/:id" element={<CompanySetup />} />
-                <Route path="project/detail/:projectId" element={<ProjectDetail />} />
-                <Route path="client/details/:clientId" element={<ClientDetail />} />
-                <Route path="talentpool" element={<TalentPool />} />
                 <Route path="companies/create" element={<CompanyCreate />} />
                 <Route path="clients" element={<Clients />} />
                 <Route path="clients/:id" element={<ClientSetup />} />
@@ -181,18 +226,10 @@ function App() {
                 <Route path="projects" element={<Projects />} />
                 <Route path="projects/:id" element={<ProjectSetup />} />
                 <Route path="projects/create" element={<ProjectsCreate />} />
-                <Route path="jobs" element={<AdminJobs />} />
-                <Route path="jobs/create" element={<PostJobs />} />
-                <Route path="jobs/:id/applicants" element={<Applicants />} />
-                <Route path="viewjob/:id" element={<ViewJob />} />
-                <Route path="applicantprofile/:id" element={<ShowApplicantProfile />} />
-                <Route path="jobs/:id" element={<ShowJob />} />
-                <Route path="jobcalender" element={<EnhancedJobCalendar />} />
-                <Route path="chat" element={<Chat />} />
-                <Route path="settings" element={<Settings />} />
-                <Route path="wallets" element={<Wallets />} />
-                <Route path="profile" element={<Profile />} />
-                <Route path="profile/update" element={<UpdateProfilePage />} />
+                <Route path="project/detail/:projectId" element={<ProjectDetail />} />
+                <Route path="client/details/:clientId" element={<ClientDetail />} />
+                <Route path="teams" element={<Teams />} />
+                <Route path="templates" element={<Templates />} />
               </Route>
 
               {/* Technician Routes */}
@@ -201,11 +238,12 @@ function App() {
                 <Route path="jobs" element={<Jobs />} />
                 <Route path="description/:id" element={<JobDescription />} />
                 <Route path="browse" element={<Browse />} />
-                <Route path="profile" element={<Profile />} />
+                <Route path="profile" element={<TechnicianProfile />} />
                 <Route path="profile/update" element={<UpdateProfilePage />} />
                 <Route path="calender" element={<EnhancedJobCalendar />} />
                 <Route path="chat" element={<Chat />} />
-                <Route path="settings" element={<Settings />} />
+                <Route path="leaderboard" element={<TechnicianLeaderboard />} />
+                <Route path="settings" element={<MainSettings />} />
                 <Route path="wallets" element={<Wallets />} />
                 <Route path="Myjobs" element={<JobTable />} />
               </Route>
@@ -234,9 +272,12 @@ function App() {
 
             {/* Catch all route - redirect to role-based page */}
             <Route path="*" element={<RoleBasedRedirect />} />
-          </Routes>
-        </ChatProvider>
-      </UserProvider>
+                          </Routes>
+              </LanguageProvider>
+            </SettingsProvider>
+          </ChatProvider>
+        </UserProvider>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }

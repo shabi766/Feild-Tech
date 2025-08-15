@@ -4,10 +4,14 @@ import { Input } from '@/components/ui/input';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { cn } from "@/lib/utils";
+import VoiceMessage from '@/components/shared/VoiceMessage';
+import { Mic, Play, Trash2, FileText } from 'lucide-react';
+import { toast } from 'sonner';
 
 const JobDescriptionStep = ({ input, setInput, nextStep, prevStep }) => {
   const [description, setDescription] = useState(input.description || '');
   const [confidential, setConfidential] = useState(input.confidential || '');
+  const [voiceNotes, setVoiceNotes] = useState(input.voiceNotes || []);
 
   useEffect(() => {
     setDescription(input.description || '');
@@ -16,6 +20,10 @@ const JobDescriptionStep = ({ input, setInput, nextStep, prevStep }) => {
   useEffect(() => {
     setConfidential(input.confidential || '');
   }, [input.confidential]);
+
+  useEffect(() => {
+    setVoiceNotes(input.voiceNotes || []);
+  }, [input.voiceNotes]);
 
   const handleDescriptionChange = (value) => {
     setDescription(value);
@@ -30,6 +38,30 @@ const JobDescriptionStep = ({ input, setInput, nextStep, prevStep }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setInput({ ...input, [name]: value });
+  };
+
+  const handleVoiceNoteAdd = (audioBlob, duration) => {
+    const newVoiceNote = {
+      id: Date.now(),
+      audioBlob,
+      duration,
+      timestamp: new Date().toISOString(),
+      size: (audioBlob.size / 1024 / 1024).toFixed(2)
+    };
+    
+    const updatedVoiceNotes = [...voiceNotes, newVoiceNote];
+    setVoiceNotes(updatedVoiceNotes);
+    setInput({ ...input, voiceNotes: updatedVoiceNotes });
+    
+    toast.success(`Voice note added (${duration}s)`);
+  };
+
+  const handleVoiceNoteDelete = (noteId) => {
+    const updatedVoiceNotes = voiceNotes.filter(note => note.id !== noteId);
+    setVoiceNotes(updatedVoiceNotes);
+    setInput({ ...input, voiceNotes: updatedVoiceNotes });
+    
+    toast.success("Voice note removed");
   };
 
   const modules = {
@@ -49,6 +81,12 @@ const JobDescriptionStep = ({ input, setInput, nextStep, prevStep }) => {
     'header', 'align', 'link',
     'clean'
   ];
+
+  const formatDuration = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 max-w-5xl mx-auto">
@@ -74,6 +112,79 @@ const JobDescriptionStep = ({ input, setInput, nextStep, prevStep }) => {
             theme="snow"
             className="h-64"
           />
+        </div>
+      </div>
+
+      {/* Voice Notes Section */}
+      <div className="space-y-4 mb-8">
+        <Label className="text-md font-semibold text-gray-700">
+          Voice Notes <span className="text-gray-400 font-normal italic">(Optional)</span>
+        </Label>
+        <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Mic className="w-5 h-5 text-blue-600" />
+              <p className="text-sm font-medium text-blue-800">
+                Record additional details, clarifications, or specific instructions about this job
+              </p>
+            </div>
+            <p className="text-xs text-blue-600">
+              Perfect for when you want to add personal context, tone, or detailed explanations that are easier to speak than type.
+            </p>
+          </div>
+          
+          {/* Voice Note Recorder */}
+          <VoiceMessage 
+            onSendMessage={handleVoiceNoteAdd}
+            placeholder="Record additional job details, clarifications, or specific instructions..."
+            className="text-sm"
+          />
+
+          {/* Display Existing Voice Notes */}
+          {voiceNotes.length > 0 && (
+            <div className="mt-6 space-y-3">
+              <h4 className="text-sm font-semibold text-blue-800 flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Recorded Voice Notes ({voiceNotes.length})
+              </h4>
+              
+              {voiceNotes.map((note) => (
+                <div key={note.id} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-blue-200 shadow-sm">
+                  <div className="flex items-center gap-2 flex-1">
+                    <Mic className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-medium text-gray-700">
+                      Voice Note ({formatDuration(note.duration)})
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {note.size} MB • {new Date(note.timestamp).toLocaleString()}
+                    </span>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const audio = new Audio(URL.createObjectURL(note.audioBlob));
+                        audio.play();
+                      }}
+                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="Play voice note"
+                    >
+                      <Play className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleVoiceNoteDelete(note.id)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete voice note"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

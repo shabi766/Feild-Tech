@@ -72,19 +72,23 @@ const ProtectedRoute = ({ requiredRole = null, children }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Check role requirements if specified
-  if (requiredRole && user.role !== requiredRole) {
-    // Redirect based on user's actual role
-    if (user.role === 'Admin') {
-      return <Navigate to="/app/administrator" replace />;
-    } else if (user.role === 'Recruiter') {
-      return <Navigate to="/app/recruiter/dashboard" replace />;
-    } else if (user.role === 'Technician') {
-      return <Navigate to="/app/technician/home" replace />;
-    } else {
-      return <Navigate to="/app/technician/home" replace />;
+      // Check role requirements if specified
+    if (requiredRole && user.role !== requiredRole) {
+      // Redirect based on user's actual role
+      if (user.role === 'Admin') {
+        return <Navigate to="/app/administrator" replace />;
+      } else if (user.role === 'Recruiter') {
+        if (user.recruiterType === 'individual' || !user.companyId) {
+          return <Navigate to="/app/recruiter/dashboard-individual" replace />;
+        } else {
+          return <Navigate to="/app/recruiter/dashboard" replace />;
+        }
+      } else if (user.role === 'Technician') {
+        return <Navigate to="/app/technician/home" replace />;
+      } else {
+        return <Navigate to="/app/technician/home" replace />;
+      }
     }
-  }
 
   // If this is a route group (has children), render the Outlet
   if (children === undefined) {

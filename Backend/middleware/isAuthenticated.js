@@ -32,7 +32,14 @@ const isAuthenticated = async (req, res, next) => {
         // Atomic update to avoid VersionError on save()
         await User.updateOne({ _id: user._id }, { $set: { lastSeen: new Date() } });
 
-        req.user = user;
+        // Add JWT payload data to user object
+        req.user = {
+            ...user.toObject(),
+            companyId: decoded.companyId,
+            role: decoded.role,
+            recruiterType: decoded.recruiterType
+        };
+        
         next();
     } catch (error) {
         console.error("Authentication Error:", error);

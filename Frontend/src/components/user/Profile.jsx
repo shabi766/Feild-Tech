@@ -10,6 +10,7 @@ import UpdateProfileDialog from '../user/UpdateProfileDialog';
 import { useSelector } from 'react-redux';
 import useGetAppliedJobs from '../Hooks/useGetAppliedJobs';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '@/Hooks/useTranslation';
 
 const Profile = () => {
     useGetAppliedJobs();
@@ -20,6 +21,7 @@ const Profile = () => {
         threshold: 0.1
     });
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     if (loading) return (
         <div className="flex items-center justify-center h-screen">
@@ -30,8 +32,8 @@ const Profile = () => {
     if (error) return (
         <div className="flex items-center justify-center h-screen">
             <div className="text-red-600 text-center">
-                <p className="text-xl font-semibold">Error loading profile.</p>
-                <p className="text-gray-600">Please try refreshing the page.</p>
+                <p className="text-xl font-semibold">{t('errorLoadingProfile')}</p>
+                <p className="text-gray-600">{t('pleaseTryRefreshing')}</p>
             </div>
         </div>
     );
@@ -176,76 +178,145 @@ const Profile = () => {
 
             <div className="relative z-10 py-8 px-6">
                 <div className="max-w-6xl mx-auto">
-                    {/* Profile Header */}
+                    {/* Enhanced Profile Header */}
                     <motion.div 
                         ref={ref}
-                        className={`bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-100/50 p-8 mb-8 ${inView ? 'animate-slideInUp' : 'opacity-0'}`}
+                        className={`bg-gradient-to-br from-white/95 to-blue-50/50 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-100/50 p-8 mb-8 ${inView ? 'animate-slideInUp' : 'opacity-0'}`}
                     >
-                        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8">
-                            {/* Profile Picture Section */}
-                            <div className="relative">
-                                <motion.div
-                                    className="relative"
-                                    whileHover={{ scale: 1.05 }}
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    <Avatar className="h-32 w-32 border-4 border-white shadow-2xl">
-                                        <AvatarImage 
-                                            src={user?.profile?.profilePhoto || 'https://via.placeholder.com/128x128/e0e7ff/1d4ed8?text=U'} 
+                        <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
+                            {/* Enhanced Profile Photo */}
+                            <motion.div 
+                                className="relative group"
+                                whileHover={{ scale: 1.02 }}
+                                transition={{ type: "spring", stiffness: 300 }}
+                            >
+                                <div className="w-32 h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden ring-4 ring-white shadow-2xl">
+                                    {user?.profilePhoto ? (
+                                        <img 
+                                            src={user.profilePhoto} 
                                             alt="Profile" 
+                                            className="w-full h-full object-cover"
                                         />
-                                    </Avatar>
-                                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
-                                        <CheckCircle className="w-4 h-4 text-white" />
-                                    </div>
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center">
+                                            <User className="w-16 h-16 text-white" />
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                {/* Role Badge */}
+                                <motion.div 
+                                    className="absolute -bottom-2 -right-2 px-3 py-1 rounded-full text-xs font-bold text-white shadow-lg"
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ delay: 0.3, type: "spring" }}
+                                    style={{
+                                        background: user?.role === 'Recruiter' 
+                                            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                            : user?.role === 'Admin'
+                                            ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+                                            : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+                                    }}
+                                >
+                                    {user?.role}
                                 </motion.div>
-                            </div>
+                            </motion.div>
 
                             {/* Profile Info */}
-                            <div className="flex-1">
-                                <div className="flex items-center gap-4 mb-4">
-                                    <h1 className="text-3xl font-bold text-gray-900">{user?.fullname || 'N/A'}</h1>
+                            <div className="flex-1 text-center lg:text-left">
+                                <motion.div 
+                                    className="flex flex-col lg:flex-row items-center lg:items-start gap-4 mb-6"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                >
+                                    <div>
+                                        <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+                                            {user?.fullname || t('completeYourProfile')}
+                                        </h1>
+                                        <p className="text-gray-600 text-lg mb-4 max-w-2xl">
+                                            {user?.profile?.bio || 
+                                                (user?.role === 'Recruiter' 
+                                                    ? t('setUpRecruiterProfile')
+                                                    : user?.role === 'Technician'
+                                                    ? t('completeTechnicianProfile')
+                                                    : t('addBioToStandOut')
+                                                )
+                                            }
+                                        </p>
+                                    </div>
+                                    
                                     <motion.button
                                         onClick={() => navigate(`/app/${user?.role === 'Admin' ? 'administrator' : user?.role === 'Recruiter' ? 'recruiter' : 'technician'}/profile/update`)}
-                                        className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-                                        whileHover={{ scale: 1.1 }}
+                                        className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex-shrink-0"
+                                        whileHover={{ scale: 1.1, rotate: 5 }}
                                         whileTap={{ scale: 0.9 }}
                                     >
-                                        <Edit3 className="w-5 h-5" />
+                                        <Edit3 className="w-6 h-6" />
                                     </motion.button>
-                                </div>
+                                </motion.div>
 
-                                <p className="text-gray-600 text-lg mb-6 max-w-2xl">
-                                    {user?.profile?.bio || 'No bio available. Add a bio to make your profile stand out!'}
-                                </p>
-
-                                {/* Profile Completion */}
-                                <div className="mb-6">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="text-sm font-medium text-gray-700">Profile Completion</span>
-                                        <span className="text-sm font-bold text-blue-600">{completionPercentage}%</span>
+                                {/* Enhanced Profile Completion */}
+                                <motion.div 
+                                    className="mb-6"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.4 }}
+                                >
+                                    <div className="flex items-center justify-between mb-3">
+                                        <span className="text-sm font-semibold text-gray-700">{t('profileCompletion')}</span>
+                                        <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                            {completionPercentage}%
+                                        </span>
                                     </div>
-                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                                         <motion.div 
-                                            className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full"
+                                            className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
                                             initial={{ width: 0 }}
                                             animate={{ width: `${completionPercentage}%` }}
-                                            transition={{ duration: 1, delay: 0.5 }}
+                                            transition={{ duration: 1.5, delay: 0.6, ease: "easeOut" }}
                                         />
                                     </div>
-                                </div>
+                                    <p className="text-xs text-gray-500 mt-2 text-center lg:text-left">
+                                        {completionPercentage < 50 ? t('keepGoingCompleteProfile') :
+                                         completionPercentage < 100 ? t('almostThereCompleteProfile') :
+                                         t('perfectProfileComplete')}
+                                    </p>
+                                </motion.div>
 
-                                {/* Contact Info */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                        <Mail className="w-5 h-5 text-blue-600" />
-                                        <span className="text-gray-700">{user?.email || 'N/A'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                        <Phone className="w-5 h-5 text-green-600" />
-                                        <span className="text-gray-700">{user?.phoneNumber || 'N/A'}</span>
-                                    </div>
-                                </div>
+                                {/* Enhanced Contact Info */}
+                                <motion.div 
+                                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.6 }}
+                                >
+                                    <motion.div 
+                                        className="flex items-center gap-3 p-4 bg-white/70 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300"
+                                        whileHover={{ scale: 1.02, y: -2 }}
+                                    >
+                                        <div className="p-2 bg-blue-500 rounded-lg">
+                                            <Mail className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div className="text-left">
+                                            <p className="text-xs text-gray-500 font-medium">{t('email')}</p>
+                                            <p className="text-gray-700 font-semibold">{user?.email || t('notProvided')}</p>
+                                        </div>
+                                    </motion.div>
+                                    
+                                    <motion.div 
+                                        className="flex items-center gap-3 p-4 bg-white/70 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300"
+                                        whileHover={{ scale: 1.02, y: -2 }}
+                                    >
+                                        <div className="p-2 bg-green-500 rounded-lg">
+                                            <Phone className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div className="text-left">
+                                            <p className="text-xs text-gray-500 font-medium">{t('phone')}</p>
+                                            <p className="text-gray-700 font-semibold">{user?.phoneNumber || t('notProvided')}</p>
+                                        </div>
+                                    </motion.div>
+                                </motion.div>
                             </div>
                         </div>
                     </motion.div>
@@ -258,7 +329,7 @@ const Profile = () => {
                             <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl">
                                 <Star className="w-6 h-6 text-white" />
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900">Skills & Expertise</h2>
+                            <h2 className="text-2xl font-bold text-gray-900">{t('skillsAndExpertise')}</h2>
                         </div>
 
                         <div className="flex flex-wrap gap-3">
@@ -278,7 +349,7 @@ const Profile = () => {
                             ) : (
                                 <div className="text-center w-full py-8">
                                     <Star className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                                    <p className="text-gray-500">No skills added yet. Add your skills to improve your profile!</p>
+                                    <p className="text-gray-500">{t('noSkillsAddedYet')}</p>
                                 </div>
                             )}
                         </div>
@@ -292,7 +363,7 @@ const Profile = () => {
                             <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl">
                                 <FileText className="w-6 h-6 text-white" />
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900">Resume</h2>
+                            <h2 className="text-2xl font-bold text-gray-900">{t('resume')}</h2>
                         </div>
 
                         {isResumeAvailable ? (
@@ -301,7 +372,7 @@ const Profile = () => {
                                     <FileText className="w-8 h-8 text-green-600" />
                                     <div>
                                         <p className="font-semibold text-gray-900">{user.profile.resumeOriginalName}</p>
-                                        <p className="text-sm text-gray-600">Resume uploaded</p>
+                                        <p className="text-sm text-gray-600">{t('resumeUploaded')}</p>
                                     </div>
                                 </div>
                                 <motion.a
@@ -313,18 +384,18 @@ const Profile = () => {
                                     whileTap={{ scale: 0.95 }}
                                 >
                                     <Download className="w-4 h-4" />
-                                    Download
+                                    {t('download')}
                                 </motion.a>
                             </div>
                         ) : (
                             <div className="text-center py-8">
                                 <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                                <p className="text-gray-500 mb-4">No resume uploaded yet.</p>
+                                <p className="text-gray-500 mb-4">{t('noResumeUploadedYet')}</p>
                                 <Button 
                                     onClick={() => setOpen(true)}
                                     className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
                                 >
-                                    Upload Resume
+                                    {t('uploadResume')}
                                 </Button>
                             </div>
                         )}

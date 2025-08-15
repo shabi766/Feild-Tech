@@ -5,11 +5,13 @@ import { Badge } from '../ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { motion } from 'framer-motion';
+import { useTranslation } from '@/Hooks/useTranslation';
 
-const Workorder = ({ job }) => {
+const Workorder = ({ job, onViewDetails }) => {
   const navigate = useNavigate();
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const { t } = useTranslation();
 
   const daysAgoFunction = (mongodbTime) => {
     const createdAt = new Date(mongodbTime);
@@ -46,7 +48,7 @@ const Workorder = ({ job }) => {
   };
 
   const formatSalary = (salary) => {
-    if (!salary) return 'Salary not specified';
+    if (!salary) return t('salaryNotSpecified');
     
     if (salary.payableSalary) return `$${salary.payableSalary}`;
     if (salary.rate) return `$${salary.rate}`;
@@ -54,7 +56,7 @@ const Workorder = ({ job }) => {
     if (salary.partTime?.hourlyRate) return `$${salary.partTime.hourlyRate}/hr`;
     if (salary.fullTime?.contractRate) return `$${salary.fullTime.contractRate}`;
     
-    return 'Salary not specified';
+    return t('salaryNotSpecified');
   };
 
   return (
@@ -132,7 +134,7 @@ const Workorder = ({ job }) => {
         {/* Requirements */}
         {job?.requirements && (
           <div className="mb-4">
-            <p className="text-xs text-gray-500 font-medium mb-2">Requirements</p>
+            <p className="text-xs text-gray-500 font-medium mb-2">{t('requirements')}</p>
             <p className="text-sm text-gray-700">{job.requirements}</p>
           </div>
         )}
@@ -159,13 +161,13 @@ const Workorder = ({ job }) => {
           {job?.experience && (
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Clock className="w-4 h-4" />
-              <span>{job.experience} yrs exp</span>
+              <span>{job.experience} {t('yrsExp')}</span>
             </div>
           )}
           {job?.skills && job.skills.length > 0 && (
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Star className="w-4 h-4" />
-              <span>{job.skills.length} skills</span>
+              <span>{job.skills.length} {t('skillsCount')}</span>
             </div>
           )}
         </div>
@@ -183,7 +185,7 @@ const Workorder = ({ job }) => {
             whileHover={{ x: 5 }}
             transition={{ duration: 0.2 }}
           >
-            <span>View Details</span>
+                                        <span>{t('viewDetails')}</span>
             <ArrowRight className="w-4 h-4" />
           </motion.div>
         </div>

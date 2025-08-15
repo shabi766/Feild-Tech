@@ -19,6 +19,7 @@ const Signup = () => {
         password: "",
         confirmPassword: "",
         role: "",
+        recruiterType: "", // New field for recruiter type
     });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -28,10 +29,13 @@ const Signup = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Get role from navigation state
+    // Get role and recruiter type from navigation state
     useEffect(() => {
         if (location.state?.selectedRole) {
             setInput(prev => ({ ...prev, role: location.state.selectedRole }));
+        }
+        if (location.state?.recruiterType) {
+            setInput(prev => ({ ...prev, recruiterType: location.state.recruiterType }));
         }
     }, [location.state]);
 
@@ -119,6 +123,9 @@ const Signup = () => {
         formData.append("cnic", input.cnic);
         formData.append("password", input.password);
         formData.append("role", input.role);
+        if (input.recruiterType) {
+            formData.append("recruiterType", input.recruiterType);
+        }
 
         try {
             dispatch(setLoading(true));
@@ -183,7 +190,10 @@ const Signup = () => {
                     {input.role && (
                         <div className={`inline-flex items-center mt-4 px-4 py-2 rounded-full bg-gray-100 ${getRoleColor()}`}>
                             {getRoleIcon()}
-                            <span className="ml-2 font-medium">Signing up as {input.role}</span>
+                            <span className="ml-2 font-medium">
+                                Signing up as {input.role}
+                                {input.recruiterType && ` (${input.recruiterType})`}
+                            </span>
                         </div>
                     )}
                 </div>

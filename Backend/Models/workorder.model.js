@@ -120,6 +120,16 @@ const workorderSchema = new mongoose.Schema({
         url: { type: String }
     }],
 
+    // Voice notes for job descriptions
+    voiceNotes: [{
+        id: { type: String, required: true },
+        audioBlob: { type: String }, // Base64 encoded audio or URL
+        duration: { type: Number, required: true },
+        timestamp: { type: Date, default: Date.now },
+        size: { type: Number }, // Size in bytes
+        uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    }],
+
     customFields: [
         {
             id: { type: String },

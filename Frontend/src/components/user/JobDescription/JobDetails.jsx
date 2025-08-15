@@ -5,6 +5,9 @@ import { Button } from "../../ui/button";
 import { Paperclip, Image as ImageIcon } from "lucide-react";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import VoiceMessage from "@/components/shared/VoiceMessage";
+import VoiceNotePlayer from "@/components/shared/VoiceNotePlayer";
+import { useTranslation } from '@/Hooks/useTranslation';
 
 const sanitizeHtml = (html) => {
     if (!html) return '';
@@ -15,6 +18,35 @@ const sanitizeHtml = (html) => {
                    .replace(/ on\w+='[^']*'/gi, '')
                    .replace(/javascript:/gi, '');
     return safe;
+};
+
+// Function to translate HTML content
+const translateHtmlContent = (html, t) => {
+    if (!html) return '';
+    
+    // Create a temporary DOM element to parse the HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    
+    // Function to recursively translate text nodes
+    const translateTextNodes = (node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent.trim();
+            if (text) {
+                // Try to translate the text, fallback to original if no translation found
+                const translated = t(text) || text;
+                node.textContent = translated;
+            }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            // Recursively process child nodes
+            Array.from(node.childNodes).forEach(translateTextNodes);
+        }
+    };
+    
+    // Process all text nodes in the HTML
+    translateTextNodes(tempDiv);
+    
+    return tempDiv.innerHTML;
 };
 
 const quillModules = {
@@ -45,6 +77,21 @@ const JobDetails = ({
     onSaveNotes,
     fileInputRef
 }) => {
+    const { t, currentLanguage } = useTranslation();
+    
+    // Re-translate content when language changes
+    const [translatedDescription, setTranslatedDescription] = React.useState('');
+    const [translatedWorkOrderNotes, setTranslatedWorkOrderNotes] = React.useState('');
+    
+    React.useEffect(() => {
+        if (singleJob?.description) {
+            setTranslatedDescription(translateHtmlContent(sanitizeHtml(singleJob.description), t));
+        }
+        if (singleJob?.workOrderNotes) {
+            setTranslatedWorkOrderNotes(translateHtmlContent(sanitizeHtml(singleJob.workOrderNotes), t));
+        }
+    }, [singleJob?.description, singleJob?.workOrderNotes, currentLanguage, t]);
+    
     return (
         <div className="lg:col-span-2 space-y-6">
             {/* Job Description */}
@@ -52,13 +99,43 @@ const JobDetails = ({
                 <CardHeader>
                     <CardTitle className="flex items-center">
                         <span className="mr-2">📄</span>
-                        Job Description
+                        {t('jobDescription')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
+                    {/* Voice Notes Section */}
+                    {singleJob?.voiceNotes && singleJob.voiceNotes.length > 0 && (
+                        <div className="mb-4">
+                            <VoiceNotePlayer 
+                                voiceNotes={singleJob.voiceNotes}
+                                title={t('voiceNote')}
+                                className="mb-4"
+                            />
+                        </div>
+                    )}
+                    
+                    {/* Voice Note Recording Section (for applicants to add notes) */}
+                    <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                            <div>
+                                <h4 className="text-sm font-semibold text-blue-900">{t('addVoiceNote')}</h4>
+                                <p className="text-xs text-blue-700">{t('recordAdditionalJobDetails')}</p>
+                            </div>
+                        </div>
+                        
+                        <VoiceMessage 
+                            onSendMessage={(audioBlob, duration) => {
+                                console.log('Voice message received:', { audioBlob, duration });
+                                // You can implement file upload or send to chat here
+                            }}
+                            placeholder={t('recordAdditionalJobDetails')}
+                            className="text-sm"
+                        />
+                    </div>
+                    
                     <div
                         className="prose max-w-none text-gray-800"
-                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(singleJob?.description) }}
+                        dangerouslySetInnerHTML={{ __html: translatedDescription }}
                     />
                 </CardContent>
             </Card>
@@ -68,13 +145,13 @@ const JobDetails = ({
                 <CardHeader>
                     <CardTitle className="flex items-center">
                         <span className="mr-2">🛠️</span>
-                        Skills & Requirements
+                        {t('skillsAndRequirements')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {singleJob?.skills && singleJob.skills.length > 0 && (
                         <div>
-                            <h4 className="font-semibold text-gray-900 mb-2">Required Skills</h4>
+                            <h4 className="font-semibold text-gray-900 mb-2">{t('requiredSkills')}</h4>
                             <div className="flex flex-wrap gap-2">
                                 {singleJob.skills.map((skill, index) => (
                                     <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800">
@@ -87,7 +164,7 @@ const JobDetails = ({
                     
                     {singleJob?.requiredTools && singleJob.requiredTools.length > 0 && (
                         <div>
-                            <h4 className="font-semibold text-gray-900 mb-2">Required Tools</h4>
+                            <h4 className="font-semibold text-gray-900 mb-2">{t('requiredTools')}</h4>
                             <div className="flex flex-wrap gap-2">
                                 {singleJob.requiredTools.map((tool, index) => (
                                     <Badge key={index} variant="secondary" className="bg-green-100 text-green-800">
@@ -100,33 +177,33 @@ const JobDetails = ({
 
                     {singleJob?.experience && (
                         <div>
-                            <h4 className="font-semibold text-gray-900 mb-2">Experience Required</h4>
-                            <p className="text-gray-700">{singleJob.experience} years</p>
+                            <h4 className="font-semibold text-gray-900 mb-2">{t('experienceRequired')}</h4>
+                            <p className="text-gray-700">{singleJob.experience} {t('years')}</p>
                         </div>
                     )}
 
                     {singleJob?.selectionRules && (
                         <div>
-                            <h4 className="font-semibold text-gray-900 mb-2">Selection Criteria</h4>
+                            <h4 className="font-semibold text-gray-900 mb-2">{t('selectionCriteria')}</h4>
                             <div className="space-y-2">
                                 {singleJob.selectionRules.requiredDegrees && singleJob.selectionRules.requiredDegrees.length > 0 && (
                                     <p className="text-sm text-gray-600">
-                                        <strong>Required Degrees:</strong> {singleJob.selectionRules.requiredDegrees.join(', ')}
+                                        <strong>{t('requiredDegrees')}:</strong> {singleJob.selectionRules.requiredDegrees.join(', ')}
                                     </p>
                                 )}
                                 {singleJob.selectionRules.requiredCertifications && singleJob.selectionRules.requiredCertifications.length > 0 && (
                                     <p className="text-sm text-gray-600">
-                                        <strong>Required Certifications:</strong> {singleJob.selectionRules.requiredCertifications.join(', ')}
+                                        <strong>{t('requiredCertifications')}:</strong> {singleJob.selectionRules.requiredCertifications.join(', ')}
                                     </p>
                                 )}
                                 {singleJob.selectionRules.minimumExperience && (
                                     <p className="text-sm text-gray-600">
-                                        <strong>Minimum Experience:</strong> {singleJob.selectionRules.minimumExperience} years
+                                        <strong>{t('minimumExperience')}:</strong> {singleJob.selectionRules.minimumExperience} {t('years')}
                                     </p>
                                 )}
                                 {singleJob.selectionRules.mustHavePortfolio && (
                                     <p className="text-sm text-gray-600">
-                                        <strong>Portfolio Required:</strong> Yes
+                                        <strong>{t('portfolioRequired')}:</strong> {t('yes')}
                                     </p>
                                 )}
                             </div>
@@ -141,7 +218,7 @@ const JobDetails = ({
                     <CardHeader>
                         <CardTitle className="flex items-center">
                             <span className="mr-2">📋</span>
-                            Tasks
+                            {t('tasks')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -175,18 +252,18 @@ const JobDetails = ({
                     <CardHeader>
                         <CardTitle className="flex items-center">
                             <span className="mr-2">📝</span>
-                            Work Order Notes
+                            {t('workOrderNotes')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="p-4 bg-blue-50 rounded-lg">
                             <div
                                 className="prose max-w-none text-gray-800"
-                                dangerouslySetInnerHTML={{ __html: sanitizeHtml(singleJob.workOrderNotes) }}
+                                dangerouslySetInnerHTML={{ __html: translatedWorkOrderNotes }}
                             />
                             {singleJob.doneTime && (
                                 <p className="text-sm text-gray-500 mt-2">
-                                    Completed on: {new Date(singleJob.doneTime).toLocaleString()}
+                                    {t('completedOn')}: {new Date(singleJob.doneTime).toLocaleString()}
                                 </p>
                             )}
                         </div>
@@ -201,7 +278,7 @@ const JobDetails = ({
                         <CardTitle className="flex items-center justify-between">
                             <span className="flex items-center">
                                 <span className="mr-2">📸</span>
-                                Work Order Deliverables
+                                {t('workOrderDeliverables')}
                             </span>
                             {isAssignedTechnician && singleJob.status === 'Done' && (
                                 <Button
@@ -212,7 +289,7 @@ const JobDetails = ({
                                     className="flex items-center space-x-2"
                                 >
                                     <Paperclip className="h-4 w-4" />
-                                    <span>{uploadLoading ? 'Uploading...' : 'Add More'}</span>
+                                    <span>{uploadLoading ? t('uploading') : t('addMore')}</span>
                                 </Button>
                             )}
                         </CardTitle>
@@ -235,7 +312,7 @@ const JobDetails = ({
                         </div>
                         {singleJob.doneTime && (
                             <p className="text-sm text-gray-500 mt-3">
-                                Completed on: {new Date(singleJob.doneTime).toLocaleString()}
+                                {t('completedOn')}: {new Date(singleJob.doneTime).toLocaleString()}
                             </p>
                         )}
                     </CardContent>
@@ -248,7 +325,7 @@ const JobDetails = ({
                     <CardHeader>
                         <CardTitle className="flex items-center">
                             <span className="mr-2">📸</span>
-                            Add Work Progress Images
+                            {t('addWorkProgressImages')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -270,11 +347,11 @@ const JobDetails = ({
                                     className="flex items-center space-x-2"
                                 >
                                     <Paperclip className="h-4 w-4" />
-                                    <span>{uploadLoading ? 'Uploading...' : 'Upload Progress Images'}</span>
+                                    <span>{uploadLoading ? t('uploading') : t('uploadProgressImages')}</span>
                                 </Button>
                             </div>
                             <p className="text-sm text-gray-500">
-                                Upload images to document your work progress. These will be included in the final deliverables.
+                                {t('uploadProgressImagesDescription')}
                             </p>
                         </div>
                     </CardContent>
@@ -287,7 +364,7 @@ const JobDetails = ({
                     <CardHeader>
                         <CardTitle className="flex items-center">
                             <span className="mr-2">📝</span>
-                            Add Work Progress Notes
+                            {t('addWorkProgressNotes')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -305,11 +382,11 @@ const JobDetails = ({
                                     size="sm"
                                     onClick={onSaveNotes}
                                 >
-                                    Save Notes
+                                    {t('saveNotes')}
                                 </Button>
                             </div>
                             <p className="text-sm text-gray-500">
-                                Add rich-text notes about your progress. These will be included in the final work order notes.
+                                {t('addWorkProgressNotesDescription')}
                             </p>
                         </div>
                     </CardContent>
@@ -322,7 +399,7 @@ const JobDetails = ({
                     <CardHeader>
                         <CardTitle className="flex items-center">
                             <span className="mr-2">📦</span>
-                            Shipments
+                            {t('shipments')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -330,11 +407,11 @@ const JobDetails = ({
                             {singleJob.shipments.map((shipment, index) => (
                                 <div key={index} className="p-4 border border-gray-200 rounded-lg">
                                     <div className="flex justify-between items-start mb-2">
-                                        <h4 className="font-semibold">Shipment #{shipment.shipmentNumber}</h4>
+                                        <h4 className="font-semibold">{t('shipment')} #{shipment.shipmentNumber}</h4>
                                         <Badge variant="outline">{shipment.status}</Badge>
                                     </div>
                                     {shipment.trackingId && (
-                                        <p className="text-sm text-gray-600">Tracking: {shipment.trackingId}</p>
+                                        <p className="text-sm text-gray-600">{t('tracking')}: {shipment.trackingId}</p>
                                     )}
                                     {shipment.picture && (
                                         <img src={shipment.picture} alt="Shipment" className="mt-2 w-20 h-20 object-cover rounded" />
@@ -352,7 +429,7 @@ const JobDetails = ({
                     <CardHeader>
                         <CardTitle className="flex items-center">
                             <span className="mr-2">⚙️</span>
-                            Additional Information
+                            {t('additionalInformation')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>

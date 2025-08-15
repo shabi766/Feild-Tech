@@ -601,9 +601,26 @@ export const cancelJob = async (req, res) => {
 export const PaidJob = async (req, res) => {
     const { id } = req.params;
     try {
-        const job = await Workorder.findByIdAndUpdate(id, { status: 'Paid', doneTime: new Date() }, { new: true });
+        const job = await Workorder.findByIdAndUpdate(id, { status: 'Paid', paidTime: new Date() }, { new: true });
         if (!job) return res.status(404).json({ message: 'Job not found', success: false });
-        return res.status(200).json({ message: 'Job marked Paid successfully', job, success: true });
+        
+        // Update technician performance stats when job is paid
+        if (job.assignedApplicant) {
+            try {
+                const { updateTechnicianPerformance } = await import('./review.controller.js');
+                await updateTechnicianPerformance(job.assignedApplicant);
+            } catch (error) {
+                console.error('Error updating technician performance:', error);
+                // Don't fail the main operation if performance update fails
+            }
+        }
+        
+        return res.status(200).json({ 
+            message: 'Job marked Paid successfully. You can now review the technician.', 
+            job, 
+            success: true,
+            canReview: true
+        });
     } catch (error) {
         return res.status(500).json({ message: 'Server error', success: false, error: error.message });
     }

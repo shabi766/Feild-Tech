@@ -1,12 +1,16 @@
 import React from "react";
 import { Badge } from "../../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { useTranslation } from '@/Hooks/useTranslation';
+import { formatLocation } from '@/utils/locationUtils';
 
 const JobSidebar = ({
     singleJob,
     isAssignedTechnician,
     formatCurrency
 }) => {
+    const { t } = useTranslation();
+    
     return (
         <div className="space-y-6">
             {/* Job Details */}
@@ -14,40 +18,32 @@ const JobSidebar = ({
                 <CardHeader>
                     <CardTitle className="flex items-center">
                         <span className="mr-2">💰</span>
-                        Compensation
+                        {t('compensation')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div>
-                        <h4 className="font-semibold text-gray-900 mb-2">Job Type</h4>
+                        <h4 className="font-semibold text-gray-900 mb-2">{t('jobType')}</h4>
                         <Badge variant="outline" className="capitalize">
                             {singleJob?.jobType}
                         </Badge>
                     </div>
-
-                    {singleJob?.jobType === "part-time" && singleJob?.partTimeOptions && (
+                    
+                    {singleJob?.salary && (
                         <div className="space-y-2">
-                            <p className="text-sm text-gray-600">
-                                <strong>Base:</strong> {singleJob.partTimeOptions.base}
-                            </p>
-                            {singleJob?.salary?.partTime?.hourlyRate && (
+                            {singleJob.salary.hourly && (
                                 <p className="text-sm text-gray-600">
-                                    <strong>Hourly Rate:</strong> {formatCurrency(singleJob.salary.partTime.hourlyRate)}
+                                    <strong>{t('salary')}:</strong> {formatCurrency(singleJob.salary.hourly)}/hr
                                 </p>
                             )}
-                            {singleJob?.salary?.partTime?.dailyRate && (
+                            {singleJob.salary.fixed && (
                                 <p className="text-sm text-gray-600">
-                                    <strong>Daily Rate:</strong> {formatCurrency(singleJob.salary.partTime.dailyRate)}
+                                    <strong>{t('salary')}:</strong> {formatCurrency(singleJob.salary.fixed)}
                                 </p>
                             )}
-                            {singleJob?.salary?.partTime?.weeklyRate && (
+                            {singleJob.salary.range && (
                                 <p className="text-sm text-gray-600">
-                                    <strong>Weekly Rate:</strong> {formatCurrency(singleJob.salary.partTime.weeklyRate)}
-                                </p>
-                            )}
-                            {singleJob?.salary?.partTime?.contractRate && (
-                                <p className="text-sm text-gray-600">
-                                    <strong>Contract Rate:</strong> {formatCurrency(singleJob.salary.partTime.contractRate)}
+                                    <strong>{t('salary')}:</strong> {formatCurrency(singleJob.salary.range.min)} - {formatCurrency(singleJob.salary.range.max)}
                                 </p>
                             )}
                         </div>
@@ -56,16 +52,16 @@ const JobSidebar = ({
                     {singleJob?.jobType === "full-time" && singleJob?.fullTimeOptions && (
                         <div className="space-y-2">
                             <p className="text-sm text-gray-600">
-                                <strong>Base:</strong> {singleJob.fullTimeOptions.base}
+                                <strong>{t('base')}:</strong> {singleJob.fullTimeOptions.base}
                             </p>
                             {singleJob?.salary?.fullTime?.contractRate && (
                                 <p className="text-sm text-gray-600">
-                                    <strong>Contract Rate:</strong> {formatCurrency(singleJob.salary.fullTime.contractRate)}
+                                    <strong>{t('contractRate')}:</strong> {formatCurrency(singleJob.salary.fullTime.contractRate)}
                                 </p>
                             )}
                             {singleJob?.fullTimeOptions?.contractMonths && (
                                 <p className="text-sm text-gray-600">
-                                    <strong>Contract Duration:</strong> {singleJob.fullTimeOptions.contractMonths} Months
+                                    <strong>{t('contractDuration')}:</strong> {singleJob.fullTimeOptions.contractMonths} {t('months')}
                                 </p>
                             )}
                         </div>
@@ -74,7 +70,7 @@ const JobSidebar = ({
                     {singleJob?.totalSalary && (
                         <div className="pt-2 border-t">
                             <p className="text-lg font-semibold text-indigo-600">
-                                Total Salary: {formatCurrency(singleJob.totalSalary)}
+                                {t('totalSalary')}: {formatCurrency(singleJob.totalSalary)}
                             </p>
                         </div>
                     )}
@@ -82,33 +78,46 @@ const JobSidebar = ({
                     {singleJob?.payableSalary && (
                         <div>
                             <p className="text-sm text-gray-600">
-                                <strong>Payable Salary:</strong> {formatCurrency(singleJob.payableSalary)}
+                                <strong>{t('payableSalary')}:</strong> {formatCurrency(singleJob.payableSalary)}
                             </p>
                         </div>
                     )}
                 </CardContent>
             </Card>
 
+            {/* Work Type */}
+            {singleJob?.workType && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center">
+                            <span className="mr-2">🏢</span>
+                            {t('workType')}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Badge variant="outline" className="capitalize">
+                            {singleJob.workType}
+                        </Badge>
+                    </CardContent>
+                </Card>
+            )}
+
             {/* Location */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center">
-                        <span className="mr-2">📍</span>
-                        Location
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-2">
-                        {singleJob?.location?.street && (
-                            <p className="text-gray-700">{singleJob.location.street}</p>
-                        )}
-                        <p className="text-gray-700">
-                            {singleJob?.location?.city}, {singleJob?.location?.state} {singleJob?.location?.postalCode}
+            {singleJob?.location && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center">
+                                                    <span className="mr-2">📍</span>
+                        {t('location')}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-gray-700">
+                            {formatLocation(singleJob.location)}
                         </p>
-                        <p className="text-gray-700">{singleJob?.location?.country}</p>
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
+            )}
 
             {/* Project Information */}
             {singleJob?.projectName && (
@@ -116,7 +125,7 @@ const JobSidebar = ({
                     <CardHeader>
                         <CardTitle className="flex items-center">
                             <span className="mr-2">🏗️</span>
-                            Project
+                            {t('project')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -132,7 +141,7 @@ const JobSidebar = ({
                                     rel="noopener noreferrer"
                                     className="text-indigo-600 hover:text-indigo-800 text-sm"
                                 >
-                                    Visit Website
+                                    {t('visitWebsite')}
                                 </a>
                             )}
                         </div>
@@ -141,7 +150,7 @@ const JobSidebar = ({
             )}
 
             {/* Client Information */}
-            {singleJob?.clientName && (
+            {singleJob?.client && (
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center">
@@ -151,40 +160,31 @@ const JobSidebar = ({
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-2">
-                            <h4 className="font-semibold text-gray-900">{singleJob.clientName.name}</h4>
-                            {singleJob.clientName.email && (
-                                <p className="text-sm text-gray-600">{singleJob.clientName.email}</p>
+                            <h4 className="font-semibold text-gray-900">{singleJob.client.name}</h4>
+                            {singleJob.client.company && (
+                                <p className="text-sm text-gray-600">{singleJob.client.company}</p>
                             )}
-                            {singleJob.clientName.phone && (
-                                <p className="text-sm text-gray-600">{singleJob.clientName.phone}</p>
+                            {singleJob.client.rating && (
+                                <div className="flex items-center space-x-1">
+                                    <span className="text-sm text-gray-600">Rating:</span>
+                                    <div className="flex">
+                                        {[...Array(5)].map((_, i) => (
+                                            <svg
+                                                key={i}
+                                                className={`w-4 h-4 ${
+                                                    i < singleJob.client.rating
+                                                        ? 'text-yellow-400 fill-current'
+                                                        : 'text-gray-300'
+                                                }`}
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                                            </svg>
+                                        ))}
+                                    </div>
+                                </div>
                             )}
                         </div>
-                    </CardContent>
-                </Card>
-            )}
-
-            {/* Contact Information */}
-            {(singleJob?.siteContact || singleJob?.SecondaryContact) && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center">
-                            <span className="mr-2">📞</span>
-                            Site Contacts
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                        {singleJob?.siteContact && (
-                            <div>
-                                <h4 className="font-medium text-gray-900">Primary Contact</h4>
-                                <p className="text-sm text-gray-600">{singleJob.siteContact}</p>
-                            </div>
-                        )}
-                        {singleJob?.SecondaryContact && (
-                            <div>
-                                <h4 className="font-medium text-gray-900">Secondary Contact</h4>
-                                <p className="text-sm text-gray-600">{singleJob.SecondaryContact}</p>
-                            </div>
-                        )}
                     </CardContent>
                 </Card>
             )}
@@ -194,25 +194,25 @@ const JobSidebar = ({
                 <CardHeader>
                     <CardTitle className="flex items-center">
                         <span className="mr-2">📊</span>
-                        Job Details
+                        {t('jobDetails')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                     <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Posted:</span>
+                        <span className="text-sm text-gray-600">{t('posted')}:</span>
                         <span className="text-sm text-gray-900">
                             {singleJob?.createdAt ? new Date(singleJob.createdAt).toLocaleDateString() : 'N/A'}
                         </span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Updated:</span>
+                        <span className="text-sm text-gray-600">{t('updated')}:</span>
                         <span className="text-sm text-gray-900">
                             {singleJob?.updatedAt ? new Date(singleJob.updatedAt).toLocaleDateString() : 'N/A'}
                         </span>
                     </div>
                     {singleJob?.totalJobDuration && (
                         <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">Duration:</span>
+                            <span className="text-sm text-gray-600">{t('duration')}:</span>
                             <span className="text-sm text-gray-900">
                                 {singleJob.totalJobDuration} {singleJob.totalJobTime}
                             </span>
@@ -220,7 +220,7 @@ const JobSidebar = ({
                     )}
                     {singleJob?.payableHours && (
                         <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">Payable Hours:</span>
+                            <span className="text-sm text-gray-600">{t('payableHours')}:</span>
                             <span className="text-sm text-gray-900">{singleJob.payableHours}h</span>
                         </div>
                     )}

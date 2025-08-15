@@ -50,6 +50,7 @@ const PostJobs = () => {
         fullTime: { base: '', contractMonths: 0 },
         attachments: [],
         contacts: [],
+        voiceNotes: [],
     });
     const [jobId, setJobId] = useState('');
     const [status, setStatus] = useState('Draft');

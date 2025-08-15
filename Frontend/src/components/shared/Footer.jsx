@@ -1,8 +1,10 @@
 import React from 'react'
 import '@fortawesome/fontawesome-free/css/all.min.css';
-
+import { useTranslation } from '@/Hooks/useTranslation';
 
 const Footer = () => {
+    const { t } = useTranslation();
+    
     const footerStyle = {
         backgroundColor: '#1a1a1a',
         color: '#fff',
@@ -59,20 +61,20 @@ const Footer = () => {
         <footer style={footerStyle}>
           <div style={footerContainerStyle}>
             <div style={sectionStyle}>
-              <h3 style={titleStyle}>About Us</h3>
-              <p>We are committed to providing the best service to our customers. Feel free to explore our platform and learn more about what we offer.</p>
+              <h3 style={titleStyle}>{t('aboutUs')}</h3>
+              <p>{t('aboutUsDescription')}</p>
             </div>
     
             <div style={sectionStyle}>
-              <h3 style={titleStyle}>Quick Links</h3>
-              <a href="/about" style={linkStyle} onMouseOver={(e) => e.target.style.textDecoration = 'underline'} onMouseOut={(e) => e.target.style.textDecoration = 'none'}>About</a>
-              <a href="/contact" style={linkStyle} onMouseOver={(e) => e.target.style.textDecoration = 'underline'} onMouseOut={(e) => e.target.style.textDecoration = 'none'}>Contact</a>
-              <a href="/faq" style={linkStyle} onMouseOver={(e) => e.target.style.textDecoration = 'underline'} onMouseOut={(e) => e.target.style.textDecoration = 'none'}>FAQ</a>
-              <a href="/privacy" style={linkStyle} onMouseOver={(e) => e.target.style.textDecoration = 'underline'} onMouseOut={(e) => e.target.style.textDecoration = 'none'}>Privacy Policy</a>
+              <h3 style={titleStyle}>{t('quickLinks')}</h3>
+              <a href="/about" style={linkStyle} onMouseOver={(e) => e.target.style.textDecoration = 'underline'} onMouseOut={(e) => e.target.style.textDecoration = 'none'}>{t('about')}</a>
+              <a href="/contact" style={linkStyle} onMouseOver={(e) => e.target.style.textDecoration = 'underline'} onMouseOut={(e) => e.target.style.textDecoration = 'none'}>{t('contact')}</a>
+              <a href="/faq" style={linkStyle} onMouseOver={(e) => e.target.style.textDecoration = 'underline'} onMouseOut={(e) => e.target.style.textDecoration = 'none'}>{t('faq')}</a>
+              <a href="/privacy" style={linkStyle} onMouseOver={(e) => e.target.style.textDecoration = 'underline'} onMouseOut={(e) => e.target.style.textDecoration = 'none'}>{t('privacyPolicy')}</a>
             </div>
     
             <div style={sectionStyle}>
-              <h3 style={titleStyle}>Follow Us</h3>
+              <h3 style={titleStyle}>{t('followUs')}</h3>
               <div style={socialIconsStyle}>
                 <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" style={linkStyle}>
                   <i className="fab fa-facebook-f"></i>
@@ -88,7 +90,7 @@ const Footer = () => {
           </div>
     
           <div style={footerBottomStyle}>
-            <p>&copy; {new Date().getFullYear()} YourCompany. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} {t('yourCompany')}. {t('allRightsReserved')}.</p>
             {/* Hidden Admin Access Hint - Very subtle */}
             <div style={{
               fontSize: '10px',
@@ -97,7 +99,7 @@ const Footer = () => {
               opacity: '0.3',
               cursor: 'default',
               userSelect: 'none'
-            }} title="Administrator Access Available">
+            }} title={t('administratorAccessAvailable')}>
               A
             </div>
           </div>

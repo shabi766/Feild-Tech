@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { CHAT_API_END_POINT, USER_API_END_POINT } from "@/components/utils/constant";
-import socket from "../components/shared/socket";
+import { getSocket, disconnectSocket } from "../components/shared/socket";
 
 export const ChatContext = createContext();
 
@@ -23,31 +23,44 @@ export const ChatProvider = ({ children }) => {
                 const { data } = await axios.get(`${USER_API_END_POINT}/me`, { withCredentials: true });
                 setCurrentUser(data?.user || null);
             } catch (error) {
-                console.error("Error fetching user:", error);
+                // Only log error if it's not a 401 (unauthorized) which is expected when not logged in
+                if (error.response?.status !== 401) {
+                    console.error("Error fetching user:", error);
+                }
+                setCurrentUser(null);
             }
         };
         fetchUser();
     }, []);
     
 
-    /** ✅ Fetch User Chats */
+    /** ✅ Fetch User Chats - Only when user is authenticated */
     const fetchChats = useCallback(async () => {
+        if (!currentUser) return; // Don't fetch if no user
+        
         try {
             const { data } = await axios.get(`${CHAT_API_END_POINT}/all`, { withCredentials: true });
             setChats(data?.chats || []);
         } catch (error) {
             console.error("Error fetching chats:", error);
         }
-    }, []);
+    }, [currentUser]);
 
     useEffect(() => {
-        fetchChats();
-    }, [fetchChats]);
+        if (currentUser) {
+            fetchChats();
+        } else {
+            // Clear chats when user logs out
+            setChats([]);
+        }
+    }, [fetchChats, currentUser]);
 
     /** ✅ Fetch Messages for Selected Chat */
     useEffect(() => {
-        if (!selectedChat) return;
+        if (!selectedChat || !currentUser) return; // Don't fetch if no user or no selected chat
 
+        const socket = getSocket(); // Get socket only when needed
+        
         const fetchMessages = async () => {
             try {
                 const { data } = await axios.get(`${CHAT_API_END_POINT}/${selectedChat._id}`, { withCredentials: true });
@@ -90,9 +103,15 @@ export const ChatProvider = ({ children }) => {
         return () => {
             socket.off("new_message", handleIncoming);
         };
-    }, [selectedChat]);
+    }, [selectedChat, currentUser]);
 
+    /** ✅ Fetch Unread Messages - Only when user is authenticated */
     useEffect(() => {
+        if (!currentUser) {
+            setUnreadMessages([]);
+            return;
+        }
+        
         const fetchUnreadMessages = async () => {
             try {
                 const { data } = await axios.get(`${CHAT_API_END_POINT}/unread-messages`, { withCredentials: true });
@@ -101,38 +120,45 @@ export const ChatProvider = ({ children }) => {
                 console.error("Error fetching unread messages:", error);
             }
         };
-    
         fetchUnreadMessages();
+    }, [currentUser]);
     
-        socket.on("new_message", (message) => {
-            setUnreadMessages((prev) => {
-                // Avoid duplicates & only add new unread messages
-                if (!prev.find((m) => m.chatId === message.chatId)) {
-                    return [...prev, { chatId: message.chatId, messages: [message] }];
-                }
-                return prev;
-            });
-            // Also update chat list ordering when not in selected chat
-            setChats((prev) => {
-                const copy = [...prev];
-                const index = copy.findIndex(c => c._id === message.chatId);
-                if (index !== -1) {
-                    const updatedChat = { ...copy[index] };
-                    const msgs = Array.isArray(updatedChat.messages) ? [...updatedChat.messages, message] : [message];
-                    updatedChat.messages = msgs;
-                    updatedChat.updatedAt = message.createdAt || new Date().toISOString();
-                    copy.splice(index, 1);
-                    return [updatedChat, ...copy];
-                }
-                return prev;
-            });
+    /** ✅ Cleanup when user logs out */
+    useEffect(() => {
+        if (!currentUser) {
+            // Clear all chat-related state when user logs out
+            setChats([]);
+            setMessages([]);
+            setSelectedChat(null);
+            setUnreadMessages([]);
+            setUserStatus({});
+            setSearchResults([]);
+            
+            // Disconnect socket if connected
+            disconnectSocket();
+        }
+    }, [currentUser]);
+    
+    /** ✅ Handle Online Status - Only when user is authenticated */
+    useEffect(() => {
+        if (!currentUser) return; // Don't set up socket listeners if no user
+        
+        const socket = getSocket(); // Get socket only when needed
+        
+        socket.on("user_online", (userId) => {
+            setUserStatus((prev) => ({ ...prev, [userId]: "online" }));
         });
-    
+
+        socket.on("user_offline", ({ userId, lastSeen }) => {
+            setUserStatus((prev) => ({ ...prev, [userId]: `Last seen ${lastSeen}` }));
+        });
+
         return () => {
-            socket.off("new_message");
+            socket.off("user_online");
+            socket.off("user_offline");
         };
-    }, []);
-    
+    }, [currentUser]);
+
     /** ✅ Handle Searching Users */
     const searchUsers = async (query) => {
         try {
@@ -170,8 +196,12 @@ export const ChatProvider = ({ children }) => {
         }
     };
     
-      /** ✅ Handle Online Status */
+      /** ✅ Handle Online Status - Only when user is authenticated */
       useEffect(() => {
+        if (!currentUser) return; // Don't set up socket listeners if no user
+        
+        const socket = getSocket(); // Get socket only when needed
+        
         socket.on("user_online", (userId) => {
             setUserStatus((prev) => ({ ...prev, [userId]: "online" }));
         });
@@ -184,7 +214,7 @@ export const ChatProvider = ({ children }) => {
             socket.off("user_online");
             socket.off("user_offline");
         };
-    }, []);
+    }, [currentUser]);
 
     const sendMessage = async (content, type = "text", fileUrl = null) => {
         if (!selectedChat) {
@@ -219,6 +249,7 @@ export const ChatProvider = ({ children }) => {
             });
     
             // ✅ Emit event for real-time updates
+            const socket = getSocket(); // Get socket only when needed
             socket.emit("send_message", data.message);
         } catch (error) {
             console.error("❌ Error sending message:", error);

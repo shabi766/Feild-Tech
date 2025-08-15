@@ -5,13 +5,29 @@ import { uploadToS3 } from "../utils/s3Upload.js";
 import escapeRegex from 'escape-string-regexp';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
+import { SettingsService } from "../utils/settingsService.js";
 export const register = async (req, res) => {
     try {
-        const { fullname, email, phoneNumber, password, cnic, role } = req.body;
+        const { fullname, email, phoneNumber, password, cnic, role, recruiterType } = req.body;
 
         if (!fullname || !email || !phoneNumber || !password || !cnic || !role) {
             return res.status(400).json({
                 message: "All fields are required.",
+                success: false,
+            });
+        }
+
+        // Validate recruiter type for recruiters
+        if (role === 'Recruiter' && !recruiterType) {
+            return res.status(400).json({
+                message: "Recruiter type (Individual or Company) is required for recruiters.",
+                success: false,
+            });
+        }
+
+        if (role === 'Recruiter' && !['Individual', 'Company'].includes(recruiterType)) {
+            return res.status(400).json({
+                message: "Invalid recruiter type. Must be either 'Individual' or 'Company'.",
                 success: false,
             });
         }
@@ -33,7 +49,7 @@ export const register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        await User.create({
+        const userData = {
             fullname,
             email,
             phoneNumber,
@@ -43,7 +59,14 @@ export const register = async (req, res) => {
             profile: {
                 profilePhoto: profilePhoto,
             },
-        });
+        };
+
+        // Add recruiter type only for recruiters
+        if (role === 'Recruiter') {
+            userData.recruiterType = recruiterType;
+        }
+
+        await User.create(userData);
 
         return res.status(201).json({
             message: "Account created successfully.",
@@ -88,6 +111,9 @@ export const login = async (req, res) => {
 
         const tokenData = {
             userId: user._id,
+            role: user.role,
+            recruiterType: user.recruiterType,
+            ...(user.companyId && { companyId: user.companyId })
         };
         const token = await jwt.sign(tokenData, process.env.SECRET_KEY, { expiresIn: '7d' });
 
@@ -98,6 +124,8 @@ export const login = async (req, res) => {
             phoneNumber: user.phoneNumber,
             cnic: user.cnic,
             role: user.role,
+            recruiterType: user.recruiterType, // Include recruiter type
+            companyId: user.companyId, // Include company ID for company recruiters
             profile: user.profile,
         };
 
@@ -125,27 +153,34 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
     try {
-        if (!req.user) {
-            console.error("User not found in request");
-            return res.status(401).json({ 
-                message: "Unauthorized: User not logged in", 
-                success: false 
-            });
+        // Try to get user from request if available (from token)
+        let userId = null;
+        if (req.user && req.user._id) {
+            userId = req.user._id;
+            // Update user status to offline if we have a valid user
+            await User.findByIdAndUpdate(userId, { status: "offline", lastSeen: new Date() });
         }
 
-        const userId = req.user._id;
-        await User.findByIdAndUpdate(userId, { status: "offline", lastSeen: new Date() });
-
-        return res.status(200).clearCookie("token").json({
+        // Always clear cookies and return success, regardless of user authentication status
+        // Use the same options that were used when setting the cookie
+        return res.status(200).clearCookie("token", {
+            httpOnly: true,
+            sameSite: 'strict'
+        }).json({
             message: "Logged out successfully.",
             success: true,
+            userLoggedOut: !!userId
         });
     } catch (error) {
         console.error("Error during logout:", error);
-        return res.status(500).json({
-            message: "An error occurred during logout.",
-            success: false,
-            error: error.message,
+        // Even if there's an error, try to clear cookies and return success
+        return res.status(200).clearCookie("token", {
+            httpOnly: true,
+            sameSite: 'strict'
+        }).json({
+            message: "Logged out successfully.",
+            success: true,
+            userLoggedOut: false
         });
     }
 };
@@ -310,36 +345,77 @@ export const searchUsers = async (req, res) => {
         const user = await User.findById(req.user._id).select("-password"); // Exclude password
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-        res.status(200).json({ success: true, user });
+        // Preserve JWT payload data (companyId, role, recruiterType)
+        const userWithJWTData = {
+            ...user.toObject(),
+            companyId: req.user.companyId,
+            role: req.user.role,
+            recruiterType: req.user.recruiterType
+        };
+
+        res.status(200).json({ success: true, user: userWithJWTData });
     } catch (error) {
         console.error("Error fetching user profile:", error);
         res.status(500).json({ success: false, message: "Server error" });
     }
 };
 
+export const getUserSettings = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const result = await SettingsService.getUserSettings(userId);
+        
+        if (!result.success) {
+            return res.status(404).json({
+                success: false,
+                message: result.error
+            });
+        }
+        
+        res.status(200).json({
+            success: true,
+            settings: result.settings
+        });
+    } catch (error) {
+        console.error("Error getting user settings:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error while getting settings",
+            error: error.message
+        });
+    }
+};
 
 export const updateUserSettings = async (req, res) => {
     try {
         const userId = req.params.id;
-        const { fullname, email, password, notifications, darkMode, profilePhoto } = req.body;
-
-        let updateFields = { fullname, email, notifications, darkMode, profilePhoto };
-
-        if (password) {
-            const hashedPassword = await bcrypt.hash(password, 10);
-            updateFields.password = hashedPassword;
+        const updateData = req.body;
+        
+        // Handle profile photo upload
+        if (req.file) {
+            const profilePhoto = await uploadToS3(req.file, 'profiles');
+            updateData.profilePhoto = profilePhoto;
         }
 
-        const updatedUser = await User.findByIdAndUpdate(userId, updateFields, { new: true });
-
-        if (!updatedUser) {
-            return res.status(404).json({ message: "User not found" });
+        // Use the settings service
+        const result = await SettingsService.updateUserSettings(userId, updateData);
+        
+        if (!result.success) {
+            return res.status(400).json({
+                success: false,
+                message: result.error
+            });
         }
-
-        res.status(200).json({ success: true, user: updatedUser });
+        
+        res.status(200).json(result);
+        
     } catch (error) {
         console.error("Error updating user settings:", error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({
+            success: false,
+            message: "Server error while updating settings",
+            error: error.message
+        });
     }
 };
 export const deleteAccount = async (req, res) => {

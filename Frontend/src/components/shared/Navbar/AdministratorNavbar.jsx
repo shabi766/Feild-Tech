@@ -9,7 +9,7 @@ import axios from 'axios';
 import { USER_API_END_POINT } from '@/components/utils/constant';
 import logo from "@/assets/logo.png";
 
-const AdministratorNavbar = ({ user }) => {
+const AdministratorNavbar = ({ user, setLogoutFlag }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -43,9 +43,15 @@ const AdministratorNavbar = ({ user }) => {
 
     const handleLogout = async () => {
         setLoading(true);
+        
+        // Set logout flag to prevent unnecessary API calls
+        if (setLogoutFlag) {
+            setLogoutFlag();
+        }
+        
         try {
             // Try to call logout endpoint, but don't fail if it returns 401
-            const res = await axios.get(`${USER_API_END_POINT}/Logout`, { withCredentials: true });
+            const res = await axios.get(`${USER_API_END_POINT}/logout`, { withCredentials: true });
             if (res.data.success) {
                 toast.success("Successfully logged out");
             }

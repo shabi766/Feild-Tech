@@ -77,7 +77,7 @@ const Sidebar = () => {
       case 'Recruiter':
         return [
           { 
-            path: user.recruiterType === 'individual' || !user.companyId ? 
+            path: user.recruiterType === 'Individual' || !user.companyId ? 
                 '/app/recruiter/dashboard-individual' : '/app/recruiter/dashboard', 
             label: 'Dashboard', 
             icon: Home,
@@ -98,6 +98,14 @@ const Sidebar = () => {
             color: 'from-yellow-500 to-yellow-600',
             description: 'Manage payments'
           },
+          // Only show Team Management for company recruiters
+          ...(user.companyId ? [{
+            path: '/app/recruiter/team-management',
+            label: 'Team Management',
+            icon: Users,
+            color: 'from-indigo-500 to-indigo-600',
+            description: 'Manage company teams & roles'
+          }] : []),
           { 
             path: '/app/recruiter/profile', 
             label: 'Profile', 

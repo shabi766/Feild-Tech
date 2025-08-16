@@ -42,13 +42,13 @@ const userSchema = new mongoose.Schema(
         cnic: {
             type: String,
             required: function() {
-                // CNIC is only required for individual users, not company recruiters
-                return this.role !== "Recruiter" || this.recruiterType !== "Company";
+                // CNIC is only required for individual users, not company recruiters or company owners
+                return this.role !== "Recruiter" && this.role !== "Company";
             },
         },
         role: {
             type: String,
-            enum: ["Technician", "Recruiter", "Admin"],
+            enum: ["Technician", "Recruiter", "Admin", "Company"], // Added "Company" for company owners
         },
         // New field to track recruiter registration type
         recruiterType: {

@@ -27,11 +27,6 @@ import { useNavigate } from 'react-router-dom';
 const CompanyRecruiterDashboard = () => {
   const { user, isAuthenticated } = useSelector(store => store.auth);
   const navigate = useNavigate();
-  
-  console.log('CompanyRecruiterDashboard render - user:', user);
-  console.log('CompanyRecruiterDashboard render - user.companyId:', user?.companyId);
-  console.log('CompanyRecruiterDashboard render - isAuthenticated:', isAuthenticated);
-  console.log('CompanyRecruiterDashboard render - full store.auth:', { user, isAuthenticated });
   const [companyData, setCompanyData] = useState(null);
   const [stats, setStats] = useState({
     totalJobs: 0,
@@ -60,59 +55,29 @@ const CompanyRecruiterDashboard = () => {
   const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
-    console.log('CompanyRecruiterDashboard useEffect - user:', user);
-    console.log('User companyId:', user?.companyId);
-    console.log('User role:', user?.role);
-    console.log('User recruiterType:', user?.recruiterType);
-    console.log('User isAuthenticated:', user ? 'Yes' : 'No');
-    console.log('Full user object:', JSON.stringify(user, null, 2));
-    
     if (user?.companyId) {
-      console.log('User has companyId, fetching data...');
       fetchCompanyData();
       fetchDashboardStats();
     } else {
-      console.log('No companyId found, setting loading to false');
-      console.log('User object keys:', Object.keys(user || {}));
-      console.log('User object values:', Object.values(user || {}));
-      console.log('User object type:', typeof user);
-      console.log('User object is null:', user === null);
-      console.log('User object is undefined:', user === undefined);
       setLoading(false);
     }
     
     // Add a timeout to prevent infinite loading
     const timeout = setTimeout(() => {
       if (loading) {
-        console.log('Loading timeout reached, setting loading to false');
         setLoading(false);
       }
-    }, 10000); // 10 seconds timeout
+    }, 5000); // 5 seconds timeout
     
     return () => clearTimeout(timeout);
   }, [user, loading]);
 
   const fetchCompanyData = async () => {
     try {
-      console.log('Fetching company data for company:', user.companyId);
-      console.log('User object:', user);
-      console.log('API endpoint:', `/company/${user.companyId}/info`);
-      
-      // Fetch company information
       const response = await api.get(`/company/${user.companyId}/info`);
-      console.log('Company data response:', response.data);
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
       
       if (response.data.success) {
         const company = response.data.company;
-        console.log('Setting company data:', company);
-        console.log('Company name:', company.name);
-        console.log('Company industry:', company.industry);
-        console.log('Company recruiters:', company.recruiters);
-        console.log('Company address:', company.address);
-        console.log('Company contact:', company.contact);
-        
         setCompanyData(company);
         setCompanyMetrics({
           employeeCount: company.employeeCount || 0,
@@ -122,12 +87,9 @@ const CompanyRecruiterDashboard = () => {
           clientSatisfaction: company.stats?.clientSatisfaction || 0,
           projectSuccessRate: company.stats?.projectSuccessRate || 0
         });
-      } else {
-        console.log('Company data response not successful:', response.data);
       }
     } catch (error) {
       console.error('Error fetching company data:', error);
-      console.error('Error details:', error.response?.data || error.message);
       setError('Failed to fetch company data');
       // Set default company data on error
       setCompanyData({
@@ -147,26 +109,16 @@ const CompanyRecruiterDashboard = () => {
 
   const fetchDashboardStats = async () => {
     try {
-      console.log('Fetching dashboard stats for company:', user.companyId);
-      // Fetch real dashboard statistics
       const response = await api.get(`/dashboard/company/${user.companyId}/stats`);
-      console.log('Dashboard stats response:', response.data);
       
       if (response.data.success) {
         const data = response.data;
-        console.log('Dashboard stats data:', data.stats);
-        console.log('Recent jobs:', data.recentJobs);
-        console.log('Recent projects:', data.recentProjects);
-        
         setStats(data.stats || {});
         setRecentJobs(data.recentJobs || []);
         setRecentApplications(data.recentProjects || []);
-      } else {
-        console.log('Dashboard stats response not successful:', response.data);
       }
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
-      console.error('Error details:', error.response?.data || error.message);
       setError('Failed to fetch dashboard stats');
       // Fallback to empty stats
       setStats({
@@ -632,8 +584,6 @@ const CompanyRecruiterDashboard = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading company dashboard...</p>
-          <p className="text-sm text-gray-500 mt-2">User: {user?.fullname || 'Unknown'}</p>
-          <p className="text-sm text-gray-500">Company ID: {user?.companyId || 'None'}</p>
         </div>
       </div>
     );

@@ -276,7 +276,7 @@ const NavbarBase = ({ children, leftContent, centerContent, user, setLogoutFlag 
                                 <div className='space-y-2'>
                                     <Link 
                                         to={user.role === 'Recruiter' ? 
-                                            (user.recruiterType === 'individual' || !user.companyId ? 
+                                            (user.recruiterType === 'Individual' || !user.companyId ? 
                                                 '/app/recruiter/profile' : '/app/recruiter/profile') : 
                                             user.role === 'Technician' ? '/app/technician/profile' : 
                                             user.role === 'Admin' ? '/app/administrator/profile' : '/profile'} 
@@ -287,7 +287,7 @@ const NavbarBase = ({ children, leftContent, centerContent, user, setLogoutFlag 
                                     </Link>
                                     <Link 
                                         to={user.role === 'Recruiter' ? 
-                                            (user.recruiterType === 'individual' || !user.companyId ? 
+                                            (user.recruiterType === 'Individual' || !user.companyId ? 
                                                 '/app/recruiter/settings' : '/app/recruiter/settings') : 
                                             user.role === 'Technician' ? '/app/technician/settings' : 
                                             user.role === 'Admin' ? '/app/administrator/settings' : '/settings'} 

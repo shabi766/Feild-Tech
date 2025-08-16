@@ -97,12 +97,12 @@ export const registerCompany = async (req, res) => {
             throw new Error('Missing required recruiter information');
         }
 
-        // Create user account for the primary recruiter
-        console.log('Creating user with data:', {
+        // Create user account for the primary recruiter (Company Owner)
+        console.log('Creating company owner with data:', {
             fullname: recruiterName,
             email: recruiterEmail,
             phoneNumber: recruiterPhone,
-            role: "Recruiter",
+            role: "Company", // Changed from "Recruiter" to "Company"
             recruiterType: "Company",
             companyId: company._id
         });
@@ -112,14 +112,14 @@ export const registerCompany = async (req, res) => {
             email: recruiterEmail,
             phoneNumber: recruiterPhone,
             password: hashedPassword,
-            role: "Recruiter",
+            role: "Company", // Changed from "Recruiter" to "Company" - This makes them the company owner
             recruiterType: "Company",
             companyId: company._id,
             profile: {
                 company: company._id
             },
             profileCompleted: true,
-            // Set default values for company recruiters
+            // Set default values for company owners
             status: "online",
             lastSeen: new Date(),
             kyc: {
@@ -155,13 +155,74 @@ export const registerCompany = async (req, res) => {
 
         await user.save();
 
+        // Import Role and CompanyUser models for automatic company owner role creation
+        const { Role } = await import("../Models/role.model.js");
+        const { CompanyUser } = await import("../Models/companyUser.model.js");
+
+        // Automatically create Company Owner role for the company
+        const companyOwnerRole = new Role({
+            name: 'Company Owner',
+            description: 'Full access within the company - can manage teams, roles, users, and company settings',
+            companyId: company._id,
+            roleType: 'COMPANY_OWNER',
+            level: 10,
+            color: '#DC2626',
+            createdBy: user._id,
+            permissions: {
+                // Company Management
+                canManageCompanySettings: true,
+                canManageAllUsers: true,
+                canManageAllRoles: true,
+                canManageAllTeams: true,
+                
+                // Financial Access
+                canAccessMainWallet: true,
+                canCreateSubWallets: true,
+                canTransferFunds: true,
+                canViewAllFinancials: true,
+                
+                // Job Management
+                canCreateJobs: true,
+                canEditJobs: true,
+                canDeleteJobs: true,
+                canAssignJobs: true,
+                canViewAllJobs: true,
+                
+                // Hiring & Payments
+                canHireTechnicians: true,
+                canPayTechnicians: true,
+                
+                // System Access (within company only)
+                canViewAuditLogs: true,
+                canManageSystemSettings: true
+            }
+        });
+
+        await companyOwnerRole.save();
+
+        // Create CompanyUser record linking the owner to the company with Company Owner role
+        const companyUser = new CompanyUser({
+            userId: user._id,
+            companyId: company._id,
+            roleId: companyOwnerRole._id,
+            status: "active",
+            joinedAt: new Date(),
+            lastActive: new Date()
+        });
+
+        await companyUser.save();
+
+        console.log('✅ Company Owner role and CompanyUser record created for company owner');
+
         // Generate JWT token
         const token = jwt.sign(
             { 
                 userId: user._id, 
                 companyId: company._id,
-                role: user.role,
-                recruiterType: user.recruiterType
+                role: user.role, // "Company" - indicates company owner
+                recruiterType: user.recruiterType,
+                companyOwnerRoleId: companyOwnerRole._id, // Include company owner role ID
+                isCompanyOwner: true // Flag to indicate company ownership
             },
             process.env.SECRET_KEY || 'fallback_secret_key_for_development',
             { expiresIn: '7d' }
@@ -190,9 +251,11 @@ export const registerCompany = async (req, res) => {
                     _id: user._id,
                     fullname: user.fullname,
                     email: user.email,
-                    role: user.role,
+                    role: user.role, // "Company" - indicates company owner
                     recruiterType: user.recruiterType,
-                    companyId: company._id
+                    companyId: company._id,
+                    isCompanyOwner: true,
+                    companyOwnerRoleId: companyOwnerRole._id
                 },
                 token
             }

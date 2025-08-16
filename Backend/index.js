@@ -5,6 +5,9 @@ import dotenv from "dotenv";
 import http from "http";
 import { Server } from "socket.io";
 import walletRoute from "./Routes/wallet.route.js";
+import newWalletRoute from "./Routes/newWallet.route.js";
+import kycRoute from "./Routes/kyc.route.js";
+import walletPasscodeRoute from "./Routes/walletPasscode.route.js";
 import { stripeWebhook } from "./Controllers/wallet.controller.js";
 import connectDB from "./utils/db.js";
 import { User } from "./Models/user.model.js";
@@ -24,6 +27,9 @@ import administratorRoute from "./Routes/administrator.route.js";
 import auditRoute from "./Routes/audit.route.js";
 import reviewRoute from "./Routes/review.route.js";
 import leaderboardRoute from "./Routes/leaderboard.route.js";
+import teamRoute from "./Routes/team.route.js";
+import roleRoute from "./Routes/role.route.js";
+import companyUserRoute from "./Routes/companyUser.route.js";
 
 import { auditMiddleware } from "./middleware/auditMiddleware.js";
 
@@ -219,8 +225,14 @@ app.use("/api/v1/audit", auditRoute);
 app.use("/api/v1/notification", notificationRoute);
 app.use("/api/v1/chat", chatRoute);
 app.use("/api/v1/wallet", walletRoute);
+app.use("/api/v1/new-wallet", newWalletRoute);
+app.use("/api/v1/kyc", kycRoute);
+app.use("/api/v1/wallet-passcode", walletPasscodeRoute);
 app.use("/api/v1/review", reviewRoute);
 app.use("/api/v1/leaderboard", leaderboardRoute);
+app.use("/api/v1/teams", teamRoute);
+app.use("/api/v1/roles", roleRoute);
+app.use("/api/v1/company-users", companyUserRoute);
 
 
 // Export io for use in controllers

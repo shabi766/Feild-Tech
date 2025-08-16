@@ -87,7 +87,7 @@ const ProfileSetup = () => {
                 if (user.role === 'Admin') {
                     navigate('/app/administrator');
                 } else if (user.role === 'Recruiter') {
-                    if (user.recruiterType === 'individual' || !user.companyId) {
+                    if (user.recruiterType === 'Individual' || !user.companyId) {
                         navigate('/app/recruiter/dashboard-individual');
                     } else {
                         navigate('/app/recruiter/dashboard');
@@ -259,7 +259,7 @@ const ProfileSetup = () => {
                     if (user.role === 'Admin') {
                         navigate('/app/administrator');
                     } else if (user.role === 'Recruiter') {
-                        if (user.recruiterType === 'individual' || !user.companyId) {
+                        if (user.recruiterType === 'Individual' || !user.companyId) {
                             navigate('/app/recruiter/dashboard-individual');
                         } else {
                             navigate('/app/recruiter/dashboard');
@@ -311,7 +311,7 @@ const ProfileSetup = () => {
                 >
                     <Link 
                         to={user.role === 'Admin' ? '/app/administrator' : user.role === 'Recruiter' ? 
-                            (user.recruiterType === 'individual' || !user.companyId ? '/app/recruiter/dashboard-individual' : '/app/recruiter/dashboard') : 
+                            (user.recruiterType === 'Individual' || !user.companyId ? '/app/recruiter/dashboard-individual' : '/app/recruiter/dashboard') : 
                             '/app/technician/home'}
                         className="inline-flex items-center text-gray-600 hover:text-gray-800 transition-colors mb-6 group"
                     >

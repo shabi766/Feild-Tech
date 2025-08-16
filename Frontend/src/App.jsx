@@ -42,6 +42,9 @@ import ShowApplicantProfile from "./components/admin/ShowApplicantProfile";
 import ShowJob from "./components/admin/ShowJob";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import CompanyRecruiterDashboard from "./components/recruiter/CompanyRecruiterDashboard";
+import TeamManagement from "./components/recruiter/TeamManagement";
+import TeamDetails from "./components/recruiter/TeamDetails";
+import RoleDetails from "./components/recruiter/RoleDetails";
 import Chat from "./components/shared/Chat/chat";
 import { ChatProvider } from "./context/ChatContext";
 import { UserProvider } from "./context/UserContext";
@@ -103,9 +106,13 @@ const RoleBasedRedirect = () => {
     return <Navigate to="/app/administrator" replace />;
   } else if (user.role === 'Recruiter') {
     // Check if this is a company recruiter
+    console.log('RoleBasedRedirect - User recruiterType:', user.recruiterType);
+    console.log('RoleBasedRedirect - User companyId:', user.companyId);
     if (user.recruiterType === 'Company') {
+      console.log('RoleBasedRedirect - Redirecting to company dashboard');
       return <Navigate to="/app/recruiter/dashboard" replace />;
     } else {
+      console.log('RoleBasedRedirect - Redirecting to individual dashboard');
       return <Navigate to="/app/recruiter/dashboard-individual" replace />;
     }
   } else if (user.role === 'Technician') {
@@ -145,9 +152,13 @@ const AuthenticatedLanding = () => {
     return <Navigate to="/app/administrator" replace />;
   } else if (user.role === 'Recruiter') {
     // Check if this is a company recruiter
+    console.log('AuthenticatedLanding - User recruiterType:', user.recruiterType);
+    console.log('AuthenticatedLanding - User companyId:', user.companyId);
     if (user.recruiterType === 'Company') {
+      console.log('AuthenticatedLanding - Redirecting to company dashboard');
       return <Navigate to="/app/recruiter/dashboard" replace />;
     } else {
+      console.log('AuthenticatedLanding - Redirecting to individual dashboard');
       return <Navigate to="/app/recruiter/dashboard-individual" replace />;
     }
   } else if (user.role === 'Technician') {
@@ -230,6 +241,9 @@ function App() {
                 <Route path="client/details/:clientId" element={<ClientDetail />} />
                 <Route path="teams" element={<Teams />} />
                 <Route path="templates" element={<Templates />} />
+                <Route path="team-management" element={<TeamManagement />} />
+                <Route path="team-management/:teamId" element={<TeamDetails />} />
+                <Route path="role-management/:roleId" element={<RoleDetails />} />
               </Route>
 
               {/* Technician Routes */}

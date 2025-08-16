@@ -78,7 +78,7 @@ const ProtectedRoute = ({ requiredRole = null, children }) => {
       if (user.role === 'Admin') {
         return <Navigate to="/app/administrator" replace />;
       } else if (user.role === 'Recruiter') {
-        if (user.recruiterType === 'individual' || !user.companyId) {
+        if (user.recruiterType === 'Individual' || !user.companyId) {
           return <Navigate to="/app/recruiter/dashboard-individual" replace />;
         } else {
           return <Navigate to="/app/recruiter/dashboard" replace />;

@@ -24,6 +24,20 @@ import { useNavigate } from 'react-router-dom';
 const IndividualRecruiterDashboard = () => {
   const { user } = useSelector(store => store.auth);
   const navigate = useNavigate();
+  
+  console.log('IndividualRecruiterDashboard render - user:', user);
+  console.log('IndividualRecruiterDashboard render - user.recruiterType:', user?.recruiterType);
+  console.log('IndividualRecruiterDashboard render - user.companyId:', user?.companyId);
+  
+  // Redirect company recruiters to their dashboard
+  useEffect(() => {
+    if (user && user.role === 'Recruiter' && user.recruiterType === 'Company') {
+      console.log('Company recruiter detected, redirecting to company dashboard');
+      navigate('/app/recruiter/dashboard');
+      return;
+    }
+  }, [user, navigate]);
+  
   const [stats, setStats] = useState({
     totalJobs: 0,
     activeJobs: 0,

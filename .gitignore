@@ -168,3 +168,8 @@ sketch
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+Backend/create-env-files.sh
+Backend/create-env-files.ps1
+Backend/setup-env.js
+Backend/setup-env.cjs

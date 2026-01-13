@@ -2,6 +2,8 @@ import { stripe, getAppFeeCents, isStripeConfigured } from "../Services/stripe.s
 import { Transaction } from "../Models/transaction.model.js";
 import { AuthServiceClient } from "../Services/auth-client.service.js";
 import { WorkorderServiceClient } from "../Services/workorder-client.service.js";
+import { getKafkaProducer, TOPICS } from '../../shared-kafka/index.js';
+import { BaseEvent } from '../../shared-kafka/event-schemas.js';
 
 // Create or get Stripe customer
 export const createOrGetStripeCustomer = async (req, res) => {
@@ -9,7 +11,7 @@ export const createOrGetStripeCustomer = async (req, res) => {
     if (!isStripeConfigured()) {
       return res.status(500).json({ success: false, message: "Stripe not configured on server" });
     }
-    
+
     const userId = req.user.userId || req.user._id;
     const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
 
@@ -46,7 +48,7 @@ export const createOrGetConnectAccount = async (req, res) => {
     if (!isStripeConfigured()) {
       return res.status(500).json({ success: false, message: "Stripe not configured on server" });
     }
-    
+
     const userId = req.user.userId || req.user._id;
     const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
 
@@ -67,12 +69,12 @@ export const createOrGetConnectAccount = async (req, res) => {
         connectChargesEnabled: !!acct.charges_enabled,
         detailsSubmitted: !!acct.details_submitted
       }, token);
-      
-      return res.status(200).json({ 
-        success: true, 
-        accountId: user.stripe.connectAccountId, 
-        chargesEnabled: acct.charges_enabled, 
-        detailsSubmitted: acct.details_submitted 
+
+      return res.status(200).json({
+        success: true,
+        accountId: user.stripe.connectAccountId,
+        chargesEnabled: acct.charges_enabled,
+        detailsSubmitted: acct.details_submitted
       });
     }
 
@@ -94,11 +96,11 @@ export const createOrGetConnectAccount = async (req, res) => {
       detailsSubmitted: !!account.details_submitted
     }, token);
 
-    return res.status(201).json({ 
-      success: true, 
-      accountId: account.id, 
-      chargesEnabled: account.charges_enabled, 
-      detailsSubmitted: account.details_submitted 
+    return res.status(201).json({
+      success: true,
+      accountId: account.id,
+      chargesEnabled: account.charges_enabled,
+      detailsSubmitted: account.details_submitted
     });
   } catch (error) {
     console.error("createOrGetConnectAccount error", error);
@@ -112,7 +114,7 @@ export const createConnectOnboardingLink = async (req, res) => {
     if (!isStripeConfigured()) {
       return res.status(500).json({ success: false, message: "Stripe not configured on server" });
     }
-    
+
     const userId = req.user.userId || req.user._id;
     const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
 
@@ -149,7 +151,7 @@ export const createPaymentIntentForJob = async (req, res) => {
     if (!isStripeConfigured()) {
       return res.status(500).json({ success: false, message: "Stripe not configured on server" });
     }
-    
+
     const recruiterId = req.user.userId || req.user._id;
     const { workorderId } = req.params;
     const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
@@ -159,7 +161,7 @@ export const createPaymentIntentForJob = async (req, res) => {
     if (!recruiter) {
       return res.status(404).json({ success: false, message: "Recruiter not found" });
     }
-    
+
     if (recruiter.role !== "Recruiter") {
       return res.status(403).json({ success: false, message: "Only recruiters can pay" });
     }
@@ -169,11 +171,11 @@ export const createPaymentIntentForJob = async (req, res) => {
     if (!workorder) {
       return res.status(404).json({ success: false, message: "Job not found" });
     }
-    
+
     if (!workorder.assignedApplicant) {
       return res.status(400).json({ success: false, message: "No technician assigned" });
     }
-    
+
     if (!workorder.payableSalary || workorder.payableSalary <= 0) {
       return res.status(400).json({ success: false, message: "No payable salary calculated" });
     }
@@ -186,10 +188,10 @@ export const createPaymentIntentForJob = async (req, res) => {
 
     // Ensure recruiter has a customer
     if (!recruiter.stripe?.customerId) {
-      const customer = await stripe.customers.create({ 
-        email: recruiter.email, 
-        name: recruiter.fullname, 
-        metadata: { userId: String(recruiter._id), role: recruiter.role } 
+      const customer = await stripe.customers.create({
+        email: recruiter.email,
+        name: recruiter.fullname,
+        metadata: { userId: String(recruiter._id), role: recruiter.role }
       });
       await AuthServiceClient.updateUserStripeData(recruiterId, { customerId: customer.id }, token);
     }
@@ -230,10 +232,10 @@ export const createPaymentIntentForJob = async (req, res) => {
       events: [{ type: "payment_intent.created", payload: { id: paymentIntent.id } }]
     });
 
-    return res.status(201).json({ 
-      success: true, 
-      clientSecret: paymentIntent.client_secret, 
-      paymentIntentId: paymentIntent.id 
+    return res.status(201).json({
+      success: true,
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id
     });
   } catch (error) {
     console.error("createPaymentIntentForJob error", error);
@@ -247,7 +249,7 @@ export const createCheckoutSessionForJob = async (req, res) => {
     if (!isStripeConfigured()) {
       return res.status(500).json({ success: false, message: "Stripe not configured on server" });
     }
-    
+
     const recruiterId = req.user.userId || req.user._id;
     const { workorderId } = req.params;
     const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
@@ -257,7 +259,7 @@ export const createCheckoutSessionForJob = async (req, res) => {
     if (!recruiter) {
       return res.status(404).json({ success: false, message: "Recruiter not found" });
     }
-    
+
     if (recruiter.role !== "Recruiter") {
       return res.status(403).json({ success: false, message: "Only recruiters can pay" });
     }
@@ -267,11 +269,11 @@ export const createCheckoutSessionForJob = async (req, res) => {
     if (!workorder) {
       return res.status(404).json({ success: false, message: "Job not found" });
     }
-    
+
     if (!workorder.assignedApplicant) {
       return res.status(400).json({ success: false, message: "No technician assigned" });
     }
-    
+
     if (!workorder.payableSalary || workorder.payableSalary <= 0) {
       return res.status(400).json({ success: false, message: "No payable salary calculated" });
     }
@@ -284,10 +286,10 @@ export const createCheckoutSessionForJob = async (req, res) => {
 
     // Ensure recruiter has a customer
     if (!recruiter.stripe?.customerId) {
-      const customer = await stripe.customers.create({ 
-        email: recruiter.email, 
-        name: recruiter.fullname, 
-        metadata: { userId: String(recruiter._id), role: recruiter.role } 
+      const customer = await stripe.customers.create({
+        email: recruiter.email,
+        name: recruiter.fullname,
+        metadata: { userId: String(recruiter._id), role: recruiter.role }
       });
       await AuthServiceClient.updateUserStripeData(recruiterId, { customerId: customer.id }, token);
     }
@@ -342,7 +344,7 @@ export const listTransactions = async (req, res) => {
   try {
     const userId = req.user.userId || req.user._id;
     const role = req.user.role;
-    
+
     let filter = {};
     if (role === "Recruiter") {
       filter.recruiter = userId;
@@ -366,7 +368,7 @@ export const getCustomerInfo = async (req, res) => {
     if (!isStripeConfigured()) {
       return res.status(500).json({ success: false, message: "Stripe not configured on server" });
     }
-    
+
     const userId = req.user.userId || req.user._id;
     const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
 
@@ -375,11 +377,11 @@ export const getCustomerInfo = async (req, res) => {
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    
+
     if (!user.stripe?.customerId) {
       return res.status(404).json({ success: false, message: 'Customer not found for user' });
     }
-    
+
     const customer = await stripe.customers.retrieve(user.stripe.customerId);
     const safe = {
       id: customer.id,
@@ -404,7 +406,7 @@ export const createSetupIntent = async (req, res) => {
     if (!isStripeConfigured()) {
       return res.status(500).json({ success: false, message: "Stripe not configured on server" });
     }
-    
+
     const userId = req.user.userId || req.user._id;
     const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
 
@@ -413,26 +415,26 @@ export const createSetupIntent = async (req, res) => {
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    
+
     if (!user.stripe?.customerId) {
-      const customer = await stripe.customers.create({ 
-        email: user.email, 
-        name: user.fullname, 
-        metadata: { userId: String(user._id), role: user.role } 
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: user.fullname,
+        metadata: { userId: String(user._id), role: user.role }
       });
       await AuthServiceClient.updateUserStripeData(userId, { customerId: customer.id }, token);
     }
-    
+
     const setupIntent = await stripe.setupIntents.create({
       customer: user.stripe.customerId,
       payment_method_types: ['card'],
       usage: 'off_session',
     });
-    
-    return res.status(201).json({ 
-      success: true, 
-      clientSecret: setupIntent.client_secret, 
-      setupIntentId: setupIntent.id 
+
+    return res.status(201).json({
+      success: true,
+      clientSecret: setupIntent.client_secret,
+      setupIntentId: setupIntent.id
     });
   } catch (error) {
     console.error('createSetupIntent error', error);
@@ -446,7 +448,7 @@ export const listPaymentMethods = async (req, res) => {
     if (!isStripeConfigured()) {
       return res.status(500).json({ success: false, message: "Stripe not configured on server" });
     }
-    
+
     const userId = req.user.userId || req.user._id;
     const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
 
@@ -455,7 +457,7 @@ export const listPaymentMethods = async (req, res) => {
     if (!user?.stripe?.customerId) {
       return res.status(404).json({ success: false, message: 'No customer found' });
     }
-    
+
     const pms = await stripe.paymentMethods.list({ customer: user.stripe.customerId, type: 'card' });
     const safe = pms.data.map(pm => ({
       id: pm.id,
@@ -477,7 +479,7 @@ export const detachPaymentMethod = async (req, res) => {
     if (!isStripeConfigured()) {
       return res.status(500).json({ success: false, message: "Stripe not configured on server" });
     }
-    
+
     const { pmId } = req.params;
     const detached = await stripe.paymentMethods.detach(pmId);
     return res.status(200).json({ success: true, paymentMethod: { id: detached.id } });
@@ -491,12 +493,12 @@ export const detachPaymentMethod = async (req, res) => {
 export const getConnectAccountInfo = async (req, res) => {
   try {
     if (!isStripeConfigured()) {
-      return res.status(503).json({ 
-        success: false, 
-        message: "Stripe payment processing is not configured. Please contact support." 
+      return res.status(503).json({
+        success: false,
+        message: "Stripe payment processing is not configured. Please contact support."
       });
     }
-    
+
     const userId = req.user.userId || req.user._id;
     const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
 
@@ -505,17 +507,17 @@ export const getConnectAccountInfo = async (req, res) => {
     if (!user?.stripe?.connectAccountId) {
       return res.status(404).json({ success: false, message: 'No connect account found' });
     }
-    
+
     const acct = await stripe.accounts.retrieve(user.stripe.connectAccountId);
-    const external_accounts = (acct.external_accounts?.data || []).map(a => ({ 
-      id: a.id, 
-      bank_name: a.bank_name, 
-      last4: a.last4, 
-      country: a.country, 
-      currency: a.currency, 
-      account_holder_name: a.account_holder_name 
+    const external_accounts = (acct.external_accounts?.data || []).map(a => ({
+      id: a.id,
+      bank_name: a.bank_name,
+      last4: a.last4,
+      country: a.country,
+      currency: a.currency,
+      account_holder_name: a.account_holder_name
     }));
-    
+
     const safe = {
       id: acct.id,
       email: acct.email,
@@ -540,12 +542,12 @@ export const getConnectAccountInfo = async (req, res) => {
 export const getConnectBalance = async (req, res) => {
   try {
     if (!isStripeConfigured()) {
-      return res.status(503).json({ 
-        success: false, 
-        message: "Stripe payment processing is not configured. Please contact support." 
+      return res.status(503).json({
+        success: false,
+        message: "Stripe payment processing is not configured. Please contact support."
       });
     }
-    
+
     const userId = req.user.userId || req.user._id;
     const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
 
@@ -554,7 +556,7 @@ export const getConnectBalance = async (req, res) => {
     if (!user?.stripe?.connectAccountId) {
       return res.status(404).json({ success: false, message: 'No connect account found' });
     }
-    
+
     const balance = await stripe.balance.retrieve({ stripeAccount: user.stripe.connectAccountId });
     return res.status(200).json({ success: true, balance });
   } catch (error) {
@@ -567,7 +569,7 @@ export const getConnectBalance = async (req, res) => {
 export const stripeWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
   let event;
-  
+
   try {
     if (!isStripeConfigured()) {
       throw new Error("Stripe not configured on server");
@@ -582,25 +584,25 @@ export const stripeWebhook = async (req, res) => {
     switch (event.type) {
       case "payment_intent.succeeded": {
         const pi = event.data.object;
-        
+
         // Update transaction status
         await Transaction.findOneAndUpdate(
           { stripePaymentIntentId: pi.id },
           { status: pi.status, $push: { events: { type: event.type, payload: pi } } }
         );
-        
+
         // Handle wallet top-up
         if (pi.metadata?.type === 'wallet_topup') {
           const userId = pi.metadata.userId;
           const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
-          
+
           try {
             const user = await AuthServiceClient.getUser(userId, token);
             if (user) {
               await AuthServiceClient.updateUserWalletBalance(
-                userId, 
-                pi.amount / 100, 
-                'add', 
+                userId,
+                pi.amount / 100,
+                'add',
                 token
               );
             }
@@ -608,20 +610,38 @@ export const stripeWebhook = async (req, res) => {
             console.error('Error updating wallet balance in webhook:', error);
           }
         }
-        
+
         // Mark job as paid
         const { workorderId } = pi.metadata || {};
         if (workorderId) {
           try {
             const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
             await WorkorderServiceClient.updateWorkorderPaymentStatus(
-              workorderId, 
-              { status: "Paid", paidTime: new Date() }, 
+              workorderId,
+              { status: "Paid", paidTime: new Date() },
               token
             );
           } catch (error) {
             console.error('Error updating workorder status in webhook:', error);
           }
+        }
+
+        // Publish payment.completed event
+        try {
+          const producer = getKafkaProducer('payment-service');
+          const paymentEvent = new BaseEvent(TOPICS.PAYMENT_COMPLETED, {
+            paymentId: pi.id,
+            jobId: pi.metadata?.workorderId,
+            amount: pi.amount / 100,
+            currency: pi.currency,
+            technicianId: pi.metadata?.technicianId,
+            clientId: pi.metadata?.recruiterId
+          }, { source: 'payment-service' });
+
+          await producer.publishEvent(TOPICS.PAYMENT_COMPLETED, paymentEvent);
+          console.log('✅ Published payment.completed event for:', pi.id);
+        } catch (kafkaError) {
+          console.error('⚠️ Failed to publish payment.completed event:', kafkaError);
         }
         break;
       }

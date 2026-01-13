@@ -4,6 +4,7 @@ import { multipleUpload } from "../middleware/multer.js";
 import { uploadToS3 } from "../utils/s3Upload.js";
 import { AuthServiceClient } from "../Services/auth-client.service.js";
 import { ClientServiceClient } from "../Services/client-client.service.js";
+import { getKafkaProducer, JobCreatedEvent, JobUpdatedEvent, JobCompletedEvent, JobCancelledEvent, TOPICS } from '../../shared-kafka/index.js';
 
 // Constants for job statuses
 const JOB_STATUSES = ['Draft', 'Active', 'Assigned', 'In Progress', 'Done', 'Review', 'Complete', 'Cancel', 'Paid'];
@@ -253,6 +254,29 @@ export const postJob = async (req, res) => {
             };
 
             const job = await Workorder.create(jobData);
+
+            // Publish job.created event
+            try {
+                const producer = getKafkaProducer('workorder-service');
+                const event = new JobCreatedEvent({
+                    jobId: job._id.toString(),
+                    title: job.title,
+                    description: job.description,
+                    createdBy: job.created_by.toString(),
+                    location: `${job.location.city}, ${job.location.state}`,
+                    budget: job.totalSalary,
+                    category: job.skills?.[0] || 'General',
+                    status: job.status
+                }, {
+                    source: 'workorder-service',
+                    correlationId: req.headers['x-correlation-id'] || `job-${Date.now()}`
+                });
+                await producer.publishEvent(TOPICS.JOB_CREATED, event, job._id.toString());
+                console.log('✅ Published job.created event for:', job._id);
+            } catch (kafkaError) {
+                console.error('⚠️ Failed to publish job.created event:', kafkaError);
+            }
+
             return res.status(201).json({ message: "New job created successfully", job, success: true });
 
         } catch (error) {
@@ -336,7 +360,7 @@ export const getJobById = async (req, res) => {
 
         // Fetch related data from other services
         const fetchPromises = [];
-        
+
         if (job.clientName && token) {
             fetchPromises.push(
                 ClientServiceClient.getClient(job.clientName, token)
@@ -347,7 +371,7 @@ export const getJobById = async (req, res) => {
                     })
             );
         }
-        
+
         if (job.projectName && token) {
             fetchPromises.push(
                 ClientServiceClient.getProject(job.projectName, token)
@@ -358,7 +382,7 @@ export const getJobById = async (req, res) => {
                     })
             );
         }
-        
+
         if (job.assignedApplicant && token) {
             fetchPromises.push(
                 AuthServiceClient.getUser(job.assignedApplicant, token)
@@ -382,7 +406,7 @@ export const getJobById = async (req, res) => {
         }
 
         const results = await Promise.all(fetchPromises);
-        
+
         results.forEach(result => {
             if (result.data) {
                 jobObj[result.type] = result.data;
@@ -452,6 +476,20 @@ export const updateJob = async (req, res) => {
 
         if (!updatedJob) {
             return res.status(404).json({ message: 'Job not found', success: false });
+        }
+
+        // Publish job.updated event
+        try {
+            const producer = getKafkaProducer('workorder-service');
+            const event = new JobUpdatedEvent({
+                jobId: updatedJob._id.toString(),
+                updatedFields: Object.keys(updates),
+                status: updatedJob.status,
+                updatedBy: req.user?.userId || req.user?._id
+            }, { source: 'workorder-service' });
+            await producer.publishEvent(TOPICS.JOB_UPDATED, event, updatedJob._id.toString());
+        } catch (kafkaError) {
+            console.error('⚠️ Failed to publish job.updated event:', kafkaError);
         }
 
         return res.status(200).json({ message: 'Job updated successfully', job: updatedJob, success: true });
@@ -594,7 +632,7 @@ export const checkoutJob = async (req, res) => {
 export const doneJob = async (req, res) => {
     const { id } = req.params;
     const { notes, deliverables, images } = req.body;
-    
+
     try {
         const job = await Workorder.findById(id);
         if (!job) return res.status(404).json({ message: 'Job not found', success: false });
@@ -615,10 +653,10 @@ export const doneJob = async (req, res) => {
         }
 
         if (errors.length > 0) {
-            return res.status(400).json({ 
-                message: 'Completion requirements not met', 
-                errors, 
-                success: false 
+            return res.status(400).json({
+                message: 'Completion requirements not met',
+                errors,
+                success: false
             });
         }
 
@@ -641,8 +679,25 @@ export const doneJob = async (req, res) => {
 export const completeJob = async (req, res) => {
     const { id } = req.params;
     try {
-        const job = await Workorder.findByIdAndUpdate(id, { status: 'Complete', doneTime: new Date() }, { new: true });
+        const job = await Workorder.findByIdAndUpdate(id, { status: 'Complete', completeTime: new Date() }, { new: true });
         if (!job) return res.status(404).json({ message: 'Job not found', success: false });
+
+        // Publish job.completed event
+        try {
+            const producer = getKafkaProducer('workorder-service');
+            const event = new JobCompletedEvent({
+                jobId: job._id.toString(),
+                technicianId: job.assignedApplicant?.toString(),
+                clientId: job.created_by.toString(),
+                completionDate: new Date().toISOString(),
+                finalAmount: job.payableSalary || job.totalSalary
+            }, { source: 'workorder-service' });
+            await producer.publishEvent(TOPICS.JOB_COMPLETED, event, job._id.toString());
+            console.log('✅ Published job.completed event for:', job._id);
+        } catch (kafkaError) {
+            console.error('⚠️ Failed to publish job.completed event:', kafkaError);
+        }
+
         return res.status(200).json({ message: 'Job marked Complete successfully', job, success: true });
     } catch (error) {
         return res.status(500).json({ message: 'Server error', success: false, error: error.message });
@@ -665,8 +720,23 @@ export const ReviewJob = async (req, res) => {
 export const cancelJob = async (req, res) => {
     const { id } = req.params;
     try {
-        const job = await Workorder.findByIdAndUpdate(id, { status: 'Cancel', doneTime: new Date() }, { new: true });
+        const job = await Workorder.findByIdAndUpdate(id, { status: 'Cancel', cancelledAt: new Date() }, { new: true });
         if (!job) return res.status(404).json({ message: 'Job not found', success: false });
+
+        // Publish job.cancelled event
+        try {
+            const producer = getKafkaProducer('workorder-service');
+            const event = new JobCancelledEvent({
+                jobId: job._id.toString(),
+                reason: req.body.reason || 'Not specified',
+                cancelledBy: req.user?.userId || req.user?._id,
+                cancelledAt: new Date().toISOString()
+            }, { source: 'workorder-service' });
+            await producer.publishEvent(TOPICS.JOB_CANCELLED, event, job._id.toString());
+        } catch (kafkaError) {
+            console.error('⚠️ Failed to publish job.cancelled event:', kafkaError);
+        }
+
         return res.status(200).json({ message: 'Job marked Cancel successfully', job, success: true });
     } catch (error) {
         return res.status(500).json({ message: 'Server error', success: false, error: error.message });
@@ -679,13 +749,13 @@ export const PaidJob = async (req, res) => {
     try {
         const job = await Workorder.findByIdAndUpdate(id, { status: 'Paid', paidTime: new Date() }, { new: true });
         if (!job) return res.status(404).json({ message: 'Job not found', success: false });
-        
+
         // TODO: Update technician performance stats via Review Service when it's created
         // For now, this functionality will remain in the main backend
-        
-        return res.status(200).json({ 
-            message: 'Job marked Paid successfully. You can now review the technician.', 
-            job, 
+
+        return res.status(200).json({
+            message: 'Job marked Paid successfully. You can now review the technician.',
+            job,
             success: true,
             canReview: true
         });
@@ -700,7 +770,7 @@ export const getJobsByProject = async (req, res) => {
 
     try {
         const jobs = await Workorder.find({ projectName: projectId });
-        
+
         if (!jobs || jobs.length === 0) {
             return res.status(404).json({ success: false, message: 'No jobs found for this project' });
         }
@@ -750,27 +820,27 @@ export const getTechnicianJobs = async (req, res) => {
 
         // Categorize jobs
         const appliedJobs = jobs.filter(job =>
-            job.Application && job.Application.some(appId => appId.toString() === userId.toString()) && 
+            job.Application && job.Application.some(appId => appId.toString() === userId.toString()) &&
             (!job.assignedApplicant || job.assignedApplicant.toString() !== userId.toString())
         );
 
-        const assignedJobs = jobs.filter(job => 
-            job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() && 
+        const assignedJobs = jobs.filter(job =>
+            job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() &&
             job.status === 'Assigned'
         );
 
-        const inProgressJobs = jobs.filter(job => 
-            job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() && 
+        const inProgressJobs = jobs.filter(job =>
+            job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() &&
             job.status === 'In Progress'
         );
 
-        const doneJobs = jobs.filter(job => 
-            job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() && 
+        const doneJobs = jobs.filter(job =>
+            job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() &&
             job.status === 'Done'
         );
 
-        const completedJobs = jobs.filter(job => 
-            job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() && 
+        const completedJobs = jobs.filter(job =>
+            job.assignedApplicant && job.assignedApplicant.toString() === userId.toString() &&
             job.status === 'Complete'
         );
 
@@ -820,7 +890,6 @@ export const getDraftJobById = async (req, res) => {
         const jobObj = job.toObject();
 
         // Fetch related data using Client Service
-        const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
         if (job.clientName && token) {
             try {
                 const client = await ClientServiceClient.getClient(job.clientName, token);
@@ -862,7 +931,7 @@ export const uploadWorkOrderImages = async (req, res) => {
 
         try {
             const { jobId } = req.params;
-            
+
             if (!mongoose.Types.ObjectId.isValid(jobId)) {
                 return res.status(400).json({ message: "Invalid job ID", success: false });
             }
@@ -890,11 +959,11 @@ export const uploadWorkOrderImages = async (req, res) => {
                 { new: true }
             );
 
-            return res.status(200).json({ 
-                message: "Images uploaded successfully", 
-                images: uploadedImages, 
-                job: updatedJob, 
-                success: true 
+            return res.status(200).json({
+                message: "Images uploaded successfully",
+                images: uploadedImages,
+                job: updatedJob,
+                success: true
             });
 
         } catch (error) {

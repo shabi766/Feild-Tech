@@ -1,9 +1,10 @@
 import express from "express";
-import { 
-    getSystemSettings, 
-    updateSystemSettings, 
+import {
+    getSystemSettings,
+    updateSystemSettings,
     updateAllSystemSettings,
-    resetSettingsToDefaults 
+    resetSettingsToDefaults,
+    testEmailConfiguration
 } from "../Controllers/systemSettings.controller.js";
 import isAuthenticated from "../middleware/isAuthenticated.js";
 import isAdmin from "../middleware/isAdmin.js";
@@ -19,5 +20,6 @@ router.get("/", getSystemSettings);
 router.put("/:category", updateSystemSettings);
 router.put("/", updateAllSystemSettings);
 router.post("/:category/reset", resetSettingsToDefaults);
+router.post("/email/test", testEmailConfiguration);
 
 export default router;

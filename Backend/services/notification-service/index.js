@@ -4,6 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./utils/db.js";
 import notificationRoute from "./Routes/notification.route.js";
+import NotificationEventConsumer from "./Consumers/notification-event.consumer.js";
 
 dotenv.config();
 
@@ -31,8 +32,8 @@ app.use(cors(corsOptions));
 
 // Health check endpoint
 app.get("/health", (req, res) => {
-  res.status(200).json({ 
-    status: "healthy", 
+  res.status(200).json({
+    status: "healthy",
     service: "notification-service",
     timestamp: new Date().toISOString()
   });
@@ -40,11 +41,24 @@ app.get("/health", (req, res) => {
 
 // Connect to Database
 connectDB().catch(err => {
-    console.log('⚠️ Database connection failed, but server will continue running');
+  console.log('⚠️ Database connection failed, but server will continue running');
 });
 
 // API Routes
 app.use("/api/v1/notification", notificationRoute);
+
+// Start Kafka Event Consumer
+const eventConsumer = new NotificationEventConsumer();
+eventConsumer.start().catch(err => {
+  console.error('⚠️ Failed to start Kafka consumer, but server will continue running:', err);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM signal received: closing Kafka consumer');
+  await eventConsumer.stop();
+  process.exit(0);
+});
 
 // Start the Server
 app.listen(NOTIFICATION_SERVICE_PORT, () => {

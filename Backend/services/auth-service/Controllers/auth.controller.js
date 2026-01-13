@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { uploadToS3 } from "../utils/s3Upload.js";
 import nodemailer from 'nodemailer';
+import { getKafkaProducer, UserCreatedEvent, TOPICS } from '../../shared-kafka/index.js';
 
 export const register = async (req, res) => {
     try {
@@ -64,7 +65,28 @@ export const register = async (req, res) => {
             userData.recruiterType = recruiterType;
         }
 
-        await User.create(userData);
+        const newUser = await User.create(userData);
+
+        // Publish user.created event to Kafka
+        try {
+            const producer = getKafkaProducer('auth-service');
+            const event = new UserCreatedEvent({
+                userId: newUser._id.toString(),
+                email: newUser.email,
+                name: newUser.fullname,
+                role: newUser.role,
+                phoneNumber: newUser.phoneNumber
+            }, {
+                source: 'auth-service',
+                correlationId: req.headers['x-correlation-id'] || `reg-${Date.now()}`
+            });
+
+            await producer.publishEvent(TOPICS.USER_CREATED, event, newUser._id.toString());
+            console.log('✅ Published user.created event for:', newUser.email);
+        } catch (kafkaError) {
+            // Log error but don't fail registration
+            console.error('⚠️ Failed to publish user.created event:', kafkaError);
+        }
 
         return res.status(201).json({
             message: "Account created successfully.",
@@ -128,7 +150,7 @@ export const login = async (req, res) => {
         };
 
         return res.status(200)
-            .cookie("token", token, { 
+            .cookie("token", token, {
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
                 httpOnly: true,
                 sameSite: 'strict'
@@ -364,7 +386,7 @@ export const resetPassword = async (req, res) => {
 export const verifyToken = async (req, res) => {
     try {
         const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
-        
+
         if (!token) {
             return res.status(401).json({
                 message: "Token not provided",
@@ -374,7 +396,7 @@ export const verifyToken = async (req, res) => {
 
         const decoded = jwt.verify(token, process.env.SECRET_KEY);
         const user = await User.findById(decoded.userId).select('-password');
-        
+
         if (!user) {
             return res.status(401).json({
                 message: "User not found",
@@ -403,7 +425,7 @@ export const verifyToken = async (req, res) => {
 export const getUserById = async (req, res) => {
     try {
         const { userId } = req.params;
-        
+
         // Verify token first (optional - can be made required)
         const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
         if (token) {
@@ -418,7 +440,7 @@ export const getUserById = async (req, res) => {
         }
 
         const user = await User.findById(userId).select('-password');
-        
+
         if (!user) {
             return res.status(404).json({
                 message: "User not found",
@@ -444,7 +466,7 @@ export const getUserById = async (req, res) => {
 export const getUsersByIds = async (req, res) => {
     try {
         const { userIds } = req.body; // Array of user IDs
-        
+
         if (!Array.isArray(userIds) || userIds.length === 0) {
             return res.status(400).json({
                 message: "userIds must be a non-empty array",
@@ -466,7 +488,7 @@ export const getUsersByIds = async (req, res) => {
         }
 
         const users = await User.find({ _id: { $in: userIds } }).select('-password');
-        
+
         return res.status(200).json({
             success: true,
             users: users.map(user => user.toObject()),
@@ -487,7 +509,7 @@ export const updateUserStripeData = async (req, res) => {
     try {
         const { userId } = req.params;
         const stripeData = req.body; // { customerId, connectAccountId, connectChargesEnabled, detailsSubmitted }
-        
+
         // Verify token
         const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
         if (!token) {
@@ -545,7 +567,7 @@ export const updateUserWalletBalance = async (req, res) => {
     try {
         const { userId } = req.params;
         const { walletBalance, operation } = req.body; // operation: 'set', 'add', 'subtract'
-        
+
         // Verify token
         const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
         if (!token) {
@@ -611,7 +633,7 @@ export const updateUserKYC = async (req, res) => {
     try {
         const { userId } = req.params;
         const kycData = req.body; // { fatherName, cnicNumber, dateOfBirth, cnicFrontUrl, cnicBackUrl, kycStatus }
-        
+
         // Verify token
         const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
         if (!token) {
@@ -646,6 +668,8 @@ export const updateUserKYC = async (req, res) => {
         if (kycData.cnicFrontUrl !== undefined) user.kyc.cnicFrontUrl = kycData.cnicFrontUrl;
         if (kycData.cnicBackUrl !== undefined) user.kyc.cnicBackUrl = kycData.cnicBackUrl;
         if (kycData.kycStatus !== undefined) user.kyc.kycStatus = kycData.kycStatus;
+        if (kycData.remarks !== undefined) user.kyc.remarks = kycData.remarks;
+        if (kycData.rejectionReason !== undefined) user.kyc.rejectionReason = kycData.rejectionReason;
 
         await user.save();
 
@@ -661,6 +685,63 @@ export const updateUserKYC = async (req, res) => {
         console.error("Error updating KYC data:", error);
         return res.status(500).json({
             message: "Error updating KYC data",
+            success: false,
+            error: error.message,
+        });
+    }
+};
+
+// Update user rating (for Review Service)
+export const updateUserRating = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { averageRating, totalReviews, ratingBreakdown } = req.body;
+
+        const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
+        if (!token) {
+            return res.status(401).json({
+                message: "Token required",
+                success: false,
+            });
+        }
+
+        try {
+            jwt.verify(token, process.env.SECRET_KEY);
+        } catch (error) {
+            return res.status(401).json({
+                message: "Invalid or expired token",
+                success: false,
+            });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+                success: false,
+            });
+        }
+
+        // Update rating data
+        if (!user.rating) user.rating = {};
+        if (averageRating !== undefined) user.rating.averageRating = averageRating;
+        if (totalReviews !== undefined) user.rating.totalReviews = totalReviews;
+        if (ratingBreakdown !== undefined) user.rating.ratingBreakdown = ratingBreakdown;
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Rating updated successfully",
+            user: {
+                _id: user._id,
+                rating: user.rating
+            }
+        });
+    } catch (error) {
+        console.error("Error updating rating:", error);
+        return res.status(500).json({
+            message: "Error updating rating",
             success: false,
             error: error.message,
         });

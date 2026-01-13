@@ -4,7 +4,7 @@ const connectDB = async () => {
     try {
         // Use a default MongoDB URI if not provided
         // For microservices, you might want to use a separate database or collection
-        const mongoURI = process.env.MONGO_URI || "mongodb://localhost:27017/alpha_project";
+        const mongoURI = process.env.WORKORDER_DB_URI || process.env.MONGO_URI || "mongodb://localhost:27017/fieldtech_workorder";
         await mongoose.connect(mongoURI);
         console.log('✅ Workorder Service: MongoDB connected successfully');
     } catch (error) {

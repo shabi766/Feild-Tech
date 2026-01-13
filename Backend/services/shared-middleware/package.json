@@ -1,0 +1,15 @@
+{
+  "name": "@shiftmate/shared-middleware",
+  "version": "1.0.0",
+  "description": "Shared authentication middleware for ShiftMate microservices",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2"
+  }
+}

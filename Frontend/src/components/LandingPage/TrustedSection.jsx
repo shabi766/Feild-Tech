@@ -36,8 +36,8 @@ const trustFactors = [
     title: "Verified Profiles",
     desc: "Every technician undergoes thorough background verification and skill assessment.",
     stats: "99.8% Verified",
-    gradient: "from-blue-500 to-indigo-600",
-    bgGradient: "from-blue-100 to-indigo-100"
+    gradient: "from-primary to-primary-dark",
+    bgGradient: "from-primary-light/20 to-primary-light/10"
   },
   {
     icon: <Award className="w-8 h-8" />,
@@ -52,8 +52,8 @@ const trustFactors = [
     title: "Secure Payments",
     desc: "Your funds are protected with escrow and released only after job completion.",
     stats: "100% Secure",
-    gradient: "from-purple-500 to-violet-600",
-    bgGradient: "from-purple-100 to-violet-100"
+    gradient: "from-accent to-accent-dark",
+    bgGradient: "from-accent-light/20 to-accent-light/10"
   },
   {
     icon: <Star className="w-8 h-8" />,
@@ -93,15 +93,15 @@ const MorphingBackground = () => {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {/* Morphing blob shapes */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-indigo-400/10 to-purple-400/10 rounded-full blur-3xl animate-morph-slow"></div>
+      <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-3xl animate-morph-slow"></div>
       <div className="absolute bottom-0 right-0 w-80 h-80 bg-gradient-to-br from-green-400/10 to-teal-400/10 rounded-full blur-3xl animate-morph-delayed"></div>
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-br from-pink-400/5 to-rose-400/5 rounded-full blur-3xl animate-morph"></div>
-      
+
       {/* Floating geometric shapes */}
-      <div className="absolute top-20 right-20 w-16 h-16 border-2 border-indigo-300/20 rotate-45 animate-spin-slow"></div>
+      <div className="absolute top-20 right-20 w-16 h-16 border-2 border-primary/20 rotate-45 animate-spin-slow"></div>
       <div className="absolute bottom-32 left-32 w-12 h-12 bg-green-300/10 rounded-full animate-pulse-slow"></div>
       <div className="absolute top-1/3 right-1/3 w-8 h-8 border border-pink-300/30 transform rotate-12 animate-bounce-slow"></div>
-      <div className="absolute bottom-20 right-1/4 w-10 h-10 bg-purple-300/15 rounded-full animate-float"></div>
+      <div className="absolute bottom-20 right-1/4 w-10 h-10 bg-accent/15 rounded-full animate-float"></div>
     </div>
   );
 };
@@ -113,7 +113,7 @@ const FloatingParticles = () => {
       {[...Array(30)].map((_, i) => (
         <div
           key={i}
-          className="absolute w-1 h-1 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full animate-particle"
+          className="absolute w-1 h-1 bg-gradient-to-r from-primary to-accent rounded-full animate-particle"
           style={{
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
@@ -133,22 +133,22 @@ const AnimatedCounter = ({ end, duration = 2000, suffix = "" }) => {
 
   useEffect(() => {
     if (hasAnimated) return;
-    
+
     let startTime = null;
     const animate = (currentTime) => {
       if (!startTime) startTime = currentTime;
       const progress = Math.min((currentTime - startTime) / duration, 1);
       const currentCount = Math.floor(progress * end);
-      
+
       setCount(currentCount);
-      
+
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
         setHasAnimated(true);
       }
     };
-    
+
     requestAnimationFrame(animate);
   }, [end, duration, hasAnimated]);
 
@@ -166,7 +166,7 @@ const App = () => {
       {/* Creative Background Effects */}
       <MorphingBackground />
       <FloatingParticles />
-      
+
       {/* Custom CSS for Animations */}
       <style>
         {`
@@ -325,7 +325,7 @@ const App = () => {
           }
           
           .gradient-text {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -336,16 +336,16 @@ const App = () => {
       <div className="container mx-auto px-6 relative z-10">
         {/* Header Section */}
         <div className="text-center mb-20">
-          <div className={`inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 font-semibold text-sm mb-6 ${inView ? 'animate-scaleIn' : 'opacity-0'}`}>
+          <div className={`inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-primary-light/20 to-accent-light/20 text-primary font-semibold text-sm mb-6 ${inView ? 'animate-scaleIn' : 'opacity-0'}`}>
             <Sparkles className="w-4 h-4 mr-2 animate-spin-slow" />
             Trust & Security
           </div>
-          
+
           <h2 className={`text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 ${inView ? 'animate-slideInUp' : 'opacity-0'}`}>
             Why Users
             <span className="gradient-text"> Trust Us</span>
           </h2>
-          
+
           <p className={`text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed ${inView ? 'animate-slideInUp delay-100' : 'opacity-0'}`}>
             We've built our platform on the foundation of trust, security, and reliability. Here's what makes us different.
           </p>
@@ -354,8 +354,8 @@ const App = () => {
           <div className={`grid grid-cols-2 md:grid-cols-4 gap-8 mt-12 ${inView ? 'animate-slideInUp delay-200' : 'opacity-0'}`}>
             {stats.map((stat, idx) => (
               <div key={idx} className="text-center transform hover:scale-110 transition-transform duration-300">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-2xl mb-4 animate-glow">
-                  <div className="text-indigo-600 animate-spin-slow">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-primary-light/20 to-accent-light/20 rounded-2xl mb-4 animate-glow">
+                  <div className="text-primary animate-spin-slow">
                     {stat.icon}
                   </div>
                 </div>
@@ -377,7 +377,7 @@ const App = () => {
             >
               {/* Gradient Background on Hover */}
               <div className={`absolute inset-0 bg-gradient-to-br ${factor.bgGradient} opacity-0 group-hover:opacity-20 transition-opacity duration-500`}></div>
-              
+
               {/* Icon Container with Creative Animation */}
               <div className={`relative p-6 rounded-2xl bg-gradient-to-br ${factor.gradient} shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300 animate-glow`}>
                 <div className="text-white animate-spin-slow">
@@ -391,7 +391,7 @@ const App = () => {
                 <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-gray-800 transition-colors">
                   {factor.title}
                 </h3>
-                
+
                 <p className="text-gray-600 leading-relaxed mb-4 group-hover:text-gray-700 transition-colors">
                   {factor.desc}
                 </p>
@@ -411,19 +411,19 @@ const App = () => {
 
         {/* Trust Indicators Section */}
         <div className={`text-center ${inView ? 'animate-slideInUp delay-800' : 'opacity-0'}`}>
-          <div className="relative bg-gradient-to-r from-indigo-50 to-purple-50 rounded-3xl p-12 max-w-4xl mx-auto shadow-xl border border-gray-200/50 overflow-hidden">
+          <div className="relative bg-gradient-to-r from-primary-light/10 to-accent-light/10 rounded-3xl p-12 max-w-4xl mx-auto shadow-xl border border-gray-200/50 overflow-hidden">
             {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-400/10 to-purple-400/10 rounded-full blur-2xl"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-2xl"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-green-400/10 to-teal-400/10 rounded-full blur-2xl"></div>
-            
+
             <div className="relative z-10">
               <h3 className="text-3xl font-bold text-gray-900 mb-6">
                 Trusted by Industry Leaders
               </h3>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-glow">
+                  <div className="w-16 h-16 gradient-ocean rounded-2xl flex items-center justify-center mx-auto mb-4 animate-glow">
                     <Shield className="w-8 h-8 text-white" />
                   </div>
                   <div className="text-lg font-semibold text-gray-900">ISO 27001</div>
@@ -437,7 +437,7 @@ const App = () => {
                   <div className="text-sm text-gray-500">Compliant</div>
                 </div>
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-glow">
+                  <div className="w-16 h-16 gradient-accent rounded-2xl flex items-center justify-center mx-auto mb-4 animate-glow">
                     <CheckCircle className="w-8 h-8 text-white" />
                   </div>
                   <div className="text-lg font-semibold text-gray-900">SSL</div>
@@ -451,20 +451,21 @@ const App = () => {
                   <div className="text-sm text-gray-500">Rating</div>
                 </div>
               </div>
-              
+
               <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
                 Our commitment to security and trust has earned us certifications and recognition from leading industry standards.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="group relative bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 overflow-hidden">
+                <button className="group relative gradient-ocean text-white px-8 py-4 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 overflow-hidden">
+
                   <span className="flex items-center justify-center relative z-10">
                     <Shield className="w-5 h-5" />
                     Learn More
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 gradient-accent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </button>
-                <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-full font-semibold hover:border-indigo-600 hover:text-indigo-600 transition-all duration-300 transform hover:scale-105">
+                <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-full font-semibold hover:border-primary hover:text-primary transition-all duration-300 transform hover:scale-105">
                   Security Report
                 </button>
               </div>

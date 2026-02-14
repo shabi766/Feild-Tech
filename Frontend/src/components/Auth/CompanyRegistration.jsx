@@ -7,21 +7,25 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { toast } from 'sonner';
-import { 
-  Building, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Globe, 
-  Users, 
-  ArrowLeft, 
+import { useDispatch } from 'react-redux';
+import { setUser, setToken } from '@/redux/authSlice';
+import {
+  Building,
+  MapPin,
+  Phone,
+  Mail,
+  Globe,
+  Users,
+  ArrowLeft,
   CheckCircle,
   Loader2,
   AlertCircle
 } from 'lucide-react';
+import { API_ENDPOINTS } from '@/config/environment';
 
 const CompanyRegistration = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [companyData, setCompanyData] = useState({
@@ -30,12 +34,12 @@ const CompanyRegistration = () => {
     companyType: '',
     industry: '',
     description: '',
-    
+
     // Contact Information
     email: '',
     phone: '',
     website: '',
-    
+
     // Address
     address: {
       street: '',
@@ -44,18 +48,18 @@ const CompanyRegistration = () => {
       postalCode: '',
       country: ''
     },
-    
+
     // Company Details
     foundedYear: '',
     employeeCount: '',
     annualRevenue: '',
-    
+
     // Recruiter Info
     recruiterName: '',
     recruiterEmail: '',
     recruiterPhone: '',
     recruiterPosition: '',
-    
+
     // Business Verification
     businessLicense: '',
     taxId: '',
@@ -127,7 +131,7 @@ const CompanyRegistration = () => {
         [field]: value
       }));
     }
-    
+
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -170,22 +174,22 @@ const CompanyRegistration = () => {
         }
         break;
 
-             case 3:
-         if (!companyData.recruiterName.trim()) {
-           newErrors.recruiterName = 'Recruiter name is required';
-         }
-         if (!companyData.recruiterEmail.trim()) {
-           newErrors.recruiterEmail = 'Recruiter email is required';
-         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(companyData.recruiterEmail)) {
-           newErrors.recruiterEmail = 'Please enter a valid email address';
-         }
-         if (!companyData.recruiterPhone.trim()) {
-           newErrors.recruiterPhone = 'Recruiter phone is required';
-         }
-         if (!companyData.password || companyData.password.length < 6) {
-           newErrors.password = 'Password must be at least 6 characters long';
-         }
-         break;
+      case 3:
+        if (!companyData.recruiterName.trim()) {
+          newErrors.recruiterName = 'Recruiter name is required';
+        }
+        if (!companyData.recruiterEmail.trim()) {
+          newErrors.recruiterEmail = 'Recruiter email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(companyData.recruiterEmail)) {
+          newErrors.recruiterEmail = 'Please enter a valid email address';
+        }
+        if (!companyData.recruiterPhone.trim()) {
+          newErrors.recruiterPhone = 'Recruiter phone is required';
+        }
+        if (!companyData.password || companyData.password.length < 6) {
+          newErrors.password = 'Password must be at least 6 characters long';
+        }
+        break;
     }
 
     setErrors(newErrors);
@@ -209,37 +213,37 @@ const CompanyRegistration = () => {
 
     setLoading(true);
     try {
-             // Prepare data for backend
-       const registrationData = {
-         companyName: companyData.companyName,
-         companyType: companyData.companyType,
-         industry: companyData.industry,
-         description: companyData.description,
-         foundedYear: companyData.foundedYear,
-         employeeCount: companyData.employeeCount,
-         annualRevenue: companyData.annualRevenue,
-         companyEmail: companyData.email, // Map from email field
-         companyPhone: companyData.phone, // Map from phone field
-         website: companyData.website,
-         address: {
-           street: companyData.address.street,
-           city: companyData.address.city,
-           state: companyData.address.state,
-           postalCode: companyData.address.postalCode,
-           country: companyData.address.country
-         },
-         recruiterName: companyData.recruiterName,
-         recruiterEmail: companyData.recruiterEmail,
-         recruiterPhone: companyData.recruiterPhone,
-         recruiterPosition: companyData.recruiterPosition,
-         password: companyData.password
-       };
+      // Prepare data for backend
+      const registrationData = {
+        companyName: companyData.companyName,
+        companyType: companyData.companyType,
+        industry: companyData.industry,
+        description: companyData.description,
+        foundedYear: companyData.foundedYear,
+        employeeCount: companyData.employeeCount,
+        annualRevenue: companyData.annualRevenue,
+        companyEmail: companyData.email, // Map from email field
+        companyPhone: companyData.phone, // Map from phone field
+        website: companyData.website,
+        address: {
+          street: companyData.address.street,
+          city: companyData.address.city,
+          state: companyData.address.state,
+          postalCode: companyData.address.postalCode,
+          country: companyData.address.country
+        },
+        recruiterName: companyData.recruiterName,
+        recruiterEmail: companyData.recruiterEmail,
+        recruiterPhone: companyData.recruiterPhone,
+        recruiterPosition: companyData.recruiterPosition,
+        password: companyData.password
+      };
 
-             // Debug: Log the payload being sent
-       console.log('Sending registration data:', registrationData);
-       
-       // Make API call to backend
-       const response = await fetch('http://localhost:8000/api/v1/company-registration/register', {
+      // Debug: Log the payload being sent
+      console.log('Sending registration data:', registrationData);
+
+      // Make API call to backend
+      const response = await fetch(`${API_ENDPOINTS.COMPANY_REGISTRATION}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -248,28 +252,36 @@ const CompanyRegistration = () => {
         credentials: 'include'
       });
 
-             const result = await response.json();
-       console.log('Backend response:', result);
+      const result = await response.json();
+      console.log('Backend response:', result);
 
-       if (!response.ok) {
-         console.error('Backend error details:', result);
-         throw new Error(result.message || 'Registration failed');
-       }
+      if (!response.ok) {
+        console.error('Backend error details:', result);
+        throw new Error(result.message || 'Registration failed');
+      }
 
       toast.success('Company registration successful!');
-      
-      // Store the token and user data
+
+      // Dispatch user data to Redux store
+      console.log('CompanyRegistration - Setting user:', result.data.user);
+      dispatch(setUser(result.data.user));
+      dispatch(setToken(result.data.token));
+
+      // Store the token and user data in localStorage as backup
       localStorage.setItem('token', result.data.token);
       localStorage.setItem('userData', JSON.stringify(result.data.user));
       localStorage.setItem('companyData', JSON.stringify(result.data.company));
-      
-             // Navigate to company dashboard
-       navigate('/app/recruiter/dashboard', { 
-         state: { 
-           companyData: result.data.company,
-           userData: result.data.user
-         } 
-       });
+
+      // Add a small delay to ensure Redux state is properly set
+      setTimeout(() => {
+        // Navigate to company dashboard
+        navigate('/app/recruiter/dashboard', {
+          state: {
+            companyData: result.data.company,
+            userData: result.data.user
+          }
+        });
+      }, 100);
     } catch (error) {
       console.error('Registration error:', error);
       toast.error(error.message || 'Registration failed. Please try again.');
@@ -391,41 +403,41 @@ const CompanyRegistration = () => {
 
   const renderStep2 = () => (
     <div className="space-y-6">
-             <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4">
-         <h3 className="font-semibold text-blue-900 mb-2">Company Contact Information</h3>
-         <p className="text-blue-700 text-sm">
-           This is the main contact information for your company (different from the recruiter's personal contact).
-         </p>
-       </div>
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4">
+        <h3 className="font-semibold text-blue-900 mb-2">Company Contact Information</h3>
+        <p className="text-blue-700 text-sm">
+          This is the main contact information for your company (different from the recruiter's personal contact).
+        </p>
+      </div>
 
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-         <div>
-           <Label htmlFor="email">Company Email *</Label>
-           <Input
-             id="email"
-             type="email"
-             value={companyData.email}
-             onChange={(e) => handleInputChange('email', e.target.value)}
-             placeholder="info@company.com"
-             className="mt-2"
-           />
-           <p className="text-xs text-gray-500 mt-1">Main company email address</p>
-           <ErrorMessage error={errors.email} />
-         </div>
-         <div>
-           <Label htmlFor="phone">Company Phone *</Label>
-           <Input
-             id="phone"
-             type="tel"
-             value={companyData.phone}
-             onChange={(e) => handleInputChange('phone', e.target.value)}
-             placeholder="+1 (555) 123-4567"
-             className="mt-2"
-           />
-           <p className="text-xs text-gray-500 mt-1">Main company phone number</p>
-           <ErrorMessage error={errors.phone} />
-         </div>
-       </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="email">Company Email *</Label>
+          <Input
+            id="email"
+            type="email"
+            value={companyData.email}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+            placeholder="info@company.com"
+            className="mt-2"
+          />
+          <p className="text-xs text-gray-500 mt-1">Main company email address</p>
+          <ErrorMessage error={errors.email} />
+        </div>
+        <div>
+          <Label htmlFor="phone">Company Phone *</Label>
+          <Input
+            id="phone"
+            type="tel"
+            value={companyData.phone}
+            onChange={(e) => handleInputChange('phone', e.target.value)}
+            placeholder="+1 (555) 123-4567"
+            className="mt-2"
+          />
+          <p className="text-xs text-gray-500 mt-1">Main company phone number</p>
+          <ErrorMessage error={errors.phone} />
+        </div>
+      </div>
 
       <div>
         <Label htmlFor="website">Website</Label>
@@ -550,29 +562,29 @@ const CompanyRegistration = () => {
         </div>
       </div>
 
-             <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-         <h3 className="font-semibold text-yellow-900 mb-2">Next Steps</h3>
-         <p className="text-yellow-700 text-sm">
-           After registration, you'll be able to set up your company profile, create job postings, and start hiring technicians.
-         </p>
-       </div>
+      <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+        <h3 className="font-semibold text-yellow-900 mb-2">Next Steps</h3>
+        <p className="text-yellow-700 text-sm">
+          After registration, you'll be able to set up your company profile, create job postings, and start hiring technicians.
+        </p>
+      </div>
 
-       <div className="space-y-4">
-         <Label htmlFor="password">Account Password *</Label>
-         <Input
-           id="password"
-           type="password"
-           value={companyData.password || ''}
-           onChange={(e) => handleInputChange('password', e.target.value)}
-           placeholder="Create a strong password for your company account"
-           className="mt-2"
-           required
-         />
-         <p className="text-sm text-gray-600">
-           This password will be used to log into your company account
-         </p>
-         <ErrorMessage error={errors.password} />
-       </div>
+      <div className="space-y-4">
+        <Label htmlFor="password">Account Password *</Label>
+        <Input
+          id="password"
+          type="password"
+          value={companyData.password || ''}
+          onChange={(e) => handleInputChange('password', e.target.value)}
+          placeholder="Create a strong password for your company account"
+          className="mt-2"
+          required
+        />
+        <p className="text-sm text-gray-600">
+          This password will be used to log into your company account
+        </p>
+        <ErrorMessage error={errors.password} />
+      </div>
     </div>
   );
 
@@ -580,11 +592,10 @@ const CompanyRegistration = () => {
     <div className="flex items-center justify-center mb-8">
       {[1, 2, 3].map((stepNumber) => (
         <div key={stepNumber} className="flex items-center">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-            stepNumber <= step 
-              ? 'bg-blue-600 border-blue-600 text-white' 
-              : 'bg-white border-gray-300 text-gray-400'
-          }`}>
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${stepNumber <= step
+            ? 'bg-blue-600 border-blue-600 text-white'
+            : 'bg-white border-gray-300 text-gray-400'
+            }`}>
             {stepNumber < step ? (
               <CheckCircle className="w-5 h-5" />
             ) : (
@@ -592,9 +603,8 @@ const CompanyRegistration = () => {
             )}
           </div>
           {stepNumber < 3 && (
-            <div className={`w-16 h-1 ${
-              stepNumber < step ? 'bg-blue-600' : 'bg-gray-300'
-            }`} />
+            <div className={`w-16 h-1 ${stepNumber < step ? 'bg-blue-600' : 'bg-gray-300'
+              }`} />
           )}
         </div>
       ))}
@@ -624,8 +634,8 @@ const CompanyRegistration = () => {
       <div className="w-full max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link 
-            to="/role-selection" 
+          <Link
+            to="/role-selection"
             className="inline-flex items-center text-gray-600 hover:text-gray-800 transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -670,8 +680,8 @@ const CompanyRegistration = () => {
                   Next Step
                 </Button>
               ) : (
-                <Button 
-                  onClick={handleSubmit} 
+                <Button
+                  onClick={handleSubmit}
                   disabled={loading}
                   className="px-8 bg-blue-600 hover:bg-blue-700"
                 >

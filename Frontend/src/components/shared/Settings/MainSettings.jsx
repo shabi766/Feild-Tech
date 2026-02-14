@@ -6,12 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  Settings, 
-  Palette, 
-  Globe, 
-  Bell, 
-  Shield, 
+import {
+  Settings,
+  Palette,
+  Globe,
+  Bell,
+  Shield,
   User,
   Lock,
   Smartphone,
@@ -53,12 +53,12 @@ const MainSettings = () => {
   });
 
   // Destructure with fallbacks to prevent errors
-  const { 
-    settings = {}, 
-    updateSetting = () => {}, 
-    updateMultipleSettings = () => {}, 
-    resetToDefaults = () => {}, 
-    isLoading = false 
+  const {
+    settings = {},
+    updateSetting = () => { },
+    updateMultipleSettings = () => { },
+    resetToDefaults = () => { },
+    isLoading = false
   } = settingsContext || {};
 
   // Show loading if context is not yet available
@@ -105,11 +105,11 @@ const MainSettings = () => {
     setIsSaving(true);
     try {
       // Handle form submission logic here
-              setSaveStatus({ type: 'success', message: t('settingsUpdated', currentLanguage) });
-        setTimeout(() => setSaveStatus(null), 3000);
-      } catch (error) {
-        setSaveStatus({ type: 'error', message: t('settingsUpdateFailed', currentLanguage) });
-        setTimeout(() => setSaveStatus(null), 5000);
+      setSaveStatus({ type: 'success', message: t('settingsUpdated', currentLanguage) });
+      setTimeout(() => setSaveStatus(null), 3000);
+    } catch (error) {
+      setSaveStatus({ type: 'error', message: t('settingsUpdateFailed', currentLanguage) });
+      setTimeout(() => setSaveStatus(null), 5000);
     } finally {
       setIsSaving(false);
     }
@@ -170,7 +170,7 @@ const MainSettings = () => {
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
-          <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full">
+          <div className="p-3 gradient-accent rounded-full">
             <Settings className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
@@ -184,11 +184,10 @@ const MainSettings = () => {
 
       {/* Status Messages */}
       {saveStatus && (
-        <div className={`p-4 rounded-xl flex items-center gap-3 shadow-lg ${
-          saveStatus.type === 'success' 
-            ? 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-800 border border-green-200' 
+        <div className={`p-4 rounded-xl flex items-center gap-3 shadow-lg ${saveStatus.type === 'success'
+            ? 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-800 border border-green-200'
             : 'bg-gradient-to-r from-red-50 to-pink-50 text-red-800 border border-red-200'
-        }`}>
+          }`}>
           {saveStatus.type === 'success' ? (
             <CheckCircle className="w-6 h-6 text-green-600" />
           ) : (
@@ -204,7 +203,7 @@ const MainSettings = () => {
           <div className="flex items-center gap-6">
             <Avatar className="w-20 h-20 ring-4 ring-white shadow-lg">
               <AvatarImage src={user?.profile?.profilePhoto || '/default-avatar.png'} alt="Profile" />
-              <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+              <AvatarFallback className="text-2xl font-bold gradient-accent text-white">
                 {getInitials(user?.fullname || 'User')}
               </AvatarFallback>
             </Avatar>
@@ -247,53 +246,53 @@ const MainSettings = () => {
       {/* Settings Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-6 h-16 bg-gray-50 p-1 rounded-xl">
-          <TabsTrigger 
-            value="profile" 
+          <TabsTrigger
+            value="profile"
             className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200"
           >
             <User className="w-4 h-4" />
-                            <span className="hidden sm:inline">{t('profile', currentLanguage)}</span>
+            <span className="hidden sm:inline">{t('profile', currentLanguage)}</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="account" 
+          <TabsTrigger
+            value="account"
             className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200"
           >
             <Shield className="w-4 h-4" />
-                            <span className="hidden sm:inline">{t('account', currentLanguage)}</span>
+            <span className="hidden sm:inline">{t('account', currentLanguage)}</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="preferences" 
+          <TabsTrigger
+            value="preferences"
             className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200"
           >
             <Palette className="w-4 h-4" />
-                            <span className="hidden sm:inline">{t('preferences', currentLanguage)}</span>
+            <span className="hidden sm:inline">{t('preferences', currentLanguage)}</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="privacy" 
+          <TabsTrigger
+            value="privacy"
             className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200"
           >
             <Lock className="w-4 h-4" />
-                            <span className="hidden sm:inline">{t('privacy', currentLanguage)}</span>
+            <span className="hidden sm:inline">{t('privacy', currentLanguage)}</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="notifications" 
+          <TabsTrigger
+            value="notifications"
             className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200"
           >
             <Bell className="w-4 h-4" />
-                            <span className="hidden sm:inline">{t('notifications', currentLanguage)}</span>
+            <span className="hidden sm:inline">{t('notifications', currentLanguage)}</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="additional" 
+          <TabsTrigger
+            value="additional"
             className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200"
           >
             <Settings className="w-4 h-4" />
-                            <span className="hidden sm:inline">{t('more', currentLanguage)}</span>
+            <span className="hidden sm:inline">{t('more', currentLanguage)}</span>
           </TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
         <TabsContent value="profile" className="space-y-6">
-          <ProfileSettings 
+          <ProfileSettings
             user={user}
             settings={settings}
             updateSetting={updateSetting}
@@ -304,7 +303,7 @@ const MainSettings = () => {
 
         {/* Account Tab */}
         <TabsContent value="account" className="space-y-6">
-          <AccountSettings 
+          <AccountSettings
             user={user}
             settings={settings}
             showPasswords={showPasswords}
@@ -318,7 +317,7 @@ const MainSettings = () => {
 
         {/* Preferences Tab */}
         <TabsContent value="preferences" className="space-y-6">
-          <PreferencesSettings 
+          <PreferencesSettings
             settings={settings}
             updateSetting={updateSetting}
             isLoading={isLoading}
@@ -328,7 +327,7 @@ const MainSettings = () => {
 
         {/* Privacy Tab */}
         <TabsContent value="privacy" className="space-y-6">
-          <PrivacySettings 
+          <PrivacySettings
             settings={settings}
             handleSubmit={handleSubmit}
             handleNestedChange={handleChange}
@@ -338,7 +337,7 @@ const MainSettings = () => {
 
         {/* Notifications Tab */}
         <TabsContent value="notifications" className="space-y-6">
-          <NotificationsSettings 
+          <NotificationsSettings
             settings={settings}
             handleSubmit={handleSubmit}
             handleNestedChange={handleChange}
@@ -348,7 +347,7 @@ const MainSettings = () => {
 
         {/* Additional Tab */}
         <TabsContent value="additional" className="space-y-6">
-          <AdditionalSettings 
+          <AdditionalSettings
             settings={settings}
             handleSubmit={handleSubmit}
             handleNestedChange={handleChange}
@@ -368,7 +367,7 @@ const MainSettings = () => {
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-8 shadow-2xl flex flex-col items-center gap-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                            <p className="text-gray-600 font-medium">{t('updatingSettings', currentLanguage)}</p>
+            <p className="text-gray-600 font-medium">{t('updatingSettings', currentLanguage)}</p>
           </div>
         </div>
       )}

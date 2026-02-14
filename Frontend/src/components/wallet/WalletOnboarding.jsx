@@ -4,6 +4,7 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
 import axios from 'axios';
+import { API_ENDPOINTS } from '@/config/environment';
 import { toast } from 'sonner';
 import { useSelector } from 'react-redux';
 import { 
@@ -50,7 +51,7 @@ const WalletOnboarding = ({ onComplete }) => {
 
     const checkKYCStatus = async () => {
         try {
-            const res = await axios.get('/api/v1/kyc/status', { withCredentials: true });
+            const res = await axios.get(`${API_ENDPOINTS.WALLET}/kyc/status`, { withCredentials: true });
             if (res.data?.success) {
                 const status = res.data.kyc?.kycStatus || 'unverified';
                 setKycStatus(status);
@@ -170,7 +171,7 @@ const WalletOnboarding = ({ onComplete }) => {
             if (files.selfie) data.append('selfie', files.selfie);
             if (files.utilityBill) data.append('utilityBill', files.utilityBill);
             
-            const res = await axios.post('/api/v1/kyc/submit', data, { withCredentials: true });
+            const res = await axios.post(`${API_ENDPOINTS.WALLET}/kyc/submit`, data, { withCredentials: true });
             if (res.data?.success) {
                 setKycStatus('pending');
                 setStep(4);

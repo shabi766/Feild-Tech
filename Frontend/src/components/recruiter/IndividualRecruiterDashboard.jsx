@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import api from '../../lib/axios';
-import { 
-  Briefcase, 
-  Users, 
-  DollarSign, 
-  TrendingUp, 
+import {
+  Briefcase,
+  Users,
+  DollarSign,
+  TrendingUp,
   Calendar,
   MessageSquare,
   FileText,
@@ -20,15 +20,19 @@ import {
   Phone
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { StatCard } from '../ui/StatCard';
+import { EmptyState } from '../ui/EmptyState';
+import { DashboardSkeleton } from '../ui/LoadingSkeleton';
+import { GradientButton } from '../ui/GradientButton';
 
 const IndividualRecruiterDashboard = () => {
   const { user } = useSelector(store => store.auth);
   const navigate = useNavigate();
-  
+
   console.log('IndividualRecruiterDashboard render - user:', user);
   console.log('IndividualRecruiterDashboard render - user.recruiterType:', user?.recruiterType);
   console.log('IndividualRecruiterDashboard render - user.companyId:', user?.companyId);
-  
+
   // Redirect company recruiters to their dashboard
   useEffect(() => {
     if (user && user.role === 'Recruiter' && user.recruiterType === 'Company') {
@@ -37,7 +41,7 @@ const IndividualRecruiterDashboard = () => {
       return;
     }
   }, [user, navigate]);
-  
+
   const [stats, setStats] = useState({
     totalJobs: 0,
     activeJobs: 0,
@@ -90,28 +94,10 @@ const IndividualRecruiterDashboard = () => {
     }
   };
 
-  const StatCard = ({ title, value, icon: Icon, color, subtitle, change }) => (
-    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
-          {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
-          {change && (
-            <p className={`text-sm mt-1 ${change > 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {change > 0 ? '+' : ''}{change}% from last month
-            </p>
-          )}
-        </div>
-        <div className={`p-3 rounded-full ${color}`}>
-          <Icon className="h-6 w-6 text-white" />
-        </div>
-      </div>
-    </div>
-  );
+  // StatCard is now imported from ui components
 
   const ProfileSummary = () => (
-    <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg shadow-md p-6 border border-purple-200">
+    <div className="card-glass p-6 animate-fade-in-up">
       <div className="flex items-center space-x-4 mb-4">
         <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
           <Users className="h-8 w-8 text-white" />
@@ -121,7 +107,7 @@ const IndividualRecruiterDashboard = () => {
           <p className="text-gray-600">Individual Recruiter</p>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div className="flex items-center space-x-2">
           <MapPin className="h-4 w-4 text-purple-600" />
@@ -157,31 +143,31 @@ const IndividualRecruiterDashboard = () => {
   );
 
   const QuickActions = () => (
-    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+    <div className="card-elevated p-6 animate-scale-in">
+      <h3 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <button 
+        <button
           onClick={() => navigate('/app/recruiter/simple-post-job')}
           className="flex flex-col items-center space-y-2 p-4 text-center bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
         >
           <Plus className="h-6 w-6 text-blue-600" />
           <span className="text-sm font-medium text-blue-900">Post Job</span>
         </button>
-        <button 
+        <button
           onClick={() => navigate('/app/recruiter/technicians/techs')}
           className="flex flex-col items-center space-y-2 p-4 text-center bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
         >
           <Users className="h-6 w-6 text-green-600" />
           <span className="text-sm font-medium text-green-900">Find Talent</span>
         </button>
-        <button 
+        <button
           onClick={() => navigate('/app/recruiter/jobs')}
           className="flex flex-col items-center space-y-2 p-4 text-center bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
         >
           <Briefcase className="h-6 w-6 text-purple-600" />
           <span className="text-sm font-medium text-purple-900">My Jobs</span>
         </button>
-        <button 
+        <button
           onClick={() => navigate('/app/recruiter/messages')}
           className="flex flex-col items-center space-y-2 p-4 text-center bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors"
         >
@@ -193,8 +179,8 @@ const IndividualRecruiterDashboard = () => {
   );
 
   const RecentJobs = () => (
-    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Jobs</h3>
+    <div className="card-elevated p-6 animate-fade-in-up">
+      <h3 className="text-lg font-semibold text-foreground mb-4">Recent Jobs</h3>
       <div className="space-y-4">
         {recentJobs.length > 0 ? (
           recentJobs.map((job) => (
@@ -217,35 +203,37 @@ const IndividualRecruiterDashboard = () => {
                   </span>
                 </div>
               </div>
-              <span className={`px-3 py-1 text-xs rounded-full ${
-                job.status === 'Active' ? 'bg-green-100 text-green-800' : 
-                job.status === 'Completed' ? 'bg-blue-100 text-blue-800' : 
-                'bg-gray-100 text-gray-800'
-              }`}>
+              <span className={`px-3 py-1 text-xs rounded-full ${job.status === 'Active' ? 'bg-green-100 text-green-800' :
+                  job.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
+                    'bg-gray-100 text-gray-800'
+                }`}>
                 {job.status}
               </span>
             </div>
           ))
         ) : (
-          <div className="text-center py-8 text-gray-500">
-            <Briefcase className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-            <p className="text-lg font-medium">No jobs posted yet</p>
-            <p className="text-sm">Start by posting your first job to find great talent!</p>
-            <button 
-              onClick={() => navigate('/app/recruiter/simple-post-job')}
-              className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Post Your First Job
-            </button>
-          </div>
+          <EmptyState
+            icon={Briefcase}
+            title="No jobs posted yet"
+            description="Start by posting your first job to find great talent!"
+            action={
+              <GradientButton
+                onClick={() => navigate('/app/recruiter/simple-post-job')}
+                variant="gradient"
+                leftIcon={<Plus className="h-4 w-4" />}
+              >
+                Post Your First Job
+              </GradientButton>
+            }
+          />
         )}
       </div>
     </div>
   );
 
   const RecentApplicants = () => (
-    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Applicants</h3>
+    <div className="card-elevated p-6 animate-fade-in-up">
+      <h3 className="text-lg font-semibold text-foreground mb-4">Recent Applicants</h3>
       <div className="space-y-4">
         {recentApplicants.length > 0 ? (
           recentApplicants.map((applicant) => (
@@ -266,45 +254,37 @@ const IndividualRecruiterDashboard = () => {
                   </div>
                 </div>
               </div>
-              <span className={`px-2 py-1 text-xs rounded-full ${
-                applicant.status === 'Under Review' ? 'bg-yellow-100 text-yellow-800' :
-                applicant.status === 'Shortlisted' ? 'bg-blue-100 text-blue-800' :
-                applicant.status === 'Hired' ? 'bg-green-100 text-green-800' :
-                'bg-gray-100 text-gray-800'
-              }`}>
+              <span className={`px-2 py-1 text-xs rounded-full ${applicant.status === 'Under Review' ? 'bg-yellow-100 text-yellow-800' :
+                  applicant.status === 'Shortlisted' ? 'bg-blue-100 text-blue-800' :
+                    applicant.status === 'Hired' ? 'bg-green-100 text-green-800' :
+                      'bg-gray-100 text-gray-800'
+                }`}>
                 {applicant.status}
               </span>
             </div>
           ))
         ) : (
-          <div className="text-center py-8 text-gray-500">
-            <Users className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-            <p className="text-lg font-medium">No applicants yet</p>
-            <p className="text-sm">Applicants will appear here once you post jobs</p>
-          </div>
+          <EmptyState
+            icon={Users}
+            title="No applicants yet"
+            description="Applicants will appear here once you post jobs"
+          />
         )}
       </div>
     </div>
   );
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Individual Recruiter Dashboard</h1>
-          <p className="text-gray-600">Welcome back, {user?.fullname}. Here's your recruiting overview.</p>
+        <div className="mb-8 animate-fade-in">
+          <h1 className="text-4xl font-bold gradient-text mb-2">Individual Recruiter Dashboard</h1>
+          <p className="text-muted-foreground text-lg">Welcome back, {user?.fullname}. Here's your recruiting overview.</p>
         </div>
 
         {/* Profile Summary */}
@@ -318,28 +298,28 @@ const IndividualRecruiterDashboard = () => {
             title="Total Jobs"
             value={stats.totalJobs}
             icon={Briefcase}
-            color="bg-blue-500"
+            gradient="from-blue-500 to-indigo-600"
             subtitle="All time"
           />
           <StatCard
             title="Active Jobs"
             value={stats.activeJobs}
             icon={Clock}
-            color="bg-green-500"
+            gradient="from-green-500 to-emerald-600"
             subtitle="Currently open"
           />
           <StatCard
             title="Total Earnings"
             value={`$${stats.totalEarnings?.toLocaleString() || '0'}`}
             icon={DollarSign}
-            color="bg-emerald-500"
+            gradient="from-emerald-500 to-green-600"
             subtitle="This year"
           />
           <StatCard
             title="Pending Payments"
             value={`$${stats.pendingPayments?.toLocaleString() || '0'}`}
             icon={AlertCircle}
-            color="bg-orange-500"
+            gradient="from-orange-500 to-red-600"
             subtitle="Awaiting payment"
           />
         </div>
@@ -350,21 +330,21 @@ const IndividualRecruiterDashboard = () => {
             title="Total Applicants"
             value={stats.totalApplicants}
             icon={Users}
-            color="bg-purple-500"
+            gradient="from-purple-500 to-pink-600"
             subtitle="All time"
           />
           <StatCard
             title="Unread Messages"
             value={stats.unreadMessages}
             icon={MessageSquare}
-            color="bg-indigo-500"
+            gradient="from-indigo-500 to-purple-600"
             subtitle="Require attention"
           />
           <StatCard
             title="Upcoming Deadlines"
             value={stats.upcomingDeadlines}
             icon={Target}
-            color="bg-red-500"
+            gradient="from-red-500 to-orange-600"
             subtitle="This week"
           />
         </div>

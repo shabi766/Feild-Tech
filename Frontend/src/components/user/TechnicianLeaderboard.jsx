@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar';
-import { 
-    Trophy, 
-    Medal, 
-    Star, 
-    TrendingUp, 
+import {
+    Trophy,
+    Medal,
+    Star,
+    TrendingUp,
     Target,
     Clock,
     CheckCircle,
@@ -36,13 +36,13 @@ const TechnicianLeaderboard = () => {
     const loadLeaderboardData = async () => {
         try {
             setLoading(true);
-            
+
             // Load my ranking and stats
             const myRankingResponse = await axios.get(
                 `${LEADERBOARD_API_END_POINT}/technician/${user._id}`,
                 { withCredentials: true }
             );
-            
+
             if (myRankingResponse.data.success) {
                 setMyRanking(myRankingResponse.data);
                 setMyStats(myRankingResponse.data.stats || myRankingResponse.data);
@@ -129,7 +129,7 @@ const TechnicianLeaderboard = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                 >
-                    <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                    <Card className="bg-gradient-to-r from-primary to-primary-dark text-white">
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -204,7 +204,7 @@ const TechnicianLeaderboard = () => {
                                     </p>
                                     <p className="text-sm text-gray-600">Jobs Completed</p>
                                 </div>
-                                
+
                                 <div className="text-center p-4 bg-green-50 rounded-lg">
                                     <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2">
                                         <Clock className="w-6 h-6 text-white" />
@@ -214,17 +214,17 @@ const TechnicianLeaderboard = () => {
                                     </p>
                                     <p className="text-sm text-gray-600">On-Time Rate</p>
                                 </div>
-                                
-                                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                                    <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-2">
+
+                                <div className="text-center p-4 bg-cyan-50 rounded-lg">
+                                    <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center mx-auto mb-2">
                                         <Target className="w-6 h-6 text-white" />
                                     </div>
-                                    <p className="text-2xl font-bold text-purple-600">
+                                    <p className="text-2xl font-bold text-accent">
                                         {(myStats.jobCompletionRate || 0).toFixed(0)}%
                                     </p>
                                     <p className="text-sm text-gray-600">Completion Rate</p>
                                 </div>
-                                
+
                                 <div className="text-center p-4 bg-yellow-50 rounded-lg">
                                     <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-2">
                                         <Star className="w-6 h-6 text-white" />
@@ -278,11 +278,10 @@ const TechnicianLeaderboard = () => {
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: index * 0.05 }}
-                                        className={`flex items-center justify-between p-4 rounded-lg border ${
-                                            technician.technician?._id === user?._id 
-                                                ? 'border-blue-300 bg-blue-50' 
-                                                : 'border-gray-200 hover:border-gray-300'
-                                        }`}
+                                        className={`flex items-center justify-between p-4 rounded-lg border ${technician.technician?._id === user?._id
+                                            ? 'border-blue-300 bg-blue-50'
+                                            : 'border-gray-200 hover:border-gray-300'
+                                            }`}
                                     >
                                         <div className="flex items-center space-x-4">
                                             <div className="flex items-center space-x-2">
@@ -295,14 +294,14 @@ const TechnicianLeaderboard = () => {
                                                     </Badge>
                                                 )}
                                             </div>
-                                            
+
                                             <Avatar className="w-10 h-10">
                                                 <AvatarImage src={technician.technician?.profile?.avatar} />
                                                 <AvatarFallback>
                                                     {technician.technician?.fullname?.charAt(0)}
                                                 </AvatarFallback>
                                             </Avatar>
-                                            
+
                                             <div>
                                                 <h3 className="font-semibold text-gray-900">
                                                     {technician.technician?.fullname}
@@ -315,7 +314,7 @@ const TechnicianLeaderboard = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                         <div className="text-right">
                                             <div className="text-lg font-bold text-blue-600">
                                                 {technician.overallScore?.toFixed(0) || 0}
@@ -341,7 +340,7 @@ const TechnicianLeaderboard = () => {
                         <Award className="w-16 h-16 text-green-600 mx-auto mb-4" />
                         <h3 className="text-xl font-bold text-gray-800 mb-2">Keep Up the Great Work!</h3>
                         <p className="text-gray-600 mb-4">
-                            Your performance is tracked based on job completion, punctuality, and customer satisfaction. 
+                            Your performance is tracked based on job completion, punctuality, and customer satisfaction.
                             Continue delivering excellent service to climb the rankings!
                         </p>
                         <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">

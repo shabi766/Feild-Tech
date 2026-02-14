@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Users, 
-  Briefcase, 
-  DollarSign, 
-  TrendingUp, 
+import {
+  Users,
+  Briefcase,
+  DollarSign,
+  TrendingUp,
   TrendingDown,
   Activity,
   Calendar,
@@ -21,8 +21,9 @@ import {
 } from 'lucide-react';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import "chart.js/auto";
-import axios from 'axios';
-import { DASHBOARD_API_END_POINT } from '../utils/constant';
+import "chart.js/auto";
+import api from '../../lib/axios';
+import { API_ENDPOINTS } from '@/config/environment';
 
 const AdminStats = () => {
   const [stats, setStats] = useState(null);
@@ -36,48 +37,16 @@ const AdminStats = () => {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      // This would be an actual API call to get admin stats
-      // const response = await axios.get(`${DASHBOARD_API_END_POINT}/admin/stats?range=${timeRange}`, { withCredentials: true });
-      
-      // Mock data for now
-      const mockStats = {
-        overview: {
-          totalUsers: 1247,
-          activeUsers: 1189,
-          totalJobs: 456,
-          activeJobs: 89,
-          totalRevenue: 125000,
-          monthlyGrowth: 12.5
-        },
-        users: {
-          technicians: 567,
-          clients: 423,
-          recruiters: 89,
-          admins: 8,
-          newUsers: 45,
-          userGrowth: 8.2
-        },
-        kyc: {
-          pending: 23,
-          verified: 1124,
-          rejected: 12,
-          verificationRate: 98.9
-        },
-        financial: {
-          totalTransactions: 2341,
-          totalVolume: 125000,
-          averageTransaction: 53.4,
-          monthlyVolume: 45000
-        },
-        system: {
-          uptime: 99.9,
-          activeSessions: 234,
-          serverLoad: 45,
-          lastBackup: '2024-01-15T02:00:00Z'
-        }
-      };
-      
-      setStats(mockStats);
+      // Fetch real admin stats
+      const response = await api.get(`/dashboard/admin/stats?range=${timeRange}`);
+
+      if (response.data.success) {
+        setStats(response.data.stats);
+      } else {
+        // Keep mock data if API fails or returns no data (optional, but good for stability during dev)
+        console.warn('API returned success: false, using mock data');
+        setStats(mockStats);
+      }
     } catch (error) {
       console.error('Error fetching admin stats:', error);
     } finally {
@@ -167,7 +136,7 @@ const AdminStats = () => {
           <h2 className="text-2xl font-bold text-gray-900">Admin Dashboard</h2>
           <p className="text-gray-600">Platform overview and analytics</p>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           <select
             value={timeRange}
@@ -256,7 +225,7 @@ const AdminStats = () => {
         >
           <h3 className="text-lg font-semibold text-gray-900 mb-4">User Growth Trend</h3>
           <div className="h-64">
-            <Line 
+            <Line
               data={monthlyGrowthData}
               options={{
                 responsive: true,
@@ -293,7 +262,7 @@ const AdminStats = () => {
         >
           <h3 className="text-lg font-semibold text-gray-900 mb-4">KYC Status Distribution</h3>
           <div className="h-64">
-            <Doughnut 
+            <Doughnut
               data={kycStatusData}
               options={{
                 responsive: true,

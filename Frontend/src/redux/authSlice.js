@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { setCookie, removeCookie } from '../lib/axios';
 
 const initialState = {
     loading: false,
@@ -23,12 +22,10 @@ const authSlice = createSlice({
             state.error = null;
         },
         setToken: (state, action) => {
+            // Token is no longer persisted on the client; we keep it only
+            // in memory if needed for debugging/UI. Authentication relies
+            // on the httpOnly cookie set by the backend.
             state.token = action.payload;
-            if (action.payload) {
-                // Store token in localStorage and cookie
-                localStorage.setItem('authToken', action.payload);
-                setCookie('token', action.payload, 7);
-            }
         },
         setError: (state, action) => {
             state.error = action.payload;
@@ -40,10 +37,6 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             state.error = null;
             state.loading = false;
-            
-            // Clear from localStorage and cookies
-            localStorage.removeItem('authToken');
-            removeCookie('token');
         },
         clearError: (state) => {
             state.error = null;

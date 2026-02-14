@@ -1,18 +1,22 @@
 import express from "express";
-import { 
+import {
     getAuditLogs,
     getSuspiciousActivities,
     getUserActivitySummary,
     getAuditStats,
     exportAuditLogs,
-    cleanOldLogs
+    cleanOldLogs,
+    createAuditLog
 } from "../Controllers/audit.controller.js";
 import isAuthenticated from "../middleware/isAuthenticated.js";
 import isAdmin from "../middleware/isAdmin.js";
 
 const router = express.Router();
 
-// All routes require authentication and admin access
+// POST endpoint for receiving audit logs from microservices (no auth required)
+router.post("/log", createAuditLog);
+
+// All other routes require authentication and admin access
 router.use(isAuthenticated);
 router.use(isAdmin);
 

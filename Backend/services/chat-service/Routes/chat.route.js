@@ -7,6 +7,7 @@ import {
     getChats,
     getMessages,
     getUnreadMessages,
+    getUnreadMessageCount,
     markMessagesAsRead,
     searchChats,
     sendMessage,
@@ -18,6 +19,7 @@ const router = express.Router();
 
 // Specific routes should come before parameterized routes
 router.route('/unread-messages').get(isAuthenticated, getUnreadMessages);
+router.route('/unread-count/:userId').get(isAuthenticated, getUnreadMessageCount);
 router.route('/all').get(isAuthenticated, getChats);
 router.route('/create').post(isAuthenticated, createChat);
 router.route('/send').post(isAuthenticated, sendMessage);

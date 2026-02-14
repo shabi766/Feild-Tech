@@ -9,7 +9,7 @@ import { Building, Mail, Lock, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-r
 
 const CompanyLogin = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -33,7 +33,7 @@ const CompanyLogin = () => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/v1/company-registration/login', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/company-registration/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,10 +49,6 @@ const CompanyLogin = () => {
       }
 
       toast.success('Login successful!');
-      
-      localStorage.setItem('token', result.data.token);
-      localStorage.setItem('userData', JSON.stringify(result.data.user));
-      localStorage.setItem('companyData', JSON.stringify(result.data.company));
       
       navigate('/app/admin/dashboard', { 
         state: { 

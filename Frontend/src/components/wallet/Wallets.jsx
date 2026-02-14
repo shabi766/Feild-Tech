@@ -5,6 +5,7 @@ import PasscodeSetup from './PasscodeSetup';
 import PasscodeEntry from './PasscodeEntry';
 import NewWalletDashboard from './NewWalletDashboard';
 import axios from 'axios';
+import { API_ENDPOINTS } from '@/config/environment';
 
 const Wallets = () => {
   const { user } = useSelector((s) => s.auth);
@@ -20,7 +21,7 @@ const Wallets = () => {
       setLoading(true);
       
       // Check KYC status
-      const kycRes = await axios.get('/api/v1/kyc/status', { withCredentials: true });
+      const kycRes = await axios.get(`${API_ENDPOINTS.WALLET}/kyc/status`, { withCredentials: true });
       const kycStatus = kycRes.data?.kyc?.kycStatus || 'unverified';
       
       if (kycStatus === 'unverified') {
@@ -30,7 +31,7 @@ const Wallets = () => {
       } else if (kycStatus === 'verified') {
         // Check if passcode is set
         try {
-          const passcodeRes = await axios.get('/api/v1/wallet-passcode/status', { withCredentials: true });
+          const passcodeRes = await axios.get(`${API_ENDPOINTS.WALLET}/passcode/status`, { withCredentials: true });
           if (passcodeRes.data?.success && passcodeRes.data.data?.hasPasscode) {
             setWalletStatus('ready');
           } else {

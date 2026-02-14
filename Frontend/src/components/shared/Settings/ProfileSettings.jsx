@@ -7,13 +7,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  User, 
-  Camera, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Globe, 
+import {
+  User,
+  Camera,
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
   Save,
   Upload,
   X,
@@ -53,7 +53,7 @@ const ProfileSettings = ({ user, settings, updateSetting, isLoading, setSaveStat
         toast.error('Profile photo must be less than 5MB');
         return;
       }
-      
+
       setProfilePhoto(file);
       setPreviewImage(URL.createObjectURL(file));
     }
@@ -120,10 +120,10 @@ const ProfileSettings = ({ user, settings, updateSetting, isLoading, setSaveStat
   return (
     <div className="space-y-6">
       {/* Profile Photo Section */}
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-purple-50">
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-accent/5">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-xl">
-            <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+            <div className="p-2 gradient-accent rounded-lg">
               <Camera className="w-5 h-5 text-white" />
             </div>
             Profile Photo
@@ -137,7 +137,7 @@ const ProfileSettings = ({ user, settings, updateSetting, isLoading, setSaveStat
             <div className="relative">
               <Avatar className="w-24 h-24 ring-4 ring-white shadow-lg">
                 <AvatarImage src={previewImage} alt="Profile" />
-                <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-purple-500 to-pink-600 text-white">
+                <AvatarFallback className="text-2xl font-bold gradient-accent text-white">
                   {getInitials(profileData.fullname)}
                 </AvatarFallback>
               </Avatar>
@@ -170,7 +170,7 @@ const ProfileSettings = ({ user, settings, updateSetting, isLoading, setSaveStat
                     <Button
                       onClick={handlePhotoUpload}
                       disabled={isUploading}
-                      className="bg-purple-600 hover:bg-purple-700"
+                      className="bg-accent hover:bg-accent/90"
                     >
                       {isUploading ? (
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -334,7 +334,7 @@ const ProfileSettings = ({ user, settings, updateSetting, isLoading, setSaveStat
               <Label className="text-sm font-medium text-gray-600">Profile Completion</Label>
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-gray-200 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-green-500 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${Math.min(100, (Object.values(profileData).filter(Boolean).length / Object.keys(profileData).length) * 100)}%` }}
                   ></div>

@@ -45,7 +45,7 @@ const Inner = ({ onClose, onAdded }) => {
       </div>
       <div className="flex gap-2 justify-end">
         <button type="button" onClick={onClose} className="px-3 py-2 rounded bg-gray-200">Cancel</button>
-        <button type="submit" disabled={!stripe || loading || !clientSecret} className="px-3 py-2 rounded bg-indigo-600 text-white">
+        <button type="submit" disabled={!stripe || loading || !clientSecret} className="px-3 py-2 rounded bg-primary text-white">
           {loading ? 'Saving…' : 'Save Card'}
         </button>
       </div>

@@ -30,16 +30,18 @@ const Layout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
       {/* Sticky navbar at top */}
-      <Navbar setLogoutFlag={setLogoutFlag} />
-      
-      {/* Sidebar - now has its own positioning */}
+      <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
+        <Navbar setLogoutFlag={setLogoutFlag} />
+      </div>
+
+      {/* Sidebar - Positioned fixed/overlay handled by component */}
       <Sidebar />
 
-      {/* Main content area - adjusted for new sidebar */}
-      <div className="pt-20 pl-20">
-        <main className="min-h-screen p-6">
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col">
+        <main className="flex-1 w-full flex flex-col animate-fade-in">
           <Outlet />
         </main>
       </div>

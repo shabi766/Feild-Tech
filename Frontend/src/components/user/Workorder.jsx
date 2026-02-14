@@ -18,7 +18,7 @@ const Workorder = ({ job, onViewDetails }) => {
     const currentTime = new Date();
     const timeDifference = currentTime - createdAt;
     const days = Math.floor(timeDifference / (1000 * 24 * 60 * 60));
-    
+
     if (days === 0) return 'Today';
     if (days === 1) return 'Yesterday';
     if (days < 7) return `${days} days ago`;
@@ -30,9 +30,9 @@ const Workorder = ({ job, onViewDetails }) => {
 
   const getJobTypeColor = (jobType) => {
     switch (jobType?.toLowerCase()) {
-      case 'full-time': return 'from-blue-500 to-indigo-600';
+      case 'full-time': return 'from-primary to-primary-dark';
       case 'part-time': return 'from-green-500 to-emerald-600';
-      case 'contract': return 'from-purple-500 to-pink-600';
+      case 'contract': return 'from-primary to-primary-light';
       case 'freelance': return 'from-orange-500 to-red-600';
       default: return 'from-gray-500 to-gray-600';
     }
@@ -42,20 +42,20 @@ const Workorder = ({ job, onViewDetails }) => {
     switch (workType?.toLowerCase()) {
       case 'remote': return 'from-emerald-500 to-teal-600';
       case 'onsite': return 'from-blue-500 to-cyan-600';
-      case 'hybrid': return 'from-purple-500 to-indigo-600';
+      case 'hybrid': return 'from-primary to-primary-dark';
       default: return 'from-gray-500 to-gray-600';
     }
   };
 
   const formatSalary = (salary) => {
     if (!salary) return t('salaryNotSpecified');
-    
+
     if (salary.payableSalary) return `$${salary.payableSalary}`;
     if (salary.rate) return `$${salary.rate}`;
     if (salary.totalSalary) return `$${salary.totalSalary}`;
     if (salary.partTime?.hourlyRate) return `$${salary.partTime.hourlyRate}/hr`;
     if (salary.fullTime?.contractRate) return `$${salary.fullTime.contractRate}`;
-    
+
     return t('salaryNotSpecified');
   };
 
@@ -69,7 +69,7 @@ const Workorder = ({ job, onViewDetails }) => {
       onClick={() => navigate(`/app/technician/description/${job._id}`)}
     >
       {/* Gradient Background on Hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 to-purple-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-light/5 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
       {/* Header Section */}
       <div className="p-6 border-b border-gray-100/50">
@@ -81,11 +81,10 @@ const Workorder = ({ job, onViewDetails }) => {
             </span>
           </div>
           <motion.button
-            className={`p-2 rounded-full transition-all duration-300 ${
-              isBookmarked 
-                ? 'bg-red-100 text-red-600' 
+            className={`p-2 rounded-full transition-all duration-300 ${isBookmarked
+                ? 'bg-red-100 text-red-600'
                 : 'bg-gray-100 text-gray-400 hover:bg-red-100 hover:text-red-600'
-            }`}
+              }`}
             onClick={(e) => {
               e.stopPropagation();
               setIsBookmarked(!isBookmarked);
@@ -185,14 +184,14 @@ const Workorder = ({ job, onViewDetails }) => {
             whileHover={{ x: 5 }}
             transition={{ duration: 0.2 }}
           >
-                                        <span>{t('viewDetails')}</span>
+            <span>{t('viewDetails')}</span>
             <ArrowRight className="w-4 h-4" />
           </motion.div>
         </div>
       </div>
 
       {/* Hover Effect Border */}
-      <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-gradient-to-r from-blue-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+      <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-gradient-to-r from-primary to-primary-dark opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
 
       {/* Floating Sparkles Effect */}
       {isHovered && (
@@ -202,14 +201,14 @@ const Workorder = ({ job, onViewDetails }) => {
               key={i}
               className="absolute text-blue-400"
               initial={{ opacity: 0, scale: 0 }}
-              animate={{ 
-                opacity: [0, 1, 0], 
+              animate={{
+                opacity: [0, 1, 0],
                 scale: [0, 1, 0],
                 x: [0, Math.random() * 100 - 50],
                 y: [0, Math.random() * 100 - 50]
               }}
-              transition={{ 
-                duration: 1.5, 
+              transition={{
+                duration: 1.5,
                 delay: i * 0.2,
                 ease: "easeOut"
               }}

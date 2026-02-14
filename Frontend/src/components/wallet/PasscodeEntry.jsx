@@ -7,6 +7,8 @@ import {
     Fingerprint, AlertCircle, Loader2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
+import { API_ENDPOINTS } from '@/config/environment';
 
 const PasscodeEntry = ({ onSuccess, onCancel, walletName = "Wallet" }) => {
     const [passcode, setPasscode] = useState('');
@@ -57,7 +59,7 @@ const PasscodeEntry = ({ onSuccess, onCancel, walletName = "Wallet" }) => {
             setLoading(true);
             setError('');
             
-            const res = await axios.post('/api/v1/wallet-passcode/verify', {
+            const res = await axios.post(`${API_ENDPOINTS.WALLET}/passcode/verify`, {
                 passcode: passcode
             }, { withCredentials: true });
             

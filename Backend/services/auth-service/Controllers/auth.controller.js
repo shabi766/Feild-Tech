@@ -7,11 +7,12 @@ import { getKafkaProducer, UserCreatedEvent, TOPICS } from '../../shared-kafka/i
 
 export const register = async (req, res) => {
     try {
-        const { fullname, email, phoneNumber, password, cnic, role, recruiterType } = req.body;
+        const { fullname, email, phoneNumber, password, cnic, role, recruiterType, companyId } = req.body;
 
-        if (!fullname || !email || !phoneNumber || !password || !cnic || !role) {
+        // Only require essential fields
+        if (!fullname || !email || !password || !role) {
             return res.status(400).json({
-                message: "All fields are required.",
+                message: "Full name, email, password, and role are required.",
                 success: false,
             });
         }
@@ -60,9 +61,16 @@ export const register = async (req, res) => {
             },
         };
 
-        // Add recruiter type only for recruiters
-        if (role === 'Recruiter') {
-            userData.recruiterType = recruiterType;
+        // Add recruiter type only for recruiters or company owners
+        if (role === 'Recruiter' || role === 'Company') {
+            userData.recruiterType = recruiterType || 'Company';
+        }
+
+        // Add company ID if provided (for Company Owners or Company Recruiters)
+        if (companyId) {
+            userData.companyId = companyId;
+            userData.profile.company = companyId;
+            userData.profileCompleted = true; // Assume profile is completed if coming from company registration
         }
 
         const newUser = await User.create(userData);
@@ -91,6 +99,13 @@ export const register = async (req, res) => {
         return res.status(201).json({
             message: "Account created successfully.",
             success: true,
+            user: {
+                _id: newUser._id,
+                email: newUser.email,
+                fullname: newUser.fullname,
+                role: newUser.role,
+                companyId: newUser.companyId
+            }
         });
     } catch (error) {
         console.error("Error registering user:", error);
@@ -158,7 +173,8 @@ export const login = async (req, res) => {
             .json({
                 message: `Welcome back ${user.fullname}`,
                 user: userForResponse,
-                token: token, // Include token in response for frontend
+                // Deliberately do NOT return the JWT token in the JSON response.
+                // Authentication is handled via the httpOnly cookie to reduce XSS risk.
                 success: true,
             });
     } catch (error) {
@@ -167,6 +183,76 @@ export const login = async (req, res) => {
             message: "An error occurred during login.",
             success: false,
             error: error.message,
+        });
+    }
+};
+
+export const refreshToken = async (req, res) => {
+    try {
+        const token = req.cookies.token || req.headers.authorization?.replace('Bearer ', '');
+
+        if (!token) {
+            return res.status(401).json({
+                message: "Authentication token missing.",
+                success: false
+            });
+        }
+
+        // Verify existing token (even if expired, we might want to check signature if ignoreExpiration option is used, but standard jwt.verify throws on expiry)
+        // For simple refresh flow without rotating refresh tokens, we usually rely on the client knowing when to refresh or having a separate long-lived refresh token.
+        // Assuming here we are checking validity. If expired, they need to login again unless we implement dual-token (access/refresh) logic properly.
+        // Since typical simple JWT auth only has one token, 'refresh-token' endpoint often implies issuing a new one if the old one is valid-but-close-to-expiry 
+        // OR checking a separate refresh token.
+        // Given current structure, let's assume we decode, verify user exists, and issue new token.
+
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.SECRET_KEY);
+        } catch (err) {
+            return res.status(401).json({
+                message: "Invalid or expired token.",
+                success: false
+            });
+        }
+
+        const user = await User.findById(decoded.userId);
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found.",
+                success: false
+            });
+        }
+
+        const tokenData = {
+            userId: user._id,
+            role: user.role,
+            recruiterType: user.recruiterType,
+            ...(user.companyId && { companyId: user.companyId })
+        };
+
+        const newToken = await jwt.sign(tokenData, process.env.SECRET_KEY, { expiresIn: '7d' });
+
+        return res.status(200)
+            .cookie("token", newToken, {
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+                httpOnly: true,
+                sameSite: 'strict'
+            })
+            .json({
+                message: "Token refreshed successfully.",
+                success: true,
+                user: {
+                    ...user.toObject(),
+                    companyId: user.companyId // Ensure consistency
+                }
+            });
+
+    } catch (error) {
+        console.error("Error refreshing token:", error);
+        return res.status(500).json({
+            message: "Error refreshing token.",
+            success: false,
+            error: error.message
         });
     }
 };
@@ -625,6 +711,28 @@ export const updateUserWalletBalance = async (req, res) => {
             success: false,
             error: error.message,
         });
+    }
+};
+
+export const getMe = async (req, res) => {
+    try {
+        const user = await User.findById(req.id).select("-password");
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found.",
+                success: false
+            });
+        };
+        return res.status(200).json({
+            success: true,
+            user
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false,
+        })
     }
 };
 

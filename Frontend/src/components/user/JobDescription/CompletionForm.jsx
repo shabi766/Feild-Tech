@@ -21,7 +21,7 @@ const CompletionForm = ({
     if (!showCompletionForm) return null;
 
     return (
-        <Card className="mb-6 border-2 border-purple-200">
+        <Card className="mb-6 border-2 border-primary">
             <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                     <span className="flex items-center">
@@ -64,7 +64,7 @@ const CompletionForm = ({
                             <span className="text-red-500 ml-1">*</span>
                         )}
                     </label>
-                    
+
                     {/* File Upload */}
                     <div className="flex items-center space-x-2 mb-3">
                         <input
@@ -120,7 +120,7 @@ const CompletionForm = ({
                     <Button
                         onClick={onSubmit}
                         disabled={actionLoading}
-                        className="bg-purple-600 hover:bg-purple-700"
+                        className="bg-primary hover:bg-primary-dark"
                     >
                         {actionLoading ? 'Completing...' : 'Complete Work Order'}
                     </Button>

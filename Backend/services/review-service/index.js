@@ -6,6 +6,7 @@ import connectDB from "./utils/db.js";
 import reviewRoute from "./Routes/review.route.js";
 import leaderboardRoute from "./Routes/leaderboard.route.js";
 import testimonialRoute from "./Routes/testimonial.route.js";
+import ratingRoute from "./Routes/rating.route.js";
 
 dotenv.config();
 
@@ -49,6 +50,7 @@ connectDB().catch(err => {
 app.use("/api/v1/review", reviewRoute);
 app.use("/api/v1/leaderboard", leaderboardRoute);
 app.use("/api/v1/testimonials", testimonialRoute);
+app.use("/api/v1/rating", ratingRoute);
 
 // Start the Server
 app.listen(REVIEW_SERVICE_PORT, () => {

@@ -1,10 +1,10 @@
 import React from 'react';
-import { 
-  Home, 
-  Briefcase, 
-  Users, 
-  Building, 
-  FileText, 
+import {
+  Home,
+  Briefcase,
+  Users,
+  Building,
+  FileText,
   Settings,
   BarChart3,
   Calendar,
@@ -16,10 +16,13 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../redux/authSlice';
+import NotificationBadge from '../ui/NotificationBadge';
+import { useSelector } from 'react-redux';
 
 const AdminSidebar = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { user } = useSelector(store => store.auth);
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/app/recruiter/dashboard' },
@@ -62,21 +65,22 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
-            
+
             return (
               <li key={item.id}>
                 <button
                   onClick={() => handleTabClick(item.id, item.path)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                    isActive
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${isActive
                       ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
+                    }`}
                 >
-                  <Icon className={`h-5 w-5 ${
-                    isActive ? 'text-blue-700' : 'text-gray-500'
-                  }`} />
-                  <span className="font-medium">{item.label}</span>
+                  <Icon className={`h-5 w-5 ${isActive ? 'text-blue-700' : 'text-gray-500'
+                    }`} />
+                  <span className="font-medium flex-1">{item.label}</span>
+                  {item.id === 'messages' && (
+                    <NotificationBadge userId={user?._id || user?.id} size="sm" />
+                  )}
                 </button>
               </li>
             );

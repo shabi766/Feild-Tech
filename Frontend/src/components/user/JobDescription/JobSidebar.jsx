@@ -10,7 +10,7 @@ const JobSidebar = ({
     formatCurrency
 }) => {
     const { t } = useTranslation();
-    
+
     return (
         <div className="space-y-6">
             {/* Job Details */}
@@ -28,7 +28,7 @@ const JobSidebar = ({
                             {singleJob?.jobType}
                         </Badge>
                     </div>
-                    
+
                     {singleJob?.salary && (
                         <div className="space-y-2">
                             {singleJob.salary.hourly && (
@@ -69,7 +69,7 @@ const JobSidebar = ({
 
                     {singleJob?.totalSalary && (
                         <div className="pt-2 border-t">
-                            <p className="text-lg font-semibold text-indigo-600">
+                            <p className="text-lg font-semibold text-primary">
                                 {t('totalSalary')}: {formatCurrency(singleJob.totalSalary)}
                             </p>
                         </div>
@@ -107,8 +107,8 @@ const JobSidebar = ({
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center">
-                                                    <span className="mr-2">📍</span>
-                        {t('location')}
+                            <span className="mr-2">📍</span>
+                            {t('location')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -135,11 +135,11 @@ const JobSidebar = ({
                                 <p className="text-sm text-gray-600">{singleJob.projectName.description}</p>
                             )}
                             {singleJob.projectName.website && (
-                                <a 
-                                    href={singleJob.projectName.website} 
-                                    target="_blank" 
+                                <a
+                                    href={singleJob.projectName.website}
+                                    target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-indigo-600 hover:text-indigo-800 text-sm"
+                                    className="text-primary hover:text-primary-dark text-sm"
                                 >
                                     {t('visitWebsite')}
                                 </a>
@@ -171,11 +171,10 @@ const JobSidebar = ({
                                         {[...Array(5)].map((_, i) => (
                                             <svg
                                                 key={i}
-                                                className={`w-4 h-4 ${
-                                                    i < singleJob.client.rating
+                                                className={`w-4 h-4 ${i < singleJob.client.rating
                                                         ? 'text-yellow-400 fill-current'
                                                         : 'text-gray-300'
-                                                }`}
+                                                    }`}
                                                 viewBox="0 0 20 20"
                                             >
                                                 <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
@@ -273,7 +272,7 @@ const JobSidebar = ({
                                     href={attachment.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center p-2 text-sm text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded"
+                                    className="flex items-center p-2 text-sm text-primary hover:text-primary-dark hover:bg-secondary rounded"
                                 >
                                     <span className="mr-2">📄</span>
                                     {attachment.name}

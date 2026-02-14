@@ -1,5 +1,5 @@
 import KafkaConsumer from '../../../shared-kafka/kafka-consumer.js';
-import { TOPICS } from '../../../shared-kafka/event-schemas.js';
+import { TOPICS } from '../../../shared-kafka/topics.js';
 import nodemailer from 'nodemailer';
 
 class NotificationEventConsumer {
@@ -130,6 +130,7 @@ class NotificationEventConsumer {
             ];
 
             await this.consumer.subscribe(topics);
+            await this.consumer.consume(); // Start processing
             console.log('🎧 Notification Event Consumer started');
         } catch (error) {
             console.error('Failed to start Notification Event Consumer:', error);

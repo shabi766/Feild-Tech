@@ -5,10 +5,25 @@ import dotenv from "dotenv";
 import connectDB from "./utils/db.js";
 import workorderRoute from "./Routes/workorder.route.js";
 import createAuthMiddleware from "../shared-middleware/index.js";
+import {
+  createHelmetMiddleware,
+  apiRateLimiter
+} from "../shared-middleware/security.js";
+import { createLogger, requestLogger } from "../shared-middleware/logger.js";
+import { createErrorHandler } from "../shared-middleware/errorHandler.js";
+import { createHealthCheck } from "../shared-middleware/healthCheck.js";
+import { createAuditLogger } from "../shared-middleware/auditLogger.js";
+import mongoose from "mongoose";
 
 dotenv.config();
 
 const app = express();
+
+// Initialize logger
+const logger = createLogger('workorder-service', process.env.LOG_LEVEL || 'info');
+
+// Initialize audit logger
+const auditLogger = createAuditLogger('workorder-service', process.env.ADMIN_SERVICE_URL);
 
 // Get ports and origins from environment variables or defaults
 const WORKORDER_SERVICE_PORT = process.env.WORKORDER_SERVICE_PORT || 8002;
@@ -24,30 +39,42 @@ const corsOptions = {
   exposedHeaders: ['Set-Cookie']
 };
 
-// Middleware
+// Security Middleware
+app.use(createHelmetMiddleware());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors(corsOptions));
 
+// Request logging
+app.use(requestLogger(logger));
+
+// Audit logging middleware
+app.use(auditLogger.createMiddleware({
+  excludePaths: ['/health'],
+}));
+
 // Health check endpoint
-app.get("/health", (req, res) => {
-  res.status(200).json({ 
-    status: "healthy", 
-    service: "workorder-service",
-    timestamp: new Date().toISOString()
-  });
-});
+app.get("/health", createHealthCheck({
+  serviceName: 'workorder-service',
+  database: mongoose.connection,
+}));
 
 // Connect to Database
-connectDB().catch(err => {
-    console.log('⚠️ Database connection failed, but server will continue running');
-});
+connectDB()
+  .then(() => logger.info('Database connected successfully'))
+  .catch(err => {
+    logger.error('Database connection failed', { error: err.message });
+  });
 
-// API Routes
+// API Routes with rate limiting
+app.use("/api/v1/workorder", apiRateLimiter);
 app.use("/api/v1/workorder", workorderRoute);
+
+// Global error handler (must be last)
+app.use(createErrorHandler(logger));
 
 // Start the Server
 app.listen(WORKORDER_SERVICE_PORT, () => {
-  console.log(`📋 Workorder Service running at port ${WORKORDER_SERVICE_PORT}`);
+  logger.info(`Workorder Service running at port ${WORKORDER_SERVICE_PORT}`);
 });

@@ -6,21 +6,21 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { JOB_API_END_POINT } from '../utils/constant';
 import { toast } from 'sonner';
-import { 
-  Calendar as CalendarIcon, 
-  Clock, 
-  MapPin, 
-  User, 
-  Building2, 
-  CheckCircle, 
-  AlertCircle,
-  Filter,
-  Search,
-  RefreshCw,
-  TrendingUp,
-  Users,
-  DollarSign,
-  Briefcase
+import {
+    Calendar as CalendarIcon,
+    Clock,
+    MapPin,
+    User,
+    Building2,
+    CheckCircle,
+    AlertCircle,
+    Filter,
+    Search,
+    RefreshCw,
+    TrendingUp,
+    Users,
+    DollarSign,
+    Briefcase
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -79,7 +79,7 @@ const EnhancedJobCalendar = () => {
                 response = await axios.get(`${JOB_API_END_POINT}/getadminjobs`, {
                     withCredentials: true,
                 });
-                
+
                 if (response.data.success) {
                     const jobEvents = response.data.jobs
                         .filter(job => job.startTime && job.endTime) // Only jobs with scheduled times
@@ -106,7 +106,7 @@ const EnhancedJobCalendar = () => {
                 response = await axios.get(`${JOB_API_END_POINT}/technician-jobs`, {
                     withCredentials: true,
                 });
-                
+
                 if (response.data.success) {
                     const allJobs = [
                         ...response.data.appliedJobs,
@@ -115,7 +115,7 @@ const EnhancedJobCalendar = () => {
                         ...response.data.doneJobs,
                         ...response.data.completedJobs
                     ];
-                    
+
                     const jobEvents = allJobs
                         .filter(job => job.startTime && job.endTime) // Only jobs with scheduled times
                         .map((job) => ({
@@ -157,7 +157,7 @@ const EnhancedJobCalendar = () => {
 
         // Search filter
         if (searchTerm) {
-            filtered = filtered.filter(event => 
+            filtered = filtered.filter(event =>
                 event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 event.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 event.project.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -187,12 +187,12 @@ const EnhancedJobCalendar = () => {
 💰 Salary: ${event.salary}
 🛠️ Skills: ${event.requiredSkills.join(', ') || 'None specified'}
         `;
-        
+
         toast.info(eventDetails, {
             duration: 10000,
             position: 'top-center',
             style: {
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
                 color: 'white',
                 borderRadius: '12px',
                 padding: '16px',
@@ -207,12 +207,12 @@ const EnhancedJobCalendar = () => {
     const EventComponent = ({ event }) => (
         <motion.div
             className="relative p-3 text-white rounded-lg cursor-pointer shadow-lg border border-white/20 backdrop-blur-sm"
-            style={{ 
+            style={{
                 background: `linear-gradient(135deg, ${getStatusColor(event.status)} 0%, ${getStatusColor(event.status)}dd 100%)`,
                 minHeight: '80px'
             }}
-            whileHover={{ 
-                scale: 1.03, 
+            whileHover={{
+                scale: 1.03,
                 boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)',
                 zIndex: 10
             }}
@@ -223,20 +223,20 @@ const EnhancedJobCalendar = () => {
             <div className="absolute -top-2 -right-2 bg-white/90 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold shadow-md">
                 {event.status}
             </div>
-            
+
             {/* Event content */}
             <div className="space-y-2">
                 <div className="font-bold text-sm leading-tight line-clamp-2">
                     {event.title}
                 </div>
-                
+
                 {event.client !== 'No Client' && (
                     <div className="flex items-center gap-1 text-xs opacity-90">
                         <Building2 size={12} className="flex-shrink-0" />
                         <span className="truncate">{event.client}</span>
                     </div>
                 )}
-                
+
                 {event.assignedTo !== 'Unassigned' && (
                     <div className="flex items-center gap-1 text-xs opacity-90">
                         <User size={12} className="flex-shrink-0" />
@@ -271,7 +271,7 @@ const EnhancedJobCalendar = () => {
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Right side - Quick stats */}
                 <div className="flex items-center gap-4">
                     <div className="hidden lg:flex items-center gap-4">
@@ -305,11 +305,10 @@ const EnhancedJobCalendar = () => {
                             <button
                                 key={view}
                                 onClick={() => toolbar.onView(view)}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                                    toolbar.view === view
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${toolbar.view === view
                                         ? 'bg-white text-blue-600 shadow-md transform scale-105'
                                         : 'text-gray-600 hover:text-gray-800 hover:bg-gray-200'
-                                }`}
+                                    }`}
                             >
                                 {view.charAt(0).toUpperCase() + view.slice(1)}
                             </button>
@@ -334,11 +333,10 @@ const EnhancedJobCalendar = () => {
                     {/* Enhanced Filter button */}
                     <motion.button
                         onClick={() => setShowFilters(!showFilters)}
-                        className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 ${
-                            showFilters 
-                                ? 'bg-blue-50 border-blue-300 text-blue-700 shadow-md' 
+                        className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 ${showFilters
+                                ? 'bg-blue-50 border-blue-300 text-blue-700 shadow-md'
                                 : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:shadow-md'
-                        }`}
+                            }`}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                     >
@@ -389,7 +387,7 @@ const EnhancedJobCalendar = () => {
                                     <option value="Paid">Paid</option>
                                 </select>
                             </div>
-                            
+
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3">Job Count</label>
                                 <div className="px-4 py-3 bg-gradient-to-r from-gray-100 to-gray-200 rounded-xl text-gray-700 font-bold text-lg text-center shadow-inner">
@@ -443,7 +441,7 @@ const EnhancedJobCalendar = () => {
             <div className="max-w-7xl mx-auto">
                 {/* Custom Toolbar */}
                 <CustomToolbar />
-                
+
                 {/* Enhanced Calendar */}
                 <div className="bg-white rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden">
                     <Calendar
@@ -460,7 +458,7 @@ const EnhancedJobCalendar = () => {
                             event: EventComponent
                         }}
                         eventPropGetter={(event) => ({
-                            style: { 
+                            style: {
                                 backgroundColor: getStatusColor(event.status),
                                 border: 'none',
                                 borderRadius: '8px',
@@ -484,7 +482,7 @@ const EnhancedJobCalendar = () => {
                 </div>
 
                 {/* Enhanced Legend */}
-                <motion.div 
+                <motion.div
                     className="mt-8 bg-white rounded-2xl shadow-xl border border-gray-200/50 p-6"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -496,16 +494,16 @@ const EnhancedJobCalendar = () => {
                         </div>
                         <h3 className="text-xl font-bold text-gray-800">Job Status Legend</h3>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                         {['Draft', 'Active', 'Assigned', 'In Progress', 'Done', 'Complete', 'Review', 'Cancel', 'Paid'].map(status => (
-                            <motion.div 
-                                key={status} 
+                            <motion.div
+                                key={status}
                                 className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                             >
-                                <div 
+                                <div
                                     className="w-4 h-4 rounded-full shadow-sm"
                                     style={{ backgroundColor: getStatusColor(status) }}
                                 />

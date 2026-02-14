@@ -1,25 +1,8 @@
 // Import base URL from environment config
-import { API_BASE_URL } from '../../config/environment';
+import { API_ENDPOINTS as ENV_API_ENDPOINTS } from '../../config/environment';
 
 // Define API endpoints directly to avoid import issues
-export const API_ENDPOINTS = {
-  USER: `${API_BASE_URL}/user`,
-  JOB: `${API_BASE_URL}/workorder`,
-  APPLICATION: `${API_BASE_URL}/application`,
-  COMPANY: `${API_BASE_URL}/company`,
-  CLIENT: `${API_BASE_URL}/client`,
-  PROJECT: `${API_BASE_URL}/project`,
-  TECHNICIAN: `${API_BASE_URL}/technician`,
-  SEARCH: `${API_BASE_URL}/search`,
-  DASHBOARD: `${API_BASE_URL}/dashboard`,
-  NOTIFICATION: `${API_BASE_URL}/notification`,
-  CHAT: `${API_BASE_URL}/chat`,
-  WALLET: `${API_BASE_URL}/wallet`,
-  ADMINISTRATION: `${API_BASE_URL}/administration`,
-  AUDIT: `${API_BASE_URL}/audit`,
-  REVIEW: `${API_BASE_URL}/review`,
-  LEADERBOARD: `${API_BASE_URL}/leaderboard`,
-};
+export const API_ENDPOINTS = ENV_API_ENDPOINTS;
 
 // Legacy exports for backward compatibility
 export const USER_API_END_POINT = API_ENDPOINTS.USER;

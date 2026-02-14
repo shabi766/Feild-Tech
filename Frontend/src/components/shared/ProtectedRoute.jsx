@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { setUser, logout } from '@/redux/authSlice';
 import api from '@/lib/axios';
+import { API_ENDPOINTS } from '@/config/environment';
 import LoadingSpinner from '../ui/LoadingSpinner';
 
 const ProtectedRoute = ({ requiredRole = null, children }) => {
@@ -21,18 +22,11 @@ const ProtectedRoute = ({ requiredRole = null, children }) => {
 
       try {
         setIsValidating(true);
-        // Check if we have a token
-        const token = localStorage.getItem('authToken') || getCookie('token');
-        
-        if (!token) {
-          dispatch(logout());
-          setIsValidating(false);
-          return;
-        }
-
         // Validate token with backend
-        const response = await api.get('/user/me');
-        
+        const response = await api.get(`${API_ENDPOINTS.USER}/me`, {
+          withCredentials: true,
+        });
+
         if (response.data.success) {
           dispatch(setUser(response.data.user));
         } else {
@@ -72,23 +66,35 @@ const ProtectedRoute = ({ requiredRole = null, children }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-      // Check role requirements if specified
-    if (requiredRole && user.role !== requiredRole) {
+  // Check role requirements if specified
+  if (requiredRole) {
+    const userRole = user.role?.toLowerCase();
+    const required = requiredRole.toLowerCase();
+
+    // Special case: "Company" role should be treated as "Recruiter" for route protection
+    const normalizedUserRole = userRole === 'company' ? 'recruiter' : userRole;
+
+    if (normalizedUserRole !== required) {
       // Redirect based on user's actual role
-      if (user.role === 'Admin') {
+      if (userRole === 'admin') {
         return <Navigate to="/app/administrator" replace />;
-      } else if (user.role === 'Recruiter') {
+      } else if (userRole === 'company') {
+        // Company recruiter (backend returns role: "Company")
+        return <Navigate to="/app/recruiter/dashboard" replace />;
+      } else if (userRole === 'recruiter') {
+        // Individual recruiter or check recruiterType
         if (user.recruiterType === 'Individual' || !user.companyId) {
           return <Navigate to="/app/recruiter/dashboard-individual" replace />;
         } else {
           return <Navigate to="/app/recruiter/dashboard" replace />;
         }
-      } else if (user.role === 'Technician') {
+      } else if (userRole === 'technician') {
         return <Navigate to="/app/technician/home" replace />;
       } else {
         return <Navigate to="/app/technician/home" replace />;
       }
     }
+  }
 
   // If this is a route group (has children), render the Outlet
   if (children === undefined) {

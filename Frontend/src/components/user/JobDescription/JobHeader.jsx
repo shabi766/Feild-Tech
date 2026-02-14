@@ -4,10 +4,10 @@ import { Button } from "../../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { useTranslation } from '@/Hooks/useTranslation';
 
-const JobHeader = ({ 
-    singleJob, 
-    isAssignedTechnician, 
-    showApplyButton, 
+const JobHeader = ({
+    singleJob,
+    isAssignedTechnician,
+    showApplyButton,
     showAlreadyApplied,
     actionLoading,
     uploadLoading,
@@ -20,7 +20,7 @@ const JobHeader = ({
     formatTimeSpent
 }) => {
     const { t } = useTranslation();
-    
+
     return (
         <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
@@ -32,7 +32,7 @@ const JobHeader = ({
                     {singleJob.status}
                 </Badge>
             </div>
-            
+
             {/* Status Timeline for Assigned Technician */}
             {isAssignedTechnician && (
                 <Card className="mb-6">
@@ -112,7 +112,7 @@ const JobHeader = ({
                         <Button
                             onClick={onShowCompletionForm}
                             disabled={actionLoading}
-                            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg"
+                            className="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-lg"
                         >
                             {t('markAsDone')}
                         </Button>
@@ -149,7 +149,7 @@ const JobHeader = ({
                         </div>
                         <div className="text-center">
                             <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('timeSpent')}</h3>
-                            <p className="text-2xl font-bold text-purple-600">
+                            <p className="text-2xl font-bold text-primary">
                                 {singleJob?.timeSpent ? formatTimeSpent(singleJob.timeSpent) : '0h 0m'}
                             </p>
                         </div>

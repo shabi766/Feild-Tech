@@ -1,29 +1,69 @@
-import React from 'react'
-import { Badge } from '../ui/badge'
+import React from 'react';
+import { Badge } from '../ui/badge';
 import { useNavigate } from 'react-router-dom';
+import { MapPin, Building2, DollarSign, Briefcase } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-
-const LatestJobCards = ({job}) => {
+const LatestJobCards = ({ job }) => {
   const navigate = useNavigate();
+
   return (
-    <div onClick={()=>navigate(`/app/technician/description/${job._id}`)} className='p-5 rounded-md shadow-xl bg-white border border-gray-300 cursor-pointer'>
-        <div>
-        <h1 className='font-medium text-lg'>{job?.title} </h1>
-        <p className='text-sm text-gray-500'>{job?.address}</p>
+    <div
+      onClick={() => navigate(`/app/technician/description/${job._id}`)}
+      className={cn(
+        "card-elevated p-6 cursor-pointer hover-lift transition-all duration-300",
+        "animate-fade-in-up group"
+      )}
+    >
+      {/* Header */}
+      <div className="mb-4">
+        <h1 className="font-bold text-xl text-foreground group-hover:text-primary transition-colors">
+          {job?.title}
+        </h1>
+        <div className="flex items-center gap-2 mt-2 text-muted-foreground">
+          <MapPin className="h-4 w-4" />
+          <p className="text-sm">{job?.address}</p>
         </div>
-        <div>
-            <h1 className='font-bold text-lg my-2'>{job?.Company?.name}</h1>
-            <p className='text-sm text-gray-600'>{job?.description}</p>
-        </div>
-        <div className='flex items-center gap-2 mt-4'>
-            <Badge className={'text-blue-400 font-bold' } variant="ghost">{job?.requirments}</Badge>
-            <Badge className={'text-red-400 font-bold' } variant="ghost">{job?.jobType}</Badge>
-            <Badge className={'text-green-400 font-bold' } variant="ghost">{job?.Salary}</Badge>
+      </div>
 
+      {/* Company Info */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Building2 className="h-4 w-4 text-primary" />
+          <h2 className="font-semibold text-lg text-foreground">
+            {job?.Company?.name}
+          </h2>
         </div>
-        
+        <p className="text-sm text-muted-foreground line-clamp-2">
+          {job?.description}
+        </p>
+      </div>
+
+      {/* Badges */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <Badge
+          variant="info"
+          className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 border-blue-200"
+        >
+          <Briefcase className="h-3 w-3 mr-1" />
+          {job?.requirments}
+        </Badge>
+        <Badge
+          variant="warning"
+          className="bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 border-orange-200"
+        >
+          {job?.jobType}
+        </Badge>
+        <Badge
+          variant="success"
+          className="bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700 border-emerald-200"
+        >
+          <DollarSign className="h-3 w-3 mr-1" />
+          {job?.Salary}
+        </Badge>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default LatestJobCards
+export default LatestJobCards;

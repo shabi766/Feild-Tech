@@ -40,10 +40,28 @@ const ChatWindow = () => {
 
     useEffect(() => {
         if (selectedChat) {
-            axios.post(`${CHAT_API_END_POINT}/mark-as-read`, { chatId: selectedChat._id }, { withCredentials: true });
-            setUnreadMessages((prev) => prev.filter((msg) => msg.chatId !== selectedChat._id));
+            const markAsRead = async () => {
+                try {
+                    await axios.post(`${CHAT_API_END_POINT}/mark-as-read`, { chatId: selectedChat._id }, { withCredentials: true });
+                    // Update local unread count immediately for better UX
+                    setUnreadMessages((prev) => prev.filter((msg) => msg.chatId !== selectedChat._id));
+                } catch (error) {
+                    console.error("Error marking messages as read:", error);
+                }
+            };
+            markAsRead();
         }
-    }, [selectedChat]);
+    }, [selectedChat, messages]); // Re-run when new messages arrive in the selected chat
+
+    // Play notification sound for new messages if not in current chat
+    useEffect(() => {
+        if (messages.length > 0) {
+            const lastMessage = messages[messages.length - 1];
+            if (lastMessage.sender?._id !== currentUser?._id && document.hidden) {
+                // Play sound or show browser notification here if implemented
+            }
+        }
+    }, [messages, currentUser]);
 
     useEffect(() => {
         if (messageListRef.current) {
@@ -55,11 +73,11 @@ const ChatWindow = () => {
     const handleTyping = () => {
         setIsTyping(true);
         if (typingTimeout) clearTimeout(typingTimeout);
-        
+
         const timeout = setTimeout(() => {
             setIsTyping(false);
         }, 1000);
-        
+
         setTypingTimeout(timeout);
     };
 
@@ -110,7 +128,7 @@ const ChatWindow = () => {
                 if (uploadResponse.data.success) {
                     const fileUrl = uploadResponse.data.fileUrl;
                     const fileName = file.name;
-                    
+
                     // Send message with file URL
                     sendMessage(`📎 ${fileName}`, 'file', fileUrl);
                     toast.success(`File "${fileName}" sent successfully!`);
@@ -145,7 +163,7 @@ const ChatWindow = () => {
                 <div className="flex items-center gap-3">
                     <Avatar className="w-12 h-12">
                         <AvatarImage src={recipient?.profile?.profilePhoto} />
-                        <AvatarFallback className="bg-indigo-100 text-indigo-600">
+                        <AvatarFallback className="bg-accent/20 text-accent">
                             {recipient?.fullname?.charAt(0).toUpperCase() || recipient?.username?.charAt(0).toUpperCase() || "U"}
                         </AvatarFallback>
                     </Avatar>
@@ -156,28 +174,28 @@ const ChatWindow = () => {
                         <div className="flex items-center gap-2">
                             <div className={`w-2 h-2 rounded-full ${recipientStatus === "online" ? "bg-green-500" : "bg-gray-400"}`}></div>
                             <span className="text-sm text-gray-500">
-                                {recipientStatus === "online" ? "Online" : 
-                                 recipient?.lastSeen ? 
-                                 `Last seen ${new Date(recipient.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 
-                                 "Offline"}
+                                {recipientStatus === "online" ? "Online" :
+                                    recipient?.lastSeen ?
+                                        `Last seen ${new Date(recipient.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` :
+                                        "Offline"}
                             </span>
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
-                    <Button 
-                        size="sm" 
-                        variant="ghost" 
+                    <Button
+                        size="sm"
+                        variant="ghost"
                         className="hover:bg-green-100 hover:text-green-600"
                         onClick={async () => recipient && await initiateCall(recipient)}
                         title="Audio Call"
                     >
                         <Phone size={18} />
                     </Button>
-                    <Button 
-                        size="sm" 
-                        variant="ghost" 
+                    <Button
+                        size="sm"
+                        variant="ghost"
                         className="hover:bg-blue-100 hover:text-blue-600"
                         onClick={() => toast.info("Video calls coming soon!")}
                         title="Video Call"
@@ -218,13 +236,13 @@ const ChatWindow = () => {
                             );
                         })
                     )}
-                    
+
                     {/* Typing indicator */}
                     {isTyping && (
                         <div className="flex items-end gap-2 justify-start">
                             <Avatar className="w-8 h-8 flex-shrink-0">
                                 <AvatarImage src={recipient?.profile?.profilePhoto} />
-                                <AvatarFallback className="bg-indigo-100 text-indigo-600 text-xs">
+                                <AvatarFallback className="bg-accent/20 text-accent text-xs">
                                     {recipient?.fullname?.charAt(0).toUpperCase() || recipient?.username?.charAt(0).toUpperCase() || "U"}
                                 </AvatarFallback>
                             </Avatar>
@@ -254,7 +272,7 @@ const ChatWindow = () => {
                                 handleTyping();
                             }}
                             onKeyPress={handleKeyPress}
-                            className="pr-12 py-3 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 resize-none"
+                            className="pr-12 py-3 border-gray-300 focus:border-primary focus:ring-primary resize-none"
                             style={{ minHeight: '44px', maxHeight: '120px' }}
                         />
                         <div className="absolute right-2 bottom-2 flex items-center gap-1">
@@ -265,7 +283,7 @@ const ChatWindow = () => {
                     <Button
                         onClick={handleSendMessage}
                         disabled={!newMessage.trim()}
-                        className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-primary hover:bg-primary/90 text-white px-4 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Send size={18} />
                     </Button>

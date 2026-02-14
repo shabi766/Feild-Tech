@@ -48,7 +48,7 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
         try {
             console.log('TechnicianProfile: Fetching technician basic info for ID:', technicianId);
             const response = await axios.get(`${TECHNICIAN_API_END_POINT}/${technicianId}`, { withCredentials: true });
-            
+
             if (response.data.success) {
                 setTechnician(response.data.technician);
                 console.log('TechnicianProfile: Technician data loaded:', response.data.technician);
@@ -68,7 +68,7 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
         try {
             setLoading(true);
             console.log('TechnicianProfile: Loading additional data...');
-            
+
             // Always try to fetch reviews first
             try {
                 const reviewsResponse = await axios.get(
@@ -83,7 +83,7 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
                 console.warn('Reviews not available yet:', error.message);
                 setReviews([]);
             }
-            
+
             // Try to fetch review stats
             try {
                 const statsResponse = await axios.get(
@@ -96,7 +96,7 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
             } catch (error) {
                 console.warn('Review stats not available yet:', error.message);
             }
-            
+
             // Try to fetch leaderboard stats
             try {
                 const leaderboardResponse = await axios.get(
@@ -109,7 +109,7 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
             } catch (error) {
                 console.warn('Leaderboard stats not available yet:', error.message);
             }
-            
+
             setApiDataLoaded(true);
         } catch (error) {
             console.error('Error loading additional data:', error);
@@ -122,13 +122,12 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
         return Array.from({ length: 5 }, (_, i) => (
             <Star
                 key={i}
-                className={`${size} ${
-                    i < Math.floor(rating)
+                className={`${size} ${i < Math.floor(rating)
                         ? 'text-yellow-400 fill-current'
                         : i < rating
-                        ? 'text-yellow-400 fill-current opacity-50'
-                        : 'text-gray-300'
-                }`}
+                            ? 'text-yellow-400 fill-current opacity-50'
+                            : 'text-gray-300'
+                    }`}
             />
         ));
     };
@@ -185,13 +184,13 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
                                 {technician?.fullname?.charAt(0)}
                             </AvatarFallback>
                         </Avatar>
-                        
+
                         <div className="flex-1">
                             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                                 <div>
                                     <h1 className="text-3xl font-bold text-gray-900">{technician?.fullname}</h1>
                                     <p className="text-gray-600 text-lg">Technician</p>
-                                    
+
                                     {/* Rank Display - Top Priority */}
                                     <div className="flex items-center space-x-3 mt-2 mb-2">
                                         {leaderboardStats?.rank && (
@@ -202,14 +201,14 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
                                             </div>
                                         )}
                                         {leaderboardStats?.overallScore && (
-                                            <div className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-2 rounded-full shadow-lg">
+                                            <div className="flex items-center space-x-2 gradient-accent text-white px-3 py-2 rounded-full shadow-lg">
                                                 <TrendingUp className="w-4 h-4" />
                                                 <span className="font-bold">{leaderboardStats.overallScore.toFixed(0)}</span>
                                                 <span className="text-xs">Score</span>
                                             </div>
                                         )}
                                     </div>
-                                    
+
                                     {/* Basic Contact Info */}
                                     <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
                                         {technician?.email && (
@@ -225,7 +224,7 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
                                             </div>
                                         )}
                                     </div>
-                                    
+
                                     {/* Rating Display - Show if available */}
                                     {(reviewStats.averageRating || technician.performance?.averageRating) ? (
                                         <div className="flex items-center space-x-2 mt-2">
@@ -244,7 +243,7 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
                                             No reviews yet - be the first to review this technician!
                                         </p>
                                     )}
-                                    
+
                                     {/* Reviews Summary - Show if reviews exist */}
                                     {reviews.length > 0 && (
                                         <div className="mt-3 p-3 bg-gray-50 rounded-lg">
@@ -262,7 +261,7 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
                                         </div>
                                     )}
                                 </div>
-                                
+
                                 {/* Action Buttons */}
                                 <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-4 md:mt-0">
                                     {canReview && (
@@ -298,11 +297,11 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
                         </div>
                     </CardContent>
                 </Card>
-                
+
                 <Card>
                     <CardContent className="p-4">
                         <div className="flex items-center space-x-2">
-                            <Calendar className="w-5 h-5 text-purple-600" />
+                            <Calendar className="w-5 h-5 text-accent" />
                             <div>
                                 <p className="text-sm text-gray-600">Member Since</p>
                                 <p className="text-lg font-bold">
@@ -312,7 +311,7 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
                         </div>
                     </CardContent>
                 </Card>
-                
+
                 <Card>
                     <CardContent className="p-4">
                         <div className="flex items-center space-x-2">
@@ -382,7 +381,7 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
                                 </div>
                             </CardContent>
                         </Card>
-                        
+
                         <Card>
                             <CardContent className="p-4">
                                 <div className="flex items-center space-x-2">
@@ -396,7 +395,7 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
                                 </div>
                             </CardContent>
                         </Card>
-                        
+
                         <Card>
                             <CardContent className="p-4">
                                 <div className="flex items-center space-x-2">
@@ -410,11 +409,11 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
                                 </div>
                             </CardContent>
                         </Card>
-                        
+
                         <Card>
                             <CardContent className="p-4">
                                 <div className="flex items-center space-x-2">
-                                    <TrendingUp className="w-5 h-5 text-purple-600" />
+                                    <TrendingUp className="w-5 h-5 text-accent" />
                                     <div>
                                         <p className="text-sm text-gray-600">Overall Score</p>
                                         <p className="text-2xl font-bold">
@@ -448,7 +447,7 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
                                                 {review.reviewerId?.fullname?.charAt(0)}
                                             </AvatarFallback>
                                         </Avatar>
-                                        
+
                                         <div className="flex-1">
                                             <div className="flex items-center space-x-2 mb-2">
                                                 <span className="font-semibold">{review.reviewerId?.fullname}</span>
@@ -459,9 +458,9 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
                                                     {new Date(review.createdAt).toLocaleDateString()}
                                                 </span>
                                             </div>
-                                            
+
                                             <p className="text-gray-700 mb-2">{review.comment}</p>
-                                            
+
                                             {/* Show review categories if available */}
                                             {review.categories && review.categories.length > 0 && (
                                                 <div className="flex flex-wrap gap-1 mt-2">
@@ -477,7 +476,7 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
                                 </div>
                             ))}
                         </div>
-                        
+
                         {/* Pagination for reviews */}
                         {totalPages > 1 && (
                             <div className="flex items-center justify-center space-x-2 mt-6">
@@ -489,11 +488,11 @@ const TechnicianProfile = ({ job, canReview = false, onReviewSubmitted }) => {
                                 >
                                     Previous
                                 </Button>
-                                
+
                                 <span className="text-sm text-gray-600">
                                     Page {currentPage} of {totalPages}
                                 </span>
-                                
+
                                 <Button
                                     variant="outline"
                                     size="sm"

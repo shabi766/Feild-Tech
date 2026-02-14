@@ -38,7 +38,7 @@ const JobDescription = () => {
                 if (res.data.success) {
                     dispatch(setSingleJob(res.data.job));
                     setIsApplied(res.data.job.Application?.some((app) => app.applicant?._id === user?._id) || false);
-                    
+
                     // Initialize notes and deliverables if they exist
                     if (res.data.job.workOrderNotes) {
                         setNotes(res.data.job.workOrderNotes);
@@ -200,7 +200,7 @@ const JobDescription = () => {
                 deliverables: deliverables,
                 images: deliverables
             }, { withCredentials: true });
-            
+
             if (res.data.success) {
                 toast.success(res.data.message);
                 dispatch(setSingleJob(res.data.job));
@@ -223,11 +223,11 @@ const JobDescription = () => {
             'Active': 'bg-green-100 text-green-800',
             'Assigned': 'bg-blue-100 text-blue-800',
             'In Progress': 'bg-yellow-100 text-yellow-800',
-            'Done': 'bg-purple-100 text-purple-800',
+            'Done': 'bg-secondary text-primary',
             'Complete': 'bg-emerald-100 text-emerald-800',
             'Review': 'bg-orange-100 text-orange-800',
             'Cancel': 'bg-red-100 text-red-800',
-            'Paid': 'bg-indigo-100 text-indigo-800'
+            'Paid': 'bg-secondary text-primary'
         };
         return statusColors[status] || 'bg-gray-100 text-gray-800';
     };
@@ -257,7 +257,7 @@ const JobDescription = () => {
         return (
             <div className="min-h-screen bg-gray-50 flex justify-center items-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                     <p className="mt-4 text-gray-600">Loading job details...</p>
                 </div>
             </div>

@@ -21,17 +21,12 @@ const SecurityMiddleware = ({ children }) => {
           throw new Error('Insufficient privileges');
         }
 
-        // Check session validity
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('No valid session');
-        }
-
-        // Verify token with backend
+        // Verify session with backend using httpOnly cookie; no explicit
+        // token handling on the frontend to reduce XSS exposure.
         const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/verify-admin`, {
           method: 'POST',
+          credentials: 'include',
           headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
@@ -45,17 +40,13 @@ const SecurityMiddleware = ({ children }) => {
         // Check IP whitelist (if configured)
         const ipCheck = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/security/check-ip`, {
           method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          credentials: 'include',
         });
 
         // Check device trust (if configured)
         const deviceCheck = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/security/check-device`, {
           method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          credentials: 'include',
         });
 
         setSecurityChecks({

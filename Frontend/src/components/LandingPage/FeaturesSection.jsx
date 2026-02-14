@@ -136,7 +136,7 @@ const MorphingBackground = () => {
       <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-3xl animate-morph-slow"></div>
       <div className="absolute bottom-0 right-0 w-80 h-80 bg-gradient-to-br from-green-400/10 to-teal-400/10 rounded-full blur-3xl animate-morph-delayed"></div>
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-br from-orange-400/5 to-red-400/5 rounded-full blur-3xl animate-morph"></div>
-      
+
       {/* Floating geometric shapes */}
       <div className="absolute top-20 right-20 w-16 h-16 border-2 border-blue-300/20 rotate-45 animate-spin-slow"></div>
       <div className="absolute bottom-32 left-32 w-12 h-12 bg-green-300/10 rounded-full animate-pulse-slow"></div>
@@ -173,22 +173,22 @@ const AnimatedCounter = ({ end, duration = 2000, suffix = "" }) => {
 
   useEffect(() => {
     if (hasAnimated) return;
-    
+
     let startTime = null;
     const animate = (currentTime) => {
       if (!startTime) startTime = currentTime;
       const progress = Math.min((currentTime - startTime) / duration, 1);
       const currentCount = Math.floor(progress * end);
-      
+
       setCount(currentCount);
-      
+
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
         setHasAnimated(true);
       }
     };
-    
+
     requestAnimationFrame(animate);
   }, [end, duration, hasAnimated]);
 
@@ -206,7 +206,7 @@ const App = () => {
       {/* Creative Background Effects */}
       <MorphingBackground />
       <FloatingParticles />
-      
+
       {/* Custom CSS for Animations */}
       <style>
         {`
@@ -365,7 +365,7 @@ const App = () => {
           }
           
           .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -380,12 +380,12 @@ const App = () => {
             <Sparkles className="w-4 h-4 mr-2 animate-spin-slow" />
             Why Choose Our Platform?
           </div>
-          
+
           <h2 className={`text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 ${inView ? 'animate-slideInUp' : 'opacity-0'}`}>
             Built for
             <span className="gradient-text"> Success</span>
           </h2>
-          
+
           <p className={`text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed ${inView ? 'animate-slideInUp delay-100' : 'opacity-0'}`}>
             Discover a smarter way to connect recruiters and technicians. Our platform is designed to benefit both sides equally.
           </p>
@@ -420,7 +420,7 @@ const App = () => {
             >
               {/* Gradient Background on Hover */}
               <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
-              
+
               {/* Icon Container with Creative Animation */}
               <div className={`relative p-6 rounded-2xl ${feature.iconBg} shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300 animate-glow`}>
                 <div className="animate-spin-slow">
@@ -437,7 +437,7 @@ const App = () => {
                   </h3>
                   <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-300" />
                 </div>
-                
+
                 <p className="text-gray-600 leading-relaxed mb-4 group-hover:text-gray-700 transition-colors">
                   {feature.desc}
                 </p>
@@ -448,7 +448,7 @@ const App = () => {
                     <Zap className="w-3 h-3 mr-1" />
                     {feature.stats}
                   </span>
-                  
+
                   <span className={`text-sm font-semibold uppercase tracking-wide ${feature.type === 'Recruiters' ? 'text-blue-600' : 'text-green-600'}`}>
                     For {feature.type}
                   </span>
@@ -475,7 +475,7 @@ const App = () => {
             {/* Background decoration */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-2xl"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-green-400/10 to-teal-400/10 rounded-full blur-2xl"></div>
-            
+
             <div className="relative z-10">
               <h3 className="text-3xl font-bold text-gray-900 mb-4">
                 Ready to Experience the Difference?

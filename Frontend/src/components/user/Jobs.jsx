@@ -52,14 +52,14 @@ const Jobs = () => {
             return (
                 (filters.jobType === 'all' || job.jobType === filters.jobType) &&
                 (filters.workType === 'all' || job.workType === filters.workType) &&
-                (filters.location === '' || 
+                (filters.location === '' ||
                     job.location?.city?.toLowerCase().includes(filters.location.toLowerCase()) ||
                     job.location?.state?.toLowerCase().includes(filters.location.toLowerCase())) &&
-                (filters.experience === 'all' || 
+                (filters.experience === 'all' ||
                     (filters.experience === 'entry' && job.experience <= 2) ||
                     (filters.experience === 'mid' && job.experience > 2 && job.experience <= 5) ||
                     (filters.experience === 'senior' && job.experience > 5)) &&
-                (filters.salary === 'all' || 
+                (filters.salary === 'all' ||
                     (filters.salary === 'low' && (job.salary?.payableSalary || 0) < 50000) ||
                     (filters.salary === 'mid' && (job.salary?.payableSalary || 0) >= 50000 && (job.salary?.payableSalary || 0) < 100000) ||
                     (filters.salary === 'high' && (job.salary?.payableSalary || 0) >= 100000))
@@ -74,14 +74,14 @@ const Jobs = () => {
         return (
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 {/* Morphing blob shapes */}
-                <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-400/10 to-indigo-400/10 rounded-full blur-3xl animate-morph-slow"></div>
+                <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-primary-light/10 to-primary/10 rounded-full blur-3xl animate-morph-slow"></div>
                 <div className="absolute bottom-0 right-0 w-80 h-80 bg-gradient-to-br from-green-400/10 to-emerald-400/10 rounded-full blur-3xl animate-morph-delayed"></div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-br from-purple-400/5 to-pink-400/5 rounded-full blur-3xl animate-morph"></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-br from-primary/5 to-primary-light/5 rounded-full blur-3xl animate-morph"></div>
 
                 {/* Floating geometric shapes */}
                 <div className="absolute top-20 right-20 w-16 h-16 border-2 border-blue-300/20 rotate-45 animate-spin-slow"></div>
                 <div className="absolute bottom-32 left-32 w-12 h-12 bg-green-300/10 rounded-full animate-pulse-slow"></div>
-                <div className="absolute top-1/3 right-1/3 w-8 h-8 border border-purple-300/30 transform rotate-12 animate-bounce-slow"></div>
+                <div className="absolute top-1/3 right-1/3 w-8 h-8 border border-primary/30 transform rotate-12 animate-bounce-slow"></div>
                 <div className="absolute bottom-20 right-1/4 w-10 h-10 bg-orange-300/15 rounded-full animate-float"></div>
             </div>
         );
@@ -94,7 +94,7 @@ const Jobs = () => {
                 {[...Array(20)].map((_, i) => (
                     <div
                         key={i}
-                        className="absolute w-1 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-particle"
+                        className="absolute w-1 h-1 bg-gradient-to-r from-primary-light to-primary rounded-full animate-particle"
                         style={{
                             left: `${Math.random() * 100}%`,
                             top: `${Math.random() * 100}%`,
@@ -120,99 +120,21 @@ const Jobs = () => {
     const activeFiltersCount = Object.values(filters).filter(value => value !== 'all' && value !== '').length;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 relative">
+        <div className="flex-1 w-full bg-gradient-to-br from-gray-50 via-white to-gray-100 relative">
             {/* Creative Background Effects */}
             <MorphingBackground />
             <FloatingParticles />
 
-            {/* Custom CSS for Animations */}
-            <style>
-                {`
-                @keyframes morph {
-                    0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(1); }
-                    33% { transform: translate(30px, -50px) rotate(120deg) scale(1.1); }
-                    66% { transform: translate(-20px, 20px) rotate(240deg) scale(0.9); }
-                }
-                @keyframes morph-delayed {
-                    0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(1); }
-                    33% { transform: translate(-30px, 50px) rotate(-120deg) scale(1.1); }
-                    66% { transform: translate(20px, -20px) rotate(-240deg) scale(0.9); }
-                }
-                @keyframes morph-slow {
-                    0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(1); }
-                    50% { transform: translate(20px, -30px) rotate(180deg) scale(1.05); }
-                }
-                @keyframes particle {
-                    0% { transform: translateY(0px) rotate(0deg); opacity: 1; }
-                    100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
-                }
-                @keyframes float {
-                    0%, 100% { transform: translateY(0px); }
-                    50% { transform: translateY(-20px); }
-                }
-                @keyframes slideInUp {
-                    0% { opacity: 0; transform: translateY(30px); }
-                    100% { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes scaleIn {
-                    0% { opacity: 0; transform: scale(0.8); }
-                    100% { opacity: 1; transform: scale(1); }
-                }
-                @keyframes spin-slow {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-                @keyframes bounce-slow {
-                    0%, 100% { transform: translateY(0); }
-                    50% { transform: translateY(-10px); }
-                }
-                @keyframes pulse-slow {
-                    0%, 100% { opacity: 0.5; transform: scale(1); }
-                    50% { opacity: 1; transform: scale(1.1); }
-                }
-                @keyframes glow {
-                    0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
-                    50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
-                }
 
-                .animate-morph { animation: morph 8s ease-in-out infinite; }
-                .animate-morph-delayed { animation: morph-delayed 10s ease-in-out infinite; }
-                .animate-morph-slow { animation: morph-slow 12s ease-in-out infinite; }
-                .animate-particle { animation: particle linear infinite; }
-                .animate-float { animation: float 6s ease-in-out infinite; }
-                .animate-slideInUp { animation: slideInUp 0.8s ease-out forwards; }
-                .animate-scaleIn { animation: scaleIn 0.6s ease-out forwards; }
-                .animate-spin-slow { animation: spin-slow 20s linear infinite; }
-                .animate-bounce-slow { animation: bounce-slow 3s ease-in-out infinite; }
-                .animate-pulse-slow { animation: pulse-slow 2s ease-in-out infinite; }
-                .animate-glow { animation: glow 2s ease-in-out infinite; }
 
-                .delay-100 { animation-delay: 0.1s; }
-                .delay-200 { animation-delay: 0.2s; }
-                .delay-300 { animation-delay: 0.3s; }
-                .delay-400 { animation-delay: 0.4s; }
-                .delay-500 { animation-delay: 0.5s; }
-                .delay-600 { animation-delay: 0.6s; }
-                .delay-700 { animation-delay: 0.7s; }
-                .delay-800 { animation-delay: 0.8s; }
-
-                .gradient-text {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    background-clip: text;
-                }
-                `}
-            </style>
-
-            <div className="relative z-10 py-8 px-6">
+            <div className="relative z-10 py-8 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
                     {/* Header Section */}
-                    <motion.div 
+                    <motion.div
                         ref={ref}
                         className={`text-center mb-12 ${inView ? 'animate-slideInUp' : 'opacity-0'}`}
                     >
-                        <div className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 font-semibold text-sm mb-6">
+                        <div className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-secondary to-accent text-primary font-semibold text-sm mb-6">
                             <Sparkles className="w-4 h-4 mr-2 animate-spin-slow" />
                             {t('findPerfectJob', currentLanguage)}
                         </div>
@@ -226,11 +148,11 @@ const Jobs = () => {
                     </motion.div>
 
                     {/* Advanced Filters */}
-                    <motion.div 
+                    <motion.div
                         className={`bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-100/50 p-8 mb-8 ${inView ? 'animate-slideInUp delay-200' : 'opacity-0'}`}
                     >
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl">
+                            <div className="p-3 bg-gradient-to-r from-primary to-primary-light rounded-xl">
                                 <Filter className="w-6 h-6 text-white" />
                             </div>
                             <h2 className="text-2xl font-bold text-gray-900">{t('advancedFilters', currentLanguage)}</h2>
@@ -334,7 +256,7 @@ const Jobs = () => {
                     </motion.div>
 
                     {/* Jobs Grid */}
-                    <motion.div 
+                    <motion.div
                         className={`${inView ? 'animate-slideInUp delay-400' : 'opacity-0'}`}
                     >
                         {filterJobs.length === 0 ? (
@@ -348,7 +270,7 @@ const Jobs = () => {
                                 </p>
                                 <Button
                                     onClick={clearAllFilters}
-                                    className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
+                                    className="bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary"
                                 >
                                     {t('clearFilters')}
                                 </Button>

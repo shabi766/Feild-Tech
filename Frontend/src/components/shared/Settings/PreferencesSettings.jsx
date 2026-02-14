@@ -6,13 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Palette, 
-  Globe, 
-  Monitor, 
-  Clock, 
-  Calendar, 
-  DollarSign, 
+import {
+  Palette,
+  Globe,
+  Monitor,
+  Clock,
+  Calendar,
+  DollarSign,
   Languages,
   Sun,
   Moon,
@@ -46,7 +46,7 @@ const PreferencesSettings = ({ settings, updateSetting, isLoading, setSaveStatus
       <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-3 text-xl">
-            <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+            <div className="p-2 gradient-accent rounded-lg">
               <Palette className="w-5 h-5 text-white" />
             </div>
             {t('appearance', currentLanguage)}
@@ -75,23 +75,22 @@ const PreferencesSettings = ({ settings, updateSetting, isLoading, setSaveStatus
               checked={settings.darkMode}
               onCheckedChange={(checked) => handleSettingChange('darkMode', checked)}
               disabled={isLoading}
-              className="data-[state=checked]:bg-purple-600"
+              className="data-[state=checked]:bg-accent"
             />
           </div>
 
           {/* Theme Preview */}
-          <div className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-            settings.darkMode 
-              ? 'bg-gray-900 border-gray-700 text-white' 
+          <div className={`p-4 rounded-xl border-2 transition-all duration-300 ${settings.darkMode
+              ? 'bg-gray-900 border-gray-700 text-white'
               : 'bg-white border-gray-200 text-gray-900'
-          }`}>
+            }`}>
             <div className="flex items-center gap-3 mb-3">
               <div className={`w-3 h-3 rounded-full ${settings.darkMode ? 'bg-red-500' : 'bg-green-500'}`}></div>
               <div className={`w-3 h-3 rounded-full ${settings.darkMode ? 'bg-yellow-500' : 'bg-yellow-500'}`}></div>
               <div className={`w-3 h-3 rounded-full ${settings.darkMode ? 'bg-green-500' : 'bg-red-500'}`}></div>
             </div>
             <p className="text-sm">
-              {settings.darkMode 
+              {settings.darkMode
                 ? t('darkModeDesc', currentLanguage)
                 : t('lightModeDesc', currentLanguage)
               }
@@ -322,12 +321,12 @@ const PreferencesSettings = ({ settings, updateSetting, isLoading, setSaveStatus
 
             <Button
               variant="outline"
-              className="h-auto p-4 flex flex-col items-start gap-2 hover:bg-purple-50 hover:border-purple-300"
+              className="h-auto p-4 flex flex-col items-start gap-2 hover:bg-accent/10 hover:border-accent/30"
               onClick={() => handleSettingChange('darkMode', !settings.darkMode)}
               disabled={isLoading}
             >
               {settings.darkMode ? (
-                <Moon className="w-5 h-5 text-purple-600" />
+                <Moon className="w-5 h-5 text-accent" />
               ) : (
                 <Sun className="w-5 h-5 text-yellow-600" />
               )}

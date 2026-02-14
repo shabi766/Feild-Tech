@@ -19,11 +19,12 @@ import {
     uploadWorkOrderImages
 } from "../Controllers/workorder.controller.js";
 import isAuthenticated from "../middleware/isAuthenticated.js";
+import { validate, createJobSchema } from "../../shared-middleware/validation.js";
 
 const router = express.Router();
 
 // All routes require authentication
-router.route("/post").post(isAuthenticated, postJob);
+router.route("/post").post(isAuthenticated, validate(createJobSchema), postJob);
 router.route("/get").get(isAuthenticated, getAllJobs);
 router.route("/getadminjobs").get(isAuthenticated, getAdminJobs);
 router.route("/get/:id").get(isAuthenticated, getJobById);

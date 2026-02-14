@@ -2,12 +2,64 @@ import { User } from "../Models/user.model.js";
 import mongoose from "mongoose";
 
 /**
+ * Submit KYC Application (for user)
+ */
+export const submitKYC = async (req, res) => {
+    try {
+        const userId = req.user.userId || req.user._id;
+        const { fatherName, cnicNumber, dateOfBirth, cnicFrontUrl, cnicBackUrl } = req.body;
+
+        if (!fatherName || !cnicNumber || !dateOfBirth || !cnicFrontUrl || !cnicBackUrl) {
+            return res.status(400).json({
+                success: false,
+                message: "All KYC fields are required"
+            });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        // Update KYC details
+        user.kyc = {
+            fatherName,
+            cnicNumber,
+            dateOfBirth: new Date(dateOfBirth),
+            cnicFrontUrl,
+            cnicBackUrl,
+            kycStatus: 'pending',
+            submittedAt: new Date()
+        };
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "KYC application submitted successfully",
+            kyc: user.kyc
+        });
+
+    } catch (error) {
+        console.error("Error submitting KYC:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error.message
+        });
+    }
+};
+
+/**
  * Get KYC requests for administration
  */
 export const getKYCRequests = async (req, res) => {
     try {
         const { page = 1, limit = 20, status, search } = req.query;
-        
+
         // Build filter object
         const filter = {};
         if (status && status !== 'all') filter['kyc.kycStatus'] = status;
@@ -21,7 +73,7 @@ export const getKYCRequests = async (req, res) => {
 
         // Calculate pagination
         const skip = (parseInt(page) - 1) * parseInt(limit);
-        
+
         // Get users with KYC data
         const kycRequests = await User.find(filter)
             .select('fullname email phoneNumber kyc createdAt profile')
@@ -61,10 +113,10 @@ export const getKYCRequests = async (req, res) => {
 export const getKYCDetails = async (req, res) => {
     try {
         const { userId } = req.params;
-        
+
         const user = await User.findById(userId)
             .select('fullname email phoneNumber kyc profile');
-        
+
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -103,7 +155,7 @@ export const updateKYCStatus = async (req, res) => {
         const { userId } = req.params;
         const { status, remarks, rejectionReason } = req.body;
         const adminId = req.user.userId || req.user._id;
-        
+
         // Validate status
         if (!['pending', 'verified', 'rejected', 'unverified'].includes(status)) {
             return res.status(400).json({
@@ -125,7 +177,7 @@ export const updateKYCStatus = async (req, res) => {
         user.kyc.kycStatus = status;
         if (remarks) user.kyc.remarks = remarks;
         if (rejectionReason) user.kyc.rejectionReason = rejectionReason;
-        
+
         if (status === 'verified') {
             user.kyc.verifiedAt = new Date();
         } else if (status === 'rejected') {
@@ -162,14 +214,14 @@ export const updateKYCStatus = async (req, res) => {
 export const getAllKYC = async (req, res) => {
     try {
         const { status, page = 1, limit = 20 } = req.query;
-        
+
         const query = {};
         if (status && ['unverified', 'pending', 'verified', 'rejected'].includes(status)) {
             query['kyc.kycStatus'] = status;
         }
 
         const skip = (page - 1) * limit;
-        
+
         const [kycApplications, total] = await Promise.all([
             User.find(query)
                 .select('fullname email phoneNumber kyc createdAt profile')
@@ -215,7 +267,7 @@ export const getKYCStatistics = async (req, res) => {
                 }
             }
         ]);
-        
+
         // Format statistics
         const formattedStats = {
             unverified: 0,
@@ -252,7 +304,7 @@ export const getKYCStatistics = async (req, res) => {
 export const deleteKYC = async (req, res) => {
     try {
         const { userId } = req.params;
-        
+
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({

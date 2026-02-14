@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Home, 
-  User, 
-  Calendar, 
-  Wallet, 
-  MessageCircle, 
-  Plus, 
-  Users, 
-  Building2, 
-  FileText, 
+import {
+  Home,
+  User,
+  Calendar,
+  Wallet,
+  MessageCircle,
+  Plus,
+  Users,
+  Building2,
+  FileText,
   Briefcase,
   ChevronRight,
   X,
@@ -30,7 +30,8 @@ const Sidebar = () => {
   const { t } = useTranslation();
 
   // Check if sidebar should be shown
-  const shouldShowSidebar = user && (user.role === 'Recruiter' || user.role === 'Technician');
+  const normalizedRole = user?.role?.toLowerCase().trim();
+  const shouldShowSidebar = user && (normalizedRole === 'recruiter' || normalizedRole === 'company' || normalizedRole === 'technician');
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
@@ -50,7 +51,7 @@ const Sidebar = () => {
   useEffect(() => {
     const timer = setTimeout(() => setShowToggle(true), 2000);
     const handleScroll = () => setShowToggle(true);
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => {
       clearTimeout(timer);
@@ -65,7 +66,7 @@ const Sidebar = () => {
         setShowHint(true);
       }
     }, 5000);
-    
+
     return () => clearTimeout(hintTimer);
   }, [showToggle]);
 
@@ -73,27 +74,74 @@ const Sidebar = () => {
   const getNavigationItems = () => {
     if (!user) return [];
 
-    switch (user.role) {
-      case 'Recruiter':
+    const normalizedRole = user.role?.toLowerCase().trim();
+    switch (normalizedRole) {
+      case 'company':
+        // Company recruiter (backend returns role: "Company")
         return [
-          { 
-            path: user.recruiterType === 'Individual' || !user.companyId ? 
-                '/app/recruiter/dashboard-individual' : '/app/recruiter/dashboard', 
-            label: 'Dashboard', 
+          {
+            path: '/app/recruiter/dashboard',
+            label: 'Dashboard',
             icon: Home,
             color: 'from-blue-500 to-blue-600',
             description: 'Overview & Analytics'
           },
-          { 
-            path: '/app/recruiter/chat', 
-            label: 'Chat', 
+          {
+            path: '/app/recruiter/chat',
+            label: 'Chat',
             icon: MessageCircle,
             color: 'from-green-500 to-green-600',
             description: 'Communicate with team'
           },
-          { 
-            path: '/app/recruiter/wallets', 
-            label: 'Wallets', 
+          {
+            path: '/app/recruiter/wallets',
+            label: 'Wallets',
+            icon: Wallet,
+            color: 'from-yellow-500 to-yellow-600',
+            description: 'Manage payments'
+          },
+          {
+            path: '/app/recruiter/team-management',
+            label: 'Team Management',
+            icon: Users,
+            color: 'from-primary to-primary-dark',
+            description: 'Manage company teams & roles'
+          },
+          {
+            path: '/app/recruiter/profile',
+            label: 'Profile',
+            icon: User,
+            color: 'from-primary to-primary-dark',
+            description: 'Your account settings'
+          },
+          {
+            path: '/app/recruiter/job-calendar',
+            label: 'Calendar',
+            icon: Calendar,
+            color: 'from-red-500 to-red-600',
+            description: 'Schedule management'
+          }
+        ];
+      case 'recruiter':
+        return [
+          {
+            path: user.recruiterType === 'Individual' || !user.companyId ?
+              '/app/recruiter/dashboard-individual' : '/app/recruiter/dashboard',
+            label: 'Dashboard',
+            icon: Home,
+            color: 'from-blue-500 to-blue-600',
+            description: 'Overview & Analytics'
+          },
+          {
+            path: '/app/recruiter/chat',
+            label: 'Chat',
+            icon: MessageCircle,
+            color: 'from-green-500 to-green-600',
+            description: 'Communicate with team'
+          },
+          {
+            path: '/app/recruiter/wallets',
+            label: 'Wallets',
             icon: Wallet,
             color: 'from-yellow-500 to-yellow-600',
             description: 'Manage payments'
@@ -103,64 +151,64 @@ const Sidebar = () => {
             path: '/app/recruiter/team-management',
             label: 'Team Management',
             icon: Users,
-            color: 'from-indigo-500 to-indigo-600',
+            color: 'from-primary to-primary-dark',
             description: 'Manage company teams & roles'
           }] : []),
-          { 
-            path: '/app/recruiter/profile', 
-            label: 'Profile', 
+          {
+            path: '/app/recruiter/profile',
+            label: 'Profile',
             icon: User,
-            color: 'from-purple-500 to-purple-600',
+            color: 'from-primary to-primary-dark',
             description: 'Your account settings'
           },
-          { 
-            path: '/app/recruiter/jobcalender', 
-            label: 'Calendar', 
+          {
+            path: '/app/recruiter/job-calendar',
+            label: 'Calendar',
             icon: Calendar,
             color: 'from-red-500 to-red-600',
             description: 'Schedule management'
           }
         ];
-      
-      case 'Technician':
+
+      case 'technician':
         return [
-          { 
-            path: '/app/technician/calender', 
-            label: 'Calendar', 
+          {
+            path: '/app/technician/calendar',
+            label: 'Calendar',
             icon: Calendar,
             color: 'from-red-500 to-red-600',
             description: 'Job scheduling'
           },
-          { 
-            path: '/app/technician/chat', 
-            label: 'Chat', 
+          {
+            path: '/app/technician/chat',
+            label: 'Chat',
             icon: MessageCircle,
             color: 'from-green-500 to-green-600',
             description: 'Team communication'
           },
-          { 
-            path: '/app/technician/leaderboard', 
-            label: 'Leaderboard', 
+          {
+            path: '/app/technician/leaderboard',
+            label: 'Leaderboard',
             icon: Sparkles,
             color: 'from-orange-500 to-orange-600',
             description: 'View rankings & performance'
           },
-          { 
-            path: '/app/technician/wallets', 
-            label: 'Wallets', 
+          {
+            path: '/app/technician/wallets',
+            label: 'Wallets',
             icon: Wallet,
             color: 'from-yellow-500 to-yellow-600',
             description: 'Payment management'
           },
-          { 
-            path: '/app/technician/profile', 
-            label: 'Profile', 
+          {
+            path: '/app/technician/profile',
+            label: 'Profile',
             icon: User,
-            color: 'from-purple-500 to-purple-600',
+            color: 'from-primary to-primary-dark',
             description: 'Account settings'
           }
         ];
-      
+
       default:
         return [];
     }
@@ -220,8 +268,8 @@ const Sidebar = () => {
             {/* Main Toggle Button */}
             <motion.button
               onClick={toggleSidebar}
-              className="group relative p-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-r-2xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-500"
-              whileHover={{ 
+              className="group relative p-3 bg-gradient-to-r from-primary via-primary-dark to-primary-light text-white rounded-r-2xl shadow-2xl hover:shadow-primary/25 transition-all duration-500"
+              whileHover={{
                 scale: 1.1,
                 x: 5,
                 boxShadow: "0 25px 50px -12px rgba(147, 51, 234, 0.5)"
@@ -247,7 +295,7 @@ const Sidebar = () => {
 
               {/* Glow Effect */}
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 rounded-r-2xl blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500"
+                className="absolute inset-0 bg-gradient-to-r from-primary-light via-primary to-primary-dark rounded-r-2xl blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500"
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               />
@@ -255,7 +303,7 @@ const Sidebar = () => {
 
             {/* Decorative Elements */}
             <motion.div
-              className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full"
+              className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-primary-light to-primary rounded-full"
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ delay: 0.5, duration: 0.8 }}
@@ -275,8 +323,8 @@ const Sidebar = () => {
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           >
             <motion.div
-              className="relative px-4 py-3 bg-gradient-to-r from-blue-500/90 to-purple-500/90 backdrop-blur-sm text-white text-sm font-medium rounded-r-2xl shadow-xl border border-white/20"
-              animate={{ 
+              className="relative px-4 py-3 bg-gradient-to-r from-primary/90 to-primary-dark/90 backdrop-blur-sm text-white text-sm font-medium rounded-r-2xl shadow-xl border border-white/20"
+              animate={{
                 x: [0, 5, 0],
                 boxShadow: [
                   "0 10px 25px -5px rgba(59, 130, 246, 0.3)",
@@ -290,10 +338,10 @@ const Sidebar = () => {
                 <Sparkles size={16} className="animate-pulse" />
                 <span>{t('scrollOrHoverToReveal')}</span>
               </div>
-              
+
               {/* Arrow pointing left */}
-              <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gradient-to-r from-blue-500/90 to-purple-500/90 rotate-45"></div>
-              
+              <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gradient-to-r from-primary/90 to-primary-dark/90 rotate-45"></div>
+
               {/* Auto-hide hint after 3 seconds */}
               <motion.div
                 className="absolute bottom-0 left-0 h-1 bg-white/30 rounded-full"
@@ -326,34 +374,34 @@ const Sidebar = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed top-0 left-0 h-full w-80 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white z-50 shadow-2xl"
+            className="fixed top-0 left-0 h-full w-80 bg-background/95 backdrop-blur-xl border-r border-border text-foreground z-50 shadow-2xl"
             variants={sidebarVariants}
             initial="closed"
             animate="open"
             exit="closed"
           >
             {/* Header */}
-            <div className="p-6 border-b border-gray-700">
+            <div className="p-6 border-b border-border/50">
               <div className="flex items-center justify-between mb-4">
-                <motion.h2 
-                  className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
+                <motion.h2
+                  className="text-2xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent"
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  {user?.role === 'Recruiter' ? t('recruiterHub') : t('technicianHub')}
+                  {(normalizedRole === 'recruiter' || normalizedRole === 'company') ? t('recruiterHub') : t('technicianHub')}
                 </motion.h2>
                 <motion.button
                   onClick={closeSidebar}
-                  className="p-2 hover:bg-gray-700 rounded-full transition-colors"
+                  className="p-2 hover:bg-muted rounded-full transition-colors text-muted-foreground hover:text-foreground"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
                   <X size={20} />
                 </motion.button>
               </div>
-              <motion.div 
-                className="text-gray-400 text-sm"
+              <motion.div
+                className="text-muted-foreground text-sm"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
@@ -368,7 +416,7 @@ const Sidebar = () => {
                 {navigationItems.map((item, index) => {
                   const IconComponent = item.icon;
                   const isActive = location.pathname === item.path;
-                  
+
                   return (
                     <motion.div
                       key={item.path}
@@ -381,29 +429,28 @@ const Sidebar = () => {
                     >
                       <Link
                         to={item.path}
-                        className={`group relative block p-4 rounded-xl transition-all duration-300 ${
-                          isActive 
-                            ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30' 
-                            : 'hover:bg-gray-800/50 border border-transparent hover:border-gray-600/30'
-                        }`}
+                        className={`group relative block p-4 rounded-xl transition-all duration-300 ${isActive
+                          ? 'bg-primary/10 border border-primary/20'
+                          : 'hover:bg-muted border border-transparent'
+                          }`}
                         onClick={closeSidebar}
                         onMouseEnter={() => setHoveredItem(item.path)}
                         onMouseLeave={() => setHoveredItem(null)}
                       >
                         <div className="flex items-center space-x-4">
                           <motion.div
-                            className={`p-3 rounded-lg bg-gradient-to-r ${item.color} shadow-lg`}
+                            className={`p-3 rounded-lg ${isActive ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary'} shadow-sm transition-colors`}
                             whileHover={{ rotate: 5, scale: 1.1 }}
                             transition={{ type: 'spring', stiffness: 400 }}
                           >
-                            <IconComponent size={20} className="text-white" />
+                            <IconComponent size={20} />
                           </motion.div>
-                          
+
                           <div className="flex-1">
-                            <div className="font-semibold text-white group-hover:text-blue-300 transition-colors">
+                            <div className={`font-semibold ${isActive ? 'text-primary' : 'text-foreground'} group-hover:text-primary transition-colors`}>
                               {item.label}
                             </div>
-                            <div className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
+                            <div className="text-sm text-muted-foreground group-hover:text-foreground/80 transition-colors">
                               {item.description}
                             </div>
                           </div>
@@ -412,18 +459,12 @@ const Sidebar = () => {
                         {/* Active indicator */}
                         {isActive && (
                           <motion.div
-                            className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-400 rounded-full"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-primary rounded-full"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.2 }}
                           />
                         )}
-
-                        {/* Hover effect */}
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          initial={false}
-                        />
                       </Link>
                     </motion.div>
                   );
@@ -432,19 +473,19 @@ const Sidebar = () => {
             </div>
 
             {/* Footer */}
-            <motion.div 
-              className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-700"
+            <motion.div
+              className="absolute bottom-0 left-0 right-0 p-6 border-t border-border/50 bg-muted/30"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
               <div className="text-center">
-                <div className="text-gray-400 text-sm mb-2">
-                  {user?.role === 'Recruiter' ? t('manageRecruitmentWorkflow') : t('trackTechnicianJourney')}
+                <div className="text-muted-foreground text-sm mb-2">
+                  {(normalizedRole === 'recruiter' || normalizedRole === 'company') ? t('manageRecruitmentWorkflow') : t('trackTechnicianJourney')}
                 </div>
-                <div className="w-full bg-gray-700 rounded-full h-1">
-                  <motion.div 
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-1 rounded-full"
+                <div className="w-full bg-muted rounded-full h-1">
+                  <motion.div
+                    className="bg-primary h-1 rounded-full"
                     initial={{ width: 0 }}
                     animate={{ width: '75%' }}
                     transition={{ delay: 0.8, duration: 1 }}

@@ -49,8 +49,8 @@ const WalletDashboard = () => {
     }
   };
 
-  useEffect(() => { 
-    fetchOverview(); 
+  useEffect(() => {
+    fetchOverview();
     fetchKYCStatus();
   }, []);
 
@@ -69,7 +69,7 @@ const WalletDashboard = () => {
   if (kycStatus === 'unverified' || kycStatus === 'pending') {
     return (
       <div className="rounded-2xl overflow-hidden border shadow-sm">
-        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 text-slate-100 p-6 md:p-8">
+        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-primary-dark text-slate-100 p-6 md:p-8">
           <div className="flex items-start justify-between">
             <div>
               <h2 className="text-xl md:text-2xl font-semibold">Wallet Access</h2>
@@ -87,7 +87,7 @@ const WalletDashboard = () => {
   // Show wallet dashboard if KYC is verified
   return (
     <div className="rounded-2xl overflow-hidden border shadow-sm">
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 text-slate-100 p-6 md:p-8">
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-primary-dark text-slate-100 p-6 md:p-8">
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-xl md:text-2xl font-semibold">Wallet</h2>
@@ -126,7 +126,7 @@ const WalletDashboard = () => {
         <div className="mt-6 flex flex-wrap gap-3">
           <button onClick={() => setTopupOpen(true)} className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white">Add Amount</button>
           {role === 'Technician' && (
-            <button onClick={() => setWithdrawOpen(true)} className="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white">Withdraw</button>
+            <button onClick={() => setWithdrawOpen(true)} className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white">Withdraw</button>
           )}
         </div>
         {loading && <div className="text-xs text-slate-300 mt-3">Loading…</div>}
@@ -135,11 +135,11 @@ const WalletDashboard = () => {
 
       <div className="bg-white p-4 md:p-6">
         {/* KYC Status Banner */}
-        <KYCStatusBanner 
-          status={kycStatus} 
-          onRefresh={() => { fetchOverview(); fetchKYCStatus(); }} 
+        <KYCStatusBanner
+          status={kycStatus}
+          onRefresh={() => { fetchOverview(); fetchKYCStatus(); }}
         />
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
           <div>
             <h4 className="font-semibold mb-2">Wallet Balance</h4>
@@ -164,7 +164,7 @@ const WalletDashboard = () => {
                     <div className="font-medium">{t.status}</div>
                     <div className="text-gray-600">WO: {t.workorder}</div>
                   </div>
-                  <div className="font-mono">${(t.amountCents/100).toFixed(2)}</div>
+                  <div className="font-mono">${(t.amountCents / 100).toFixed(2)}</div>
                 </div>
               ))}
             </div>

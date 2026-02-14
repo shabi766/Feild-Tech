@@ -1,38 +1,43 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import NavbarBase from './NavbarBase';
+import { Search, Wrench, MapPin, BookOpen, Info } from 'lucide-react';
 
 const GeneralNavbar = ({ setLogoutFlag }) => {
     const location = useLocation();
 
     const navItems = [
-        { path: '/find-tech', label: 'Find Tech' },
-        { path: '/find-work', label: 'Find Work' },
-        { path: '/service-coverage', label: 'Service Coverage' },
-        { path: '/resources', label: 'Resources' },
-        { path: '/about', label: 'About' }
+        { path: '/find-tech', label: 'Find Tech', icon: Search },
+        { path: '/find-work', label: 'Find Work', icon: Wrench },
+        { path: '/service-coverage', label: 'Service Coverage', icon: MapPin },
+        { path: '/resources', label: 'Resources', icon: BookOpen },
+        { path: '/about', label: 'About', icon: Info }
     ];
 
     return (
         <NavbarBase setLogoutFlag={setLogoutFlag}>
-            <ul className='flex items-center gap-2'>
+            <ul className='flex items-center gap-1'>
                 {navItems.map((item) => {
                     const isActive = location.pathname === item.path;
+                    const IconComponent = item.icon;
                     return (
                         <li key={item.path}>
-                            <Link 
+                            <Link
                                 to={item.path}
-                                className={`relative px-3 py-2 rounded-lg font-medium transition-all duration-300 group text-sm ${
-                                    isActive 
-                                        ? 'text-blue-600 bg-blue-50/80' 
+                                className={`relative flex items-center gap-1.5 px-3 py-2 rounded-lg font-medium transition-all duration-300 group text-sm ${isActive
+                                        ? 'text-blue-600 bg-blue-50/80'
                                         : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50/60'
-                                }`}
+                                    }`}
                             >
+                                <IconComponent
+                                    size={15}
+                                    className={`transition-all duration-300 group-hover:scale-110 ${isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-500'
+                                        }`}
+                                />
                                 <span className="relative z-10">{item.label}</span>
                                 {isActive && (
-                                    <div className="absolute inset-0 bg-blue-50/80 rounded-lg transition-all duration-300" />
+                                    <div className="absolute bottom-0 left-3 right-3 h-0.5 bg-blue-600 rounded-full" />
                                 )}
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/10 rounded-lg transition-all duration-300" />
                             </Link>
                         </li>
                     );

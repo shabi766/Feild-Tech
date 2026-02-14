@@ -1,5 +1,5 @@
 import { Company } from "../Models/company.model.js";
-import { User } from "../Models/user.model.js";
+import { AuthServiceClient } from "../../shared-clients/auth-client.service.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { getKafkaProducer, CompanyCreatedEvent, TOPICS } from '../../shared-kafka/index.js';
@@ -99,62 +99,33 @@ export const registerCompany = async (req, res) => {
         }
 
         // Create user account for the primary recruiter (Company Owner)
+        // Create user account for the primary recruiter (Company Owner) via Auth Service
         console.log('Creating company owner with data:', {
             fullname: recruiterName,
             email: recruiterEmail,
             phoneNumber: recruiterPhone,
-            role: "Company", // Changed from "Recruiter" to "Company"
+            role: "Company",
             recruiterType: "Company",
             companyId: company._id
         });
 
-        const user = new User({
+        // Use AuthServiceClient to create the user
+        const authResponse = await AuthServiceClient.registerUser({
             fullname: recruiterName,
             email: recruiterEmail,
             phoneNumber: recruiterPhone,
-            password: hashedPassword,
-            role: "Company", // Changed from "Recruiter" to "Company" - This makes them the company owner
+            password: password, // Use raw password, auth service will hash it
+            role: "Company",
             recruiterType: "Company",
-            companyId: company._id,
-            profile: {
-                company: company._id
-            },
-            profileCompleted: true,
-            // Set default values for company owners
-            status: "online",
-            lastSeen: new Date(),
-            kyc: {
-                kycStatus: 'unverified'
-            },
-            settings: {
-                language: 'en',
-                currency: 'USD',
-                timezone: 'UTC',
-                dateFormat: 'MM/DD/YYYY',
-                timeFormat: '12h',
-                weekStart: 'monday'
-            },
-            privacy: {
-                profileVisibility: 'public',
-                showEmail: false,
-                showPhone: false,
-                allowMessages: true,
-                showOnlineStatus: true,
-                showLastSeen: true
-            },
-            notificationPreferences: {
-                emailNotifications: true,
-                pushNotifications: true,
-                smsNotifications: false,
-                marketingEmails: false,
-                jobAlerts: true,
-                messageAlerts: true,
-                projectUpdates: true,
-                paymentNotifications: true
-            }
+            companyId: company._id.toString()
         });
 
-        await user.save();
+        if (!authResponse.success || !authResponse.user) {
+            throw new Error(authResponse.message || 'Failed to create user in Auth Service');
+        }
+
+        const user = authResponse.user;
+        console.log('✅ User created in Auth Service:', user._id);
 
         // Import Role and CompanyUser models for automatic company owner role creation
         const { Role } = await import("../Models/role.model.js");

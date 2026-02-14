@@ -1,13 +1,15 @@
+import { API_ENDPOINTS } from '@/config/environment';
+
 class AuditService {
   constructor() {
-    this.baseURL = import.meta.env.VITE_BACKEND_URL;
-    this.token = localStorage.getItem('token');
+    this.baseURL = API_ENDPOINTS.AUDIT.replace(/\/audit$/, '');
   }
 
-  // Get auth headers
+  // Get auth headers – rely on httpOnly cookies, so no Authorization header
+  // is attached here. If the backend later requires explicit tokens, this
+  // can be wired up via a central auth helper.
   getHeaders() {
     return {
-      'Authorization': `Bearer ${this.token}`,
       'Content-Type': 'application/json'
     };
   }

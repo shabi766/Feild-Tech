@@ -84,7 +84,7 @@ const WithdrawModal = ({ open, onClose, onSuccess }) => {
             </svg>
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Withdrawal Method Selection */}
           <div>
@@ -95,15 +95,14 @@ const WithdrawModal = ({ open, onClose, onSuccess }) => {
               <button
                 type="button"
                 onClick={() => setWithdrawalMethod('bank')}
-                className={`p-3 border rounded-lg text-sm font-medium transition-colors ${
-                  withdrawalMethod === 'bank'
+                className={`p-3 border rounded-lg text-sm font-medium transition-colors ${withdrawalMethod === 'bank'
                     ? 'border-blue-500 bg-blue-50 text-blue-700'
                     : 'border-gray-300 hover:border-gray-400'
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-center space-x-2">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                   </svg>
                   <span>Bank Transfer</span>
                 </div>
@@ -111,15 +110,14 @@ const WithdrawModal = ({ open, onClose, onSuccess }) => {
               <button
                 type="button"
                 onClick={() => setWithdrawalMethod('paypal')}
-                className={`p-3 border rounded-lg text-sm font-medium transition-colors ${
-                  withdrawalMethod === 'paypal'
+                className={`p-3 border rounded-lg text-sm font-medium transition-colors ${withdrawalMethod === 'paypal'
                     ? 'border-blue-500 bg-blue-50 text-blue-700'
                     : 'border-gray-300 hover:border-gray-400'
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-center space-x-2">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                   </svg>
                   <span>PayPal</span>
                 </div>
@@ -138,11 +136,10 @@ const WithdrawModal = ({ open, onClose, onSuccess }) => {
                   key={amt}
                   type="button"
                   onClick={() => handleAmountSelect(amt)}
-                  className={`p-2 text-sm border rounded-md transition-colors ${
-                    amount === amt.toString()
+                  className={`p-2 text-sm border rounded-md transition-colors ${amount === amt.toString()
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-gray-400'
-                  }`}
+                    }`}
                 >
                   ${amt}
                 </button>
@@ -208,7 +205,7 @@ const WithdrawModal = ({ open, onClose, onSuccess }) => {
               <div className="text-sm text-blue-800">
                 <p className="font-medium">Processing Time</p>
                 <p className="mt-1">
-                  {withdrawalMethod === 'bank' 
+                  {withdrawalMethod === 'bank'
                     ? 'Bank transfers typically take 2-5 business days to complete.'
                     : 'PayPal transfers are usually completed within 24 hours.'
                   }
@@ -243,7 +240,7 @@ const WithdrawModal = ({ open, onClose, onSuccess }) => {
             <button
               type="submit"
               disabled={loading || !amount}
-              className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark disabled:opacity-50 transition-colors"
             >
               {loading ? 'Processing...' : `Withdraw ${amount ? `$${amount}` : 'Funds'}`}
             </button>

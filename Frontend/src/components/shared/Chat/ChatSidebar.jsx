@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
-import useChatSearch from "@/components/Hooks/useChatSearch"; 
+import useChatSearch from "@/components/Hooks/useChatSearch";
 import { ChatContext } from "@/context/ChatContext";
 import { useAudioCall } from "@/context/AudioCallContext";
 import { Trash2, Circle, Search, Plus, MoreVertical, Phone, Video } from "lucide-react";
@@ -46,8 +46,8 @@ const ChatSidebar = () => {
     const getLastMessage = (chat) => {
         if (chat.messages && chat.messages.length > 0) {
             const lastMsg = chat.messages[chat.messages.length - 1];
-            return lastMsg.content.length > 30 
-                ? lastMsg.content.substring(0, 30) + "..." 
+            return lastMsg.content.length > 30
+                ? lastMsg.content.substring(0, 30) + "..."
                 : lastMsg.content;
         }
         return "No messages yet";
@@ -60,7 +60,7 @@ const ChatSidebar = () => {
             const date = new Date(lastMsg.createdAt);
             const now = new Date();
             const diffInHours = (now - date) / (1000 * 60 * 60);
-            
+
             if (diffInHours < 24) {
                 return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             } else if (diffInHours < 48) {
@@ -86,22 +86,22 @@ const ChatSidebar = () => {
     /** ✅ Get recipient from chat */
     const getRecipient = (chat) => {
         if (!currentUser || !chat.participants) return null;
-        
+
         // Find the participant that is not the current user
         const recipient = chat.participants.find(p => p._id !== currentUser._id);
-        
+
         // If no recipient found, try to find by userId field
         if (!recipient && chat.participants.length > 0) {
             return chat.participants[0];
         }
-        
+
         return recipient;
     };
 
     return (
         <div className="w-80 bg-white border-r border-gray-200 flex flex-col h-full">
             {/* Header */}
-            <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-indigo-500 to-purple-600">
+            <div className="p-4 border-b border-gray-200 gradient-accent">
                 <div className="flex items-center justify-between">
                     <h2 className="text-xl font-bold text-white">Messages</h2>
                     <div className="flex items-center gap-2">
@@ -170,13 +170,13 @@ const ChatSidebar = () => {
                     ) : (
                         chats.map((chat) => {
                             if (!currentUser) return null;
-                            
+
                             const recipient = getRecipient(chat);
                             if (!recipient) return null;
-                            
+
                             const unreadCount = getUnreadCount(chat._id);
                             const isOnline = userStatus[recipient._id] === "online";
-                            
+
                             return (
                                 <div
                                     key={chat._id}

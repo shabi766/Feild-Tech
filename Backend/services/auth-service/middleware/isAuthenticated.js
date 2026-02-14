@@ -1,42 +1,15 @@
-import jwt from "jsonwebtoken";
 import { User } from "../Models/user.model.js";
+import createAuthMiddleware from "../../shared-middleware/index.js";
 
-const isAuthenticated = async (req, res, next) => {
-    try {
-        const token = req.cookies.token;
-        if (!token) {
-            return res.status(401).json({
-                message: "User not authenticated",
-                success: false,
-            });
-        }
-        const decode = await jwt.verify(token, process.env.SECRET_KEY);
-        if (!decode) {
-            return res.status(401).json({
-                message: "Invalid token",
-                success: false
-            });
-        }
-        req.id = decode.userId;
+// Use the shared auth middleware so behaviour is consistent across services.
+// This middleware:
+// - Accepts JWT tokens from httpOnly cookies OR Authorization: Bearer headers
+// - Verifies the token using SECRET_KEY
+// - Optionally loads the full User document and attaches it to req.user
+const isAuthenticated = createAuthMiddleware({
+    getUserById: async (userId) => {
+        return await User.findById(userId).select("-password");
+    },
+});
 
-        // Populate user in req if needed
-        const user = await User.findById(req.id);
-        if (!user) {
-            return res.status(401).json({
-                message: "User not found",
-                success: false
-            });
-        }
-        req.user = user;
-
-        next();
-    } catch (error) {
-        console.log(error);
-        res.status(401).json({
-            message: "Authentication failed",
-            success: false,
-            error: error.message
-        });
-    }
-}
 export default isAuthenticated;

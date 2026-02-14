@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  Users, 
-  UserPlus, 
-  Shield, 
-  Key, 
-  CheckCircle, 
+import {
+  Users,
+  UserPlus,
+  Shield,
+  Key,
+  CheckCircle,
   AlertCircle,
   Copy,
   Download,
@@ -58,17 +58,15 @@ const TeamManagementDemo = () => {
           <div className="flex items-center justify-center mb-6">
             {[1, 2, 3, 4].map((step) => (
               <div key={step} className="flex items-center">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
-                  demoStep >= step 
-                    ? 'bg-blue-600 text-white' 
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${demoStep >= step
+                    ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 text-gray-600'
-                }`}>
+                  }`}>
                   {step}
                 </div>
                 {step < 4 && (
-                  <div className={`w-16 h-1 mx-2 ${
-                    demoStep > step ? 'bg-blue-600' : 'bg-gray-200'
-                  }`}></div>
+                  <div className={`w-16 h-1 mx-2 ${demoStep > step ? 'bg-blue-600' : 'bg-gray-200'
+                    }`}></div>
                 )}
               </div>
             ))}
@@ -84,7 +82,7 @@ const TeamManagementDemo = () => {
                 Company Manager Access
               </h2>
               <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                As a company manager, you have full access to create and manage team member accounts. 
+                As a company manager, you have full access to create and manage team member accounts.
                 You can invite individual users or bulk invite multiple team members at once.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -98,10 +96,10 @@ const TeamManagementDemo = () => {
                   <h3 className="font-semibold text-green-900">User Creation</h3>
                   <p className="text-sm text-green-700">Create team accounts</p>
                 </div>
-                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                  <Shield className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                  <h3 className="font-semibold text-purple-900">Permission Control</h3>
-                  <p className="text-sm text-purple-700">Manage access levels</p>
+                <div className="bg-accent/10 p-4 rounded-lg border border-accent/30">
+                  <Shield className="h-8 w-8 text-accent mx-auto mb-2" />
+                  <h3 className="font-semibold text-accent-dark">Permission Control</h3>
+                  <p className="text-sm text-accent-dark">Manage access levels</p>
                 </div>
               </div>
               <button
@@ -122,10 +120,10 @@ const TeamManagementDemo = () => {
                 Invite New Team Member
               </h2>
               <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                Invite a new team member by providing their basic information. 
+                Invite a new team member by providing their basic information.
                 The system will automatically create their account and assign them the "Recruiter" role.
               </p>
-              
+
               <div className="bg-gray-50 rounded-lg p-6 mb-6 max-w-md mx-auto">
                 <h3 className="font-semibold text-gray-900 mb-4">Invitation Form</h3>
                 <div className="space-y-3 text-left">
@@ -176,17 +174,17 @@ const TeamManagementDemo = () => {
 
           {demoStep === 3 && (
             <div className="text-center">
-              <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="h-10 w-10 text-purple-600" />
+              <div className="w-20 h-20 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="h-10 w-10 text-accent" />
               </div>
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">
                 Account Created Successfully
               </h2>
               <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                The system has automatically created John's account and assigned him the Recruiter role. 
+                The system has automatically created John's account and assigned him the Recruiter role.
                 Now you can share the login credentials with him so he can start working immediately.
               </p>
-              
+
               <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6 max-w-2xl mx-auto">
                 <h3 className="font-semibold text-green-800 mb-4 flex items-center justify-center">
                   <CheckCircle className="h-5 w-5 mr-2" />
@@ -236,7 +234,7 @@ const TeamManagementDemo = () => {
                     setDemoStep(4);
                     setShowCredentials(true);
                   }}
-                  className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  className="px-6 py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors"
                 >
                   Next: View Credentials
                 </button>
@@ -253,10 +251,10 @@ const TeamManagementDemo = () => {
                 Login Credentials Generated
               </h2>
               <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                Here are John's login credentials. You can copy them to clipboard or download them as a text file 
+                Here are John's login credentials. You can copy them to clipboard or download them as a text file
                 to share securely with John. He can use these credentials to login immediately.
               </p>
-              
+
               {showCredentials && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6 max-w-2xl mx-auto">
                   <h3 className="font-semibold text-yellow-800 mb-4 flex items-center justify-center">
@@ -283,7 +281,7 @@ const TeamManagementDemo = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex gap-3 justify-center mb-4">
                     <button
                       onClick={copyCredentials}
@@ -300,7 +298,7 @@ const TeamManagementDemo = () => {
                       Download as File
                     </button>
                   </div>
-                  
+
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
                     <p className="text-sm text-blue-800">
                       <strong>Note:</strong> Share these credentials securely with John. He can use them to login immediately without any email verification.
@@ -382,8 +380,8 @@ const TeamManagementDemo = () => {
               </p>
             </div>
             <div className="text-center p-4">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <UserPlus className="h-8 w-8 text-purple-600" />
+              <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <UserPlus className="h-8 w-8 text-accent" />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Streamlined Onboarding</h3>
               <p className="text-sm text-gray-600">
@@ -422,12 +420,12 @@ const TeamManagementDemo = () => {
 
         {/* Call to Action */}
         <div className="text-center">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-white">
+          <div className="gradient-accent rounded-xl p-8 text-white">
             <h2 className="text-2xl font-bold mb-4">
               Ready to Streamline Your Team Management?
             </h2>
             <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-              The Enhanced Team Management System provides everything you need to efficiently onboard 
+              The Enhanced Team Management System provides everything you need to efficiently onboard
               and manage your team members with professional-grade security and ease of use.
             </p>
             <div className="flex gap-4 justify-center">

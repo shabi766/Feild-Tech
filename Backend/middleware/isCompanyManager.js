@@ -1,20 +1,20 @@
-import { CompanyUser } from "../Models/companyUser.model.js";
-import { Role } from "../Models/role.model.js";
+import { CompanyUser } from "../services/company-service/Models/companyUser.model.js";
+import { Role } from "../services/company-service/Models/role.model.js";
 
 const isCompanyManager = async (req, res, next) => {
     try {
         if (!req.user) {
-            return res.status(401).json({ 
-                message: "User not authenticated", 
-                success: false 
+            return res.status(401).json({
+                message: "User not authenticated",
+                success: false
             });
         }
 
         const { companyId } = req.params;
         if (!companyId) {
-            return res.status(400).json({ 
-                message: "Company ID is required", 
-                success: false 
+            return res.status(400).json({
+                message: "Company ID is required",
+                success: false
             });
         }
 
@@ -26,23 +26,23 @@ const isCompanyManager = async (req, res, next) => {
         }).populate('roleId');
 
         if (!companyUser) {
-            return res.status(403).json({ 
-                message: "User is not associated with this company", 
-                success: false 
+            return res.status(403).json({
+                message: "User is not associated with this company",
+                success: false
             });
         }
 
         // Check if user has manager-level permissions
         const role = companyUser.roleId;
         if (!role) {
-            return res.status(403).json({ 
-                message: "User role not found", 
-                success: false 
+            return res.status(403).json({
+                message: "User role not found",
+                success: false
             });
         }
 
         // More flexible permission check - allow company recruiters and managers
-        const hasManagerPermission = 
+        const hasManagerPermission =
             role.permissions.canManageTeamMembers ||
             role.permissions.canInviteUsers ||
             role.permissions.canChangeUserRoles ||
@@ -55,9 +55,9 @@ const isCompanyManager = async (req, res, next) => {
             role.name.toLowerCase().includes('owner');       // Allow owners
 
         if (!hasManagerPermission) {
-            return res.status(403).json({ 
-                message: "Access denied. Company member privileges required.", 
-                success: false 
+            return res.status(403).json({
+                message: "Access denied. Company member privileges required.",
+                success: false
             });
         }
 
@@ -67,10 +67,10 @@ const isCompanyManager = async (req, res, next) => {
         next();
     } catch (error) {
         console.error("Company Manager Authentication Error:", error);
-        return res.status(500).json({ 
-            message: "Authentication failed", 
-            success: false, 
-            error: error.message 
+        return res.status(500).json({
+            message: "Authentication failed",
+            success: false,
+            error: error.message
         });
     }
 };

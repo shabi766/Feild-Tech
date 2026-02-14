@@ -1,6 +1,6 @@
 import express from "express";
-import { 
-    register, login, logout, forgotPassword, verifyOtp, resetPassword, verifyToken, 
+import {
+    register, login, logout, getMe, forgotPassword, verifyOtp, resetPassword, verifyToken, refreshToken,
     getUserById, getUsersByIds, updateUserStripeData, updateUserWalletBalance, updateUserKYC, updateUserRating
 } from "../Controllers/auth.controller.js";
 import {
@@ -8,20 +8,22 @@ import {
     getTechnicians, getTechnicianById
 } from "../Controllers/user.controller.js";
 import {
-    getKYCRequests, getKYCDetails, updateKYCStatus, getAllKYC, getKYCStatistics, deleteKYC
+    getKYCRequests, getKYCDetails, updateKYCStatus, getAllKYC, getKYCStatistics, deleteKYC, submitKYC
 } from "../Controllers/kyc.controller.js";
 import {
     updateSettings, getUserSettings, resetSettings, updateProfilePhoto
 } from "../Controllers/settings.controller.js";
 import { singleUpload } from "../middleware/multer.js";
 import isAuthenticated from "../middleware/isAuthenticated.js";
+import { validate, registerSchema, loginSchema, updateUserSchema } from "../../shared-middleware/validation.js";
 
 const router = express.Router();
 
 // Public routes
-router.route("/register").post(singleUpload, register);
-router.route("/login").post(login);
+router.route("/register").post(singleUpload, validate(registerSchema), register);
+router.route("/login").post(validate(loginSchema), login);
 router.route("/logout").get(logout);
+router.route("/me").get(isAuthenticated, getMe);
 router.route("/forgot-password").post(forgotPassword);
 router.route("/verify-otp").post(verifyOtp);
 router.route("/reset-password").post(resetPassword);
@@ -39,29 +41,22 @@ router.route("/users/:userId/wallet").patch(updateUserWalletBalance);
 router.route("/users/:userId/kyc").patch(updateUserKYC);
 router.route("/users/:userId/rating").put(updateUserRating);
 
-// User Management (Admin)
-router.route("/users").get(isAuthenticated, getAllUsers);
-router.route("/users/:userId/status").put(isAuthenticated, updateUserStatus);
-router.route("/users/:userId").delete(isAuthenticated, deleteUser);
+router.route("/reset-password/:token").post(resetPassword);
+router.route("/refresh-token").post(refreshToken);
 
 // User Profile & Settings
-router.route("/profile").put(isAuthenticated, updateProfile);
-router.route("/profile/password").put(isAuthenticated, changePassword);
-router.route("/profile/photo").put(isAuthenticated, singleUpload, updateProfilePhoto);
-router.route("/settings").get(isAuthenticated, getUserSettings);
-router.route("/settings").put(isAuthenticated, updateSettings);
-router.route("/settings/reset").post(isAuthenticated, resetSettings);
+router.route("/profile").put(isAuthenticated, validate(updateUserSchema), updateProfile);
+router.route("/profile/update").put(isAuthenticated, validate(updateUserSchema), updateProfile);
 
-// Technician Queries
-router.route("/technicians").get(isAuthenticated, getTechnicians);
-router.route("/technicians/:id").get(isAuthenticated, getTechnicianById);
+// Admin routes
+router.route("/users").get(isAuthenticated, getAllUsers);
+router.route("/user/:id").get(isAuthenticated, getUserById);
+router.route("/user/:id/status").put(isAuthenticated, updateUserStatus);
+router.route("/user/:id").delete(isAuthenticated, deleteUser);
 
-// KYC Management (Admin)
-router.route("/kyc/requests").get(isAuthenticated, getKYCRequests);
-router.route("/kyc/all").get(isAuthenticated, getAllKYC);
-router.route("/kyc/stats").get(isAuthenticated, getKYCStatistics);
-router.route("/kyc/:userId").get(isAuthenticated, getKYCDetails);
+// KYC routes
+router.route("/kyc/verify").post(isAuthenticated, submitKYC);
 router.route("/kyc/:userId/status").put(isAuthenticated, updateKYCStatus);
-router.route("/kyc/:userId").delete(isAuthenticated, deleteKYC);
+router.route("/kyc/:userId").get(isAuthenticated, getKYCDetails);
 
 export default router;

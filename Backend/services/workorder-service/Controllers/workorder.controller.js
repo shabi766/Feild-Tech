@@ -2,9 +2,9 @@ import { Workorder } from "../Models/workorder.model.js";
 import mongoose from 'mongoose';
 import { multipleUpload } from "../middleware/multer.js";
 import { uploadToS3 } from "../utils/s3Upload.js";
-import { AuthServiceClient } from "../Services/auth-client.service.js";
-import { ClientServiceClient } from "../Services/client-client.service.js";
-import { getKafkaProducer, JobCreatedEvent, JobUpdatedEvent, JobCompletedEvent, JobCancelledEvent, TOPICS } from '../../shared-kafka/index.js';
+import { getKafkaProducer } from '../../../shared-kafka/kafka-producer.js';
+import { TOPICS } from '../../../shared-kafka/topics.js';
+import { JobCreatedEvent, JobUpdatedEvent, JobCompletedEvent, JobCancelledEvent } from '../../../shared-kafka/events/job-events.js';
 
 // Constants for job statuses
 const JOB_STATUSES = ['Draft', 'Active', 'Assigned', 'In Progress', 'Done', 'Review', 'Complete', 'Cancel', 'Paid'];

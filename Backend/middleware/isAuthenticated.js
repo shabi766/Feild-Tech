@@ -1,45 +1,40 @@
 import jwt from "jsonwebtoken";
-import { User } from "../Models/user.model.js";
+// Legacy middleware - services should use shared-middleware/index.js instead
+// User model removed to avoid cross-service dependencies
 
 const isAuthenticated = async (req, res, next) => {
     try {
         // Check for token in cookies first, then in Authorization header
         let token = req.cookies.token;
-        
+
         if (!token) {
             const authHeader = req.headers.authorization;
             if (authHeader && authHeader.startsWith('Bearer ')) {
                 token = authHeader.substring(7);
             }
         }
-        
+
         if (!token) {
             return res.status(401).json({ message: "User not authenticated", success: false });
         }
 
         let decoded;
         try {
-            decoded = jwt.verify(token, process.env.SECRET_KEY);
+            decoded = jwt.verify(token, process.env.SECRET_KEY || "fallback_secret_key_for_dev_only");
         } catch (jwtError) {
             return res.status(401).json({ message: "Invalid or expired token", success: false });
         }
 
-        const user = await User.findById(decoded.userId).select('-password');
-        if (!user) {
-            return res.status(401).json({ message: "User not found", success: false });
-        }
-
-        // Atomic update to avoid VersionError on save()
-        await User.updateOne({ _id: user._id }, { $set: { lastSeen: new Date() } });
-
-        // Add JWT payload data to user object
+        // Just use decoded token data without fetching user from database
+        // Services should fetch user data from auth-service if needed
         req.user = {
-            ...user.toObject(),
+            userId: decoded.userId,
+            _id: decoded.userId, // For backward compatibility
             companyId: decoded.companyId,
             role: decoded.role,
             recruiterType: decoded.recruiterType
         };
-        
+
         next();
     } catch (error) {
         console.error("Authentication Error:", error);

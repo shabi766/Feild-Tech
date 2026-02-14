@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '@/redux/authSlice';
 import { toast } from 'sonner';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { USER_API_END_POINT } from '@/components/utils/constant';
 
 const useAuthCheck = () => {
@@ -41,14 +41,12 @@ const useAuthCheck = () => {
       setIsLoading(true);
       console.log('useAuthCheck - Checking authentication...');
       console.log('useAuthCheck - Current user data:', user);
-      
+
       // Check authentication status by calling the getProfile endpoint
-      const response = await axios.get(`${USER_API_END_POINT}/me`, { 
-        withCredentials: true 
-      });
-      
+      const response = await api.get(`${USER_API_END_POINT}/me`);
+
       console.log('useAuthCheck - Response:', response.data);
-      
+
       if (response.data.success) {
         // User is authenticated, set user data
         console.log('useAuthCheck - Setting user:', response.data.user);
@@ -62,7 +60,7 @@ const useAuthCheck = () => {
     } catch (error) {
       // Authentication failed (401, 403, etc.)
       console.log('useAuthCheck - Error:', error.response?.status, error.response?.data);
-      
+
       // Only dispatch setUser(null) if we're not in the middle of a logout
       if (!isLoggingOut.current) {
         dispatch(setUser(null));
@@ -80,7 +78,7 @@ const useAuthCheck = () => {
         console.log('useAuthCheck - Fresh logout detected, skipping auth check');
         return;
       }
-      
+
       // Only check auth if not already authenticated or if user data is incomplete
       if (!isAuthenticated || !user || !user.companyId) {
         console.log('useAuthCheck useEffect - Checking auth, isAuthenticated:', isAuthenticated, 'user:', !!user, 'companyId:', user?.companyId);

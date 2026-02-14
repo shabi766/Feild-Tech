@@ -1,9 +1,11 @@
 import axios from 'axios';
-import { API_BASE_URL } from '../config/environment';
+
+// import { API_BASE_URL } from '../config/environment';
 
 // Create axios instance with base configuration
+// Create axios instance with base configuration
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  // baseURL: API_BASE_URL, // Removed for microservices support
   withCredentials: true,
   timeout: 10000,
   headers: {
@@ -11,21 +13,12 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+// Request interceptor: we rely on httpOnly cookies for auth, so we don't
+// attach JWTs from localStorage or readable cookies to the Authorization
+// header anymore. Cookies are sent automatically when withCredentials=true.
 api.interceptors.request.use(
-  (config) => {
-    // Get token from localStorage or cookies
-    const token = localStorage.getItem('authToken') || getCookie('token');
-    
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (config) => config,
+  (error) => Promise.reject(error)
 );
 
 // Response interceptor to handle auth errors
@@ -35,19 +28,15 @@ api.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-    
+
     // Handle 401 Unauthorized errors
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      
-      // Clear invalid token
-      localStorage.removeItem('authToken');
-      document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      
-      // Don't redirect automatically - let React Router handle it
-      // This prevents conflicts with the authentication flow
+
+      // Let React state/routers handle logout flows; we no longer manage
+      // tokens in localStorage or non-httpOnly cookies here.
     }
-    
+
     return Promise.reject(error);
   }
 );

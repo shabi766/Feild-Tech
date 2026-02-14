@@ -4,11 +4,13 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { toast } from 'sonner';
 import { useSelector } from 'react-redux';
-import { 
+import {
     Loader2, Lock, Eye, EyeOff, Shield, CheckCircle, AlertCircle,
     KeyRound, Fingerprint, Smartphone
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
+import { API_ENDPOINTS } from '@/config/environment';
 
 const PasscodeSetup = ({ onComplete }) => {
     const { user } = useSelector((s) => s.auth);
@@ -24,7 +26,7 @@ const PasscodeSetup = ({ onComplete }) => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
-        
+
         // Clear error when user starts typing
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
@@ -56,7 +58,7 @@ const PasscodeSetup = ({ onComplete }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!validateForm()) {
             toast.error("Please fix the errors in the form.");
             return;
@@ -64,18 +66,18 @@ const PasscodeSetup = ({ onComplete }) => {
 
         try {
             setLoading(true);
-            
-            const res = await axios.post('/api/v1/wallet-passcode/create', {
+
+            const res = await axios.post(`${API_ENDPOINTS.WALLET}/passcode`, {
                 passcode: form.passcode
             }, { withCredentials: true });
-            
+
             if (res.data?.success) {
                 toast.success('Passcode set successfully! You can now access your wallet.');
                 onComplete('passcode_set');
             } else {
                 toast.error(res.data?.message || 'Failed to set passcode');
             }
-            
+
         } catch (err) {
             toast.error(err?.response?.data?.message || err.message || 'Failed to set passcode');
         } finally {
@@ -193,9 +195,9 @@ const PasscodeSetup = ({ onComplete }) => {
                         </div>
 
                         {/* Submit Button */}
-                        <Button 
-                            type="submit" 
-                            className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02]" 
+                        <Button
+                            type="submit"
+                            className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02]"
                             disabled={loading}
                         >
                             {loading ? (
@@ -223,7 +225,7 @@ const PasscodeSetup = ({ onComplete }) => {
 
                 {/* Features Preview */}
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
@@ -236,7 +238,7 @@ const PasscodeSetup = ({ onComplete }) => {
                         <p className="text-xs text-gray-600">Access your wallet with your unique passcode</p>
                     </motion.div>
 
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
@@ -249,14 +251,14 @@ const PasscodeSetup = ({ onComplete }) => {
                         <p className="text-xs text-gray-600">Send and receive money instantly</p>
                     </motion.div>
 
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
                         className="bg-white rounded-lg p-4 text-center shadow-sm border border-gray-100"
                     >
-                        <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <Shield className="w-6 h-6 text-purple-600" />
+                        <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mx-auto mb-3">
+                            <Shield className="w-6 h-6 text-primary" />
                         </div>
                         <h3 className="text-sm font-medium text-gray-900 mb-1">Safe & Secure</h3>
                         <p className="text-xs text-gray-600">Bank-level security for your funds</p>

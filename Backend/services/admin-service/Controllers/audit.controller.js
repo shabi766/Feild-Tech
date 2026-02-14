@@ -2,6 +2,98 @@ import AuditLog from '../Models/auditLog.model.js';
 import { AuthServiceClient } from '../Services/auth-client.service.js';
 
 /**
+ * Create a new audit log entry (called by microservices)
+ */
+export const createAuditLog = async (req, res) => {
+    try {
+        const {
+            service,
+            eventType,
+            userId,
+            level,
+            description,
+            metadata,
+            ipAddress,
+            userAgent,
+            timestamp
+        } = req.body;
+
+        // Validate required fields
+        if (!service || !eventType || !description) {
+            return res.status(400).json({
+                success: false,
+                message: 'Service, eventType, and description are required'
+            });
+        }
+
+        // Check if user is anonymous
+        const isAnonymous = !userId || userId === 'anonymous';
+
+        // Extract resource type from eventType (e.g., "user.login" -> "user")
+        const resourceType = eventType.split('.')[0] || 'system';
+
+        // Map eventType to action (e.g., "user.login" -> "user_login")
+        const action = eventType.replace(/\./g, '_');
+
+        // Determine status based on level
+        const status = level === 'error' || level === 'critical' ? 'failure' : 'success';
+
+        // Create audit log entry with proper schema mapping
+        const auditLog = await AuditLog.create({
+            // User information
+            userId: isAnonymous ? null : userId,
+            userEmail: metadata?.userEmail || metadata?.email || 'anonymous@system.local',
+            userRole: metadata?.userRole || metadata?.role || 'anonymous',
+            userIp: ipAddress || 'unknown',
+            userAgent: userAgent || 'unknown',
+            isAnonymous,
+
+            // Action details
+            action,
+            resourceType,
+            resourceId: metadata?.resourceId || null,
+            resourceName: metadata?.resourceName || null,
+
+            // Additional details
+            details: {
+                service,
+                eventType,
+                level,
+                description,
+                ...metadata
+            },
+
+            // Status and risk
+            status,
+            riskLevel: level === 'critical' ? 'critical' :
+                level === 'error' ? 'high' :
+                    level === 'warning' ? 'medium' : 'low',
+
+            // Request details
+            endpoint: metadata?.path || metadata?.endpoint || null,
+            httpMethod: metadata?.method || null,
+
+            // Timestamps
+            timestamp: timestamp || new Date(),
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'Audit log created successfully',
+            data: { id: auditLog._id }
+        });
+    } catch (error) {
+        console.error('Error creating audit log:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to create audit log',
+            error: error.message
+        });
+    }
+};
+
+
+/**
  * Get all audit logs with filtering and pagination
  */
 export const getAuditLogs = async (req, res) => {
@@ -31,7 +123,7 @@ export const getAuditLogs = async (req, res) => {
         };
 
         // Remove undefined filters
-        Object.keys(filters).forEach(key => 
+        Object.keys(filters).forEach(key =>
             filters[key] === undefined && delete filters[key]
         );
 
@@ -48,13 +140,13 @@ export const getAuditLogs = async (req, res) => {
                 .map(log => log.userId)
                 .filter(id => id)
             )];
-            
+
             if (userIds.length > 0) {
                 try {
                     const users = await AuthServiceClient.getUsers(userIds, token);
                     auditLogs.logs = auditLogs.logs.map(log => {
                         if (log.userId) {
-                            const user = users.find(u => 
+                            const user = users.find(u =>
                                 (u._id || u.id)?.toString() === log.userId?.toString()
                             );
                             if (user) {
@@ -94,7 +186,7 @@ export const getAuditLogs = async (req, res) => {
 export const getSuspiciousActivities = async (req, res) => {
     try {
         const { days = 7 } = req.query;
-        
+
         const suspiciousActivities = await AuditLog.getSuspiciousActivities(
             parseInt(days)
         );
@@ -106,13 +198,13 @@ export const getSuspiciousActivities = async (req, res) => {
                 .map(activity => activity.userId)
                 .filter(id => id)
             )];
-            
+
             if (userIds.length > 0) {
                 try {
                     const users = await AuthServiceClient.getUsers(userIds, token);
                     suspiciousActivities.forEach(activity => {
                         if (activity.userId) {
-                            const user = users.find(u => 
+                            const user = users.find(u =>
                                 (u._id || u.id)?.toString() === activity.userId?.toString()
                             );
                             if (user) {
@@ -151,7 +243,7 @@ export const getUserActivitySummary = async (req, res) => {
     try {
         const { userId } = req.params;
         const { days = 30 } = req.query;
-        
+
         const activitySummary = await AuditLog.getUserActivitySummary(
             userId,
             parseInt(days)
@@ -200,16 +292,16 @@ export const getAuditStats = async (req, res) => {
         auditLogs.logs.forEach(log => {
             // Count by action
             stats.byAction[log.action] = (stats.byAction[log.action] || 0) + 1;
-            
+
             // Count by risk level
             stats.byRiskLevel[log.riskLevel] = (stats.byRiskLevel[log.riskLevel] || 0) + 1;
-            
+
             // Count by status
             stats.byStatus[log.status] = (stats.byStatus[log.status] || 0) + 1;
-            
+
             // Count by user role
             stats.byUserRole[log.userRole] = (stats.byUserRole[log.userRole] || 0) + 1;
-            
+
             // Count suspicious and high-risk activities
             if (log.isSuspicious) stats.suspiciousActivities++;
             if (log.riskLevel === 'high') stats.highRiskActivities++;
@@ -258,7 +350,7 @@ export const exportAuditLogs = async (req, res) => {
         };
 
         // Remove undefined filters
-        Object.keys(filters).forEach(key => 
+        Object.keys(filters).forEach(key =>
             filters[key] === undefined && delete filters[key]
         );
 
@@ -301,7 +393,7 @@ export const exportAuditLogs = async (req, res) => {
         // Set response headers for CSV download
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader('Content-Disposition', `attachment; filename="audit_logs_${new Date().toISOString().split('T')[0]}.csv"`);
-        
+
         res.status(200).send(csvContent);
     } catch (error) {
         console.error('Error exporting audit logs:', error);
@@ -319,16 +411,16 @@ export const exportAuditLogs = async (req, res) => {
 export const cleanOldLogs = async (req, res) => {
     try {
         const { days = 2555 } = req.query; // Default retention period
-        
+
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - parseInt(days));
-        
+
         // Find logs older than cutoff date that are not compliance required
         const result = await AuditLog.deleteMany({
             createdAt: { $lt: cutoffDate },
             isComplianceRequired: false
         });
-        
+
         res.status(200).json({
             success: true,
             message: 'Old audit logs cleaned successfully',

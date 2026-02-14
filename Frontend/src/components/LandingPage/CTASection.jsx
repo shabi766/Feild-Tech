@@ -35,11 +35,11 @@ const useInView = (options) => {
 const AnimatedBackground = () => {
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800"></div>
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-400/30 to-purple-600/30 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-indigo-400/30 to-pink-600/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-purple-400/20 to-blue-600/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-      
+      <div className="absolute top-0 left-0 w-full h-full gradient-ocean"></div>
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-primary/30 to-accent/30 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-accent/30 to-pink-600/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-accent/20 to-primary/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+
       {/* Floating particles */}
       {[...Array(20)].map((_, i) => (
         <div
@@ -75,7 +75,7 @@ const App = () => {
     <section ref={ref} className="relative py-32 overflow-hidden">
       {/* Animated Background */}
       <AnimatedBackground />
-      
+
       {/* Custom CSS for Animations */}
       <style>
         {`
@@ -160,10 +160,10 @@ const App = () => {
             Ready to Get
             <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent"> Started?</span>
           </h2>
-          
+
           {/* Subtitle */}
           <p className={`text-xl md:text-2xl font-light mb-12 max-w-3xl mx-auto leading-relaxed ${inView ? 'animate-fadeInUp delay-100' : 'opacity-0'}`}>
-            Join thousands of recruiters and technicians transforming how work gets done. 
+            Join thousands of recruiters and technicians transforming how work gets done.
             Start your journey today and experience the future of hiring.
           </p>
 
@@ -181,8 +181,8 @@ const App = () => {
 
           {/* Action Buttons */}
           <div className={`flex flex-col sm:flex-row justify-center gap-6 mb-16 ${inView ? 'animate-slideInUp delay-300' : 'opacity-0'}`}>
-            <Link 
-              to="/role-selection" 
+            <Link
+              to="/role-selection"
               className="group relative bg-gradient-to-r from-white to-gray-100 text-blue-600 px-10 py-5 rounded-full font-bold text-lg shadow-2xl transform transition-all duration-300 hover:scale-105 animate-glow"
             >
               <span className="flex items-center justify-center">
@@ -192,9 +192,9 @@ const App = () => {
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </Link>
-            
-            <Link 
-              to="/role-selection" 
+
+            <Link
+              to="/role-selection"
               className="group glass-effect text-white px-10 py-5 rounded-full font-bold text-lg shadow-lg hover-lift"
             >
               <span className="flex items-center justify-center">
@@ -244,7 +244,7 @@ const App = () => {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                   <Star className="w-4 h-4 text-white" />
                 </div>
                 <div>
@@ -278,7 +278,7 @@ const App = () => {
                 Watch Demo
               </button>
             </div>
-            
+
             {/* Company Registration CTA */}
             <div className={`text-center ${inView ? 'animate-fadeInUp delay-700' : 'opacity-0'}`}>
               <p className="text-white/70 mb-4 text-base">
@@ -289,7 +289,7 @@ const App = () => {
                 Register Your Company
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
-              
+
 
             </div>
           </div>

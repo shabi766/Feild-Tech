@@ -36,10 +36,10 @@ const steps = {
       icon: <Briefcase size={32} className="text-white" />,
       title: "Post a Job",
       desc: "Create a detailed job post with requirements, budget, and timeline. Our AI helps optimize your listing for better visibility.",
-      iconBg: "bg-gradient-to-br from-blue-600 to-indigo-700",
+      iconBg: "gradient-ocean",
       time: "2-3 minutes",
       features: ["AI-optimized descriptions", "Smart budget suggestions", "Template library"],
-      gradient: "from-blue-500 to-indigo-600"
+      gradient: "from-primary to-primary-dark"
     },
     {
       icon: <UserPlus size={32} className="text-white" />,
@@ -54,10 +54,10 @@ const steps = {
       icon: <CheckCircle size={32} className="text-white" />,
       title: "Assign & Track",
       desc: "Hire the perfect match and monitor job progress in real-time. Communicate seamlessly and ensure quality delivery.",
-      iconBg: "bg-gradient-to-br from-purple-600 to-violet-700",
+      iconBg: "gradient-accent",
       time: "Instant",
       features: ["Real-time tracking", "Secure messaging", "Quality assurance"],
-      gradient: "from-purple-500 to-violet-600"
+      gradient: "from-accent to-accent-dark"
     },
   ],
   technicians: [
@@ -96,12 +96,12 @@ const MorphingBackground = () => {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {/* Morphing blob shapes */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-purple-400/10 to-pink-400/10 rounded-full blur-3xl animate-morph-slow"></div>
-      <div className="absolute bottom-0 right-0 w-80 h-80 bg-gradient-to-br from-blue-400/10 to-indigo-400/10 rounded-full blur-3xl animate-morph-delayed"></div>
+      <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-pink-400/10 to-rose-400/10 rounded-full blur-3xl animate-morph-slow"></div>
+      <div className="absolute bottom-0 right-0 w-80 h-80 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-3xl animate-morph-delayed"></div>
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-br from-green-400/5 to-teal-400/5 rounded-full blur-3xl animate-morph"></div>
-      
+
       {/* Floating geometric shapes */}
-      <div className="absolute top-20 right-20 w-16 h-16 border-2 border-purple-300/20 rotate-45 animate-spin-slow"></div>
+      <div className="absolute top-20 right-20 w-16 h-16 border-2 border-accent/20 rotate-45 animate-spin-slow"></div>
       <div className="absolute bottom-32 left-32 w-12 h-12 bg-blue-300/10 rounded-full animate-pulse-slow"></div>
       <div className="absolute top-1/3 right-1/3 w-8 h-8 border border-green-300/30 transform rotate-12 animate-bounce-slow"></div>
       <div className="absolute bottom-20 right-1/4 w-10 h-10 bg-pink-300/15 rounded-full animate-float"></div>
@@ -116,7 +116,7 @@ const FloatingParticles = () => {
       {[...Array(20)].map((_, i) => (
         <div
           key={i}
-          className="absolute w-1 h-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-particle"
+          className="absolute w-1 h-1 bg-gradient-to-r from-accent to-pink-400 rounded-full animate-particle"
           style={{
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
@@ -136,22 +136,22 @@ const AnimatedCounter = ({ end, duration = 2000, suffix = "" }) => {
 
   useEffect(() => {
     if (hasAnimated) return;
-    
+
     let startTime = null;
     const animate = (currentTime) => {
       if (!startTime) startTime = currentTime;
       const progress = Math.min((currentTime - startTime) / duration, 1);
       const currentCount = Math.floor(progress * end);
-      
+
       setCount(currentCount);
-      
+
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
         setHasAnimated(true);
       }
     };
-    
+
     requestAnimationFrame(animate);
   }, [end, duration, hasAnimated]);
 
@@ -170,7 +170,7 @@ const App = () => {
       {/* Creative Background Effects */}
       <MorphingBackground />
       <FloatingParticles />
-      
+
       {/* Custom CSS for Animations */}
       <style>
         {`
@@ -329,7 +329,7 @@ const App = () => {
           }
           
           .gradient-text {
-            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            background: linear-gradient(135deg, hsl(var(--accent)) 0%, #ec4899 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -340,16 +340,16 @@ const App = () => {
       <div className="container mx-auto px-6 relative z-10">
         {/* Header Section */}
         <div className="text-center mb-20">
-          <div className={`inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 font-semibold text-sm mb-6 ${inView ? 'animate-scaleIn' : 'opacity-0'}`}>
+          <div className={`inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-accent-light/20 to-pink-100 text-accent font-semibold text-sm mb-6 ${inView ? 'animate-scaleIn' : 'opacity-0'}`}>
             <Sparkles className="w-4 h-4 mr-2 animate-spin-slow" />
             Simple & Effective
           </div>
-          
+
           <h2 className={`text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 ${inView ? 'animate-slideInUp' : 'opacity-0'}`}>
             How It
             <span className="gradient-text"> Works</span>
           </h2>
-          
+
           <p className={`text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed ${inView ? 'animate-slideInUp delay-100' : 'opacity-0'}`}>
             Three simple steps to connect recruiters and technicians. Fast, secure, and efficient.
           </p>
@@ -359,25 +359,23 @@ const App = () => {
             <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-2 flex gap-2 shadow-xl border border-gray-200/50">
               <button
                 onClick={() => setActiveTab('recruiters')}
-                className={`px-8 py-4 rounded-xl font-semibold transition-all duration-500 flex items-center gap-2 relative overflow-hidden ${
-                  activeTab === 'recruiters'
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-105'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
+                className={`px-8 py-4 rounded-xl font-semibold transition-all duration-500 flex items-center gap-2 relative overflow-hidden ${activeTab === 'recruiters'
+                  ? 'gradient-ocean text-white shadow-lg transform scale-105'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
               >
                 <Briefcase className="w-4 h-4" />
                 For Recruiters
                 {activeTab === 'recruiters' && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-400 opacity-20 animate-pulse"></div>
+                  <div className="absolute inset-0 gradient-ocean opacity-20 animate-pulse"></div>
                 )}
               </button>
               <button
                 onClick={() => setActiveTab('technicians')}
-                className={`px-8 py-4 rounded-xl font-semibold transition-all duration-500 flex items-center gap-2 relative overflow-hidden ${
-                  activeTab === 'technicians'
-                    ? 'bg-gradient-to-r from-green-600 to-teal-600 text-white shadow-lg transform scale-105'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
+                className={`px-8 py-4 rounded-xl font-semibold transition-all duration-500 flex items-center gap-2 relative overflow-hidden ${activeTab === 'technicians'
+                  ? 'bg-gradient-to-r from-green-600 to-teal-600 text-white shadow-lg transform scale-105'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
               >
                 <UserPlus className="w-4 h-4" />
                 For Technicians
@@ -399,12 +397,12 @@ const App = () => {
               >
                 {/* Gradient Background on Hover */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${step.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
-                
+
                 {/* Step Number with Creative Design */}
-                <div className="absolute top-6 right-6 w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-sm font-bold text-white shadow-lg animate-glow">
+                <div className="absolute top-6 right-6 w-10 h-10 rounded-full gradient-accent flex items-center justify-center text-sm font-bold text-white shadow-lg animate-glow">
                   {idx + 1}
                 </div>
-                
+
                 {/* Icon Container with Creative Animation */}
                 <div className={`relative p-6 rounded-2xl ${step.iconBg} shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300 animate-glow`}>
                   <div className="animate-spin-slow">
@@ -418,15 +416,15 @@ const App = () => {
                   <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-gray-800 transition-colors">
                     {step.title}
                   </h3>
-                  
+
                   <p className="text-gray-600 leading-relaxed mb-6 group-hover:text-gray-700 transition-colors">
                     {step.desc}
                   </p>
 
                   {/* Time Badge with Creative Design */}
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="p-2 rounded-full bg-gradient-to-r from-purple-100 to-pink-100">
-                      <Clock className="w-4 h-4 text-purple-600" />
+                    <div className="p-2 rounded-full bg-gradient-to-r from-accent-light/20 to-pink-100">
+                      <Clock className="w-4 h-4 text-accent" />
                     </div>
                     <span className="text-sm font-semibold text-gray-500">{step.time}</span>
                   </div>
@@ -446,7 +444,7 @@ const App = () => {
                   {/* Arrow for next step with Creative Design */}
                   {idx < steps[activeTab].length - 1 && (
                     <div className="absolute -right-4 top-1/2 transform -translate-y-1/2 hidden lg:block">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center shadow-lg animate-pulse">
+                      <div className="w-10 h-10 rounded-full gradient-accent flex items-center justify-center shadow-lg animate-pulse">
                         <ArrowRight className="w-5 h-5 text-white" />
                       </div>
                     </div>
@@ -462,11 +460,11 @@ const App = () => {
 
         {/* Bottom Stats & CTA with Creative Design */}
         <div className={`text-center mt-20 ${inView ? 'animate-slideInUp delay-800' : 'opacity-0'}`}>
-          <div className="relative bg-gradient-to-r from-purple-50 to-pink-50 rounded-3xl p-12 max-w-4xl mx-auto shadow-xl border border-gray-200/50 overflow-hidden">
+          <div className="relative bg-gradient-to-r from-accent-light/10 to-pink-50 rounded-3xl p-12 max-w-4xl mx-auto shadow-xl border border-gray-200/50 overflow-hidden">
             {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-400/10 to-pink-400/10 rounded-full blur-2xl"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-blue-400/10 to-indigo-400/10 rounded-full blur-2xl"></div>
-            
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-accent/10 to-pink-400/10 rounded-full blur-2xl"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-2xl"></div>
+
             <div className="relative z-10">
               <div className="grid md:grid-cols-3 gap-8 mb-8">
                 <div className="text-center transform hover:scale-110 transition-transform duration-300">
@@ -486,23 +484,24 @@ const App = () => {
                   <div className="text-gray-600">Success Rate</div>
                 </div>
               </div>
-              
+
               <h3 className="text-3xl font-bold text-gray-900 mb-4">
                 Ready to Get Started?
               </h3>
               <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
                 Join thousands of users who have already transformed their hiring and job-finding experience with our platform.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="group relative bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 overflow-hidden">
+                <button className="group relative gradient-accent text-white px-8 py-4 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 overflow-hidden">
+
                   <span className="flex items-center justify-center relative z-10">
                     <Play className="w-5 h-5" />
                     Start Now
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-accent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </button>
-                <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-full font-semibold hover:border-purple-600 hover:text-purple-600 transition-all duration-300 transform hover:scale-105">
+                <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-full font-semibold hover:border-accent hover:text-accent transition-all duration-300 transform hover:scale-105">
                   Watch Demo
                 </button>
               </div>

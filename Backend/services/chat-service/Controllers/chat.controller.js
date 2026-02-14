@@ -13,10 +13,10 @@ export const createChat = async (req, res) => {
 
         let chat;
         if (groupName) {
-            chat = new Chat({ 
-                participants: [currentUserId, ...participantIds], 
-                isGroupChat: true, 
-                groupName 
+            chat = new Chat({
+                participants: [currentUserId, ...participantIds],
+                isGroupChat: true,
+                groupName
             });
         } else {
             chat = await Chat.findOne({
@@ -25,9 +25,9 @@ export const createChat = async (req, res) => {
             });
 
             if (!chat) {
-                chat = new Chat({ 
-                    participants: [currentUserId, userId], 
-                    isGroupChat: false 
+                chat = new Chat({
+                    participants: [currentUserId, userId],
+                    isGroupChat: false
                 });
             }
         }
@@ -75,7 +75,7 @@ export const sendMessage = async (req, res) => {
         // Fetch user data for the message
         const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
         let messageWithSender = lastMessage.toObject();
-        
+
         if (token) {
             try {
                 const sender = await AuthServiceClient.getUser(userId, token);
@@ -88,7 +88,7 @@ export const sendMessage = async (req, res) => {
         // Check if recipient is online and mark as read
         const io = req.app.get("io");
         const recipientId = chat.participants.find(p => p.toString() !== userId.toString());
-        
+
         if (recipientId && io) {
             const isRecipientOnline = io.sockets.adapter.rooms.has(recipientId.toString());
             if (isRecipientOnline) {
@@ -163,7 +163,7 @@ export const getChats = async (req, res) => {
         const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
         const chatsWithParticipants = await Promise.all(chats.map(async (chat) => {
             const chatObj = chat.toObject();
-            
+
             if (chat.participants && token) {
                 try {
                     const participants = await AuthServiceClient.getUsers(chat.participants, token);
@@ -172,7 +172,7 @@ export const getChats = async (req, res) => {
                     console.error(`Error fetching participants for chat ${chat._id}:`, error);
                 }
             }
-            
+
             return chatObj;
         }));
 
@@ -202,7 +202,7 @@ export const getMessages = async (req, res) => {
         const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
         const messagesWithSenders = await Promise.all(chat.messages.map(async (message) => {
             const msgObj = message.toObject();
-            
+
             if (message.sender && token) {
                 try {
                     const sender = await AuthServiceClient.getUser(message.sender, token);
@@ -211,7 +211,7 @@ export const getMessages = async (req, res) => {
                     console.error(`Error fetching sender for message ${message._id}:`, error);
                 }
             }
-            
+
             return msgObj;
         }));
 
@@ -243,7 +243,7 @@ export const searchChats = async (req, res) => {
         const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
         const chatsWithParticipants = await Promise.all(chats.map(async (chat) => {
             const chatObj = chat.toObject();
-            
+
             if (chat.participants && token) {
                 try {
                     const participants = await AuthServiceClient.getUsers(chat.participants, token);
@@ -252,7 +252,7 @@ export const searchChats = async (req, res) => {
                     console.error(`Error fetching participants:`, error);
                 }
             }
-            
+
             return chatObj;
         }));
 
@@ -378,7 +378,7 @@ export const getUnreadMessages = async (req, res) => {
             const unread = chat.messages.filter(
                 (msg) => !msg.isRead && msg.sender.toString() !== userId.toString()
             );
-            
+
             if (unread.length > 0) {
                 // Fetch sender data for unread messages
                 const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
@@ -405,6 +405,43 @@ export const getUnreadMessages = async (req, res) => {
         res.status(200).json({ success: true, unreadMessages });
     } catch (error) {
         console.error("Error fetching unread messages:", error);
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+};
+
+/**
+ * Get unread message count for a user
+ */
+export const getUnreadMessageCount = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const requestingUserId = req.user.userId || req.user._id;
+
+        // Users can only get their own unread count
+        if (userId !== requestingUserId.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: "You can only view your own unread message count"
+            });
+        }
+
+        const chats = await Chat.find({ participants: userId });
+
+        if (!chats || chats.length === 0) {
+            return res.json({ success: true, count: 0 });
+        }
+
+        let unreadCount = 0;
+        for (const chat of chats) {
+            const unread = chat.messages.filter(
+                (msg) => !msg.isRead && msg.sender.toString() !== userId.toString()
+            );
+            unreadCount += unread.length;
+        }
+
+        res.json({ success: true, count: unreadCount });
+    } catch (error) {
+        console.error("Error fetching unread message count:", error);
         res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 };

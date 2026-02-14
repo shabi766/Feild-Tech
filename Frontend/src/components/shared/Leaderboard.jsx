@@ -3,13 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar';
-import { 
-    Trophy, 
-    Medal, 
-    Star, 
-    TrendingUp, 
-    Users, 
-    Award, 
+import {
+    Trophy,
+    Medal,
+    Star,
+    TrendingUp,
+    Users,
+    Award,
     Filter,
     Search,
     ChevronLeft,
@@ -61,12 +61,12 @@ const Leaderboard = () => {
     const loadLeaderboardData = async () => {
         try {
             setLoading(true);
-            
+
             // Load global leaderboard
             const leaderboardResponse = await axios.get(
                 `${LEADERBOARD_API_END_POINT}/global?page=${currentPage}&limit=20&category=${selectedCategory}&sortBy=${sortBy}`
             );
-            
+
             if (leaderboardResponse.data.success) {
                 setLeaderboard(leaderboardResponse.data.leaderboard || []);
                 setTotalPages(leaderboardResponse.data.pagination?.totalPages || 1);
@@ -155,7 +155,7 @@ const Leaderboard = () => {
         <div className="space-y-6">
             {/* Header */}
             <div className="text-center">
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                     Technician Leaderboard
                 </h1>
                 <p className="text-gray-600 mt-2">Discover the top-performing technicians in our community</p>
@@ -204,7 +204,7 @@ const Leaderboard = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
                 >
-                    <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+                    <Card className="gradient-accent text-white">
                         <CardContent className="p-4">
                             <div className="flex items-center space-x-3">
                                 <Star className="w-8 h-8" />
@@ -423,11 +423,11 @@ const Leaderboard = () => {
                                 <ChevronLeft className="w-4 h-4" />
                                 Previous
                             </Button>
-                            
+
                             <span className="text-sm text-gray-600">
                                 Page {currentPage} of {totalPages}
                             </span>
-                            
+
                             <Button
                                 variant="outline"
                                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}

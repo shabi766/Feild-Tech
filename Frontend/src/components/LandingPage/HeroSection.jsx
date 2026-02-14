@@ -9,9 +9,9 @@ const MorphingShapes = () => {
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {/* Morphing blob shapes */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-morph"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/15 rounded-full blur-3xl animate-morph-delayed"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/15 rounded-full blur-3xl animate-morph-delayed"></div>
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-morph-slow"></div>
-      
+
       {/* Geometric shapes */}
       <div className="absolute top-20 right-20 w-16 h-16 border-2 border-white/20 rotate-45 animate-spin-slow"></div>
       <div className="absolute bottom-32 left-32 w-12 h-12 bg-white/10 rounded-full animate-pulse-slow"></div>
@@ -37,7 +37,7 @@ const ParticleSystem = () => {
           }}
         />
       ))}
-      
+
       {/* Larger floating elements */}
       {[...Array(8)].map((_, i) => (
         <div
@@ -59,7 +59,7 @@ const ParticleSystem = () => {
 const AnimatedText = ({ text, className, delay = 0 }) => {
   return (
     <div className={`overflow-hidden ${className}`}>
-      <div 
+      <div
         className="animate-text-reveal"
         style={{ animationDelay: `${delay}s` }}
       >
@@ -71,7 +71,7 @@ const AnimatedText = ({ text, className, delay = 0 }) => {
 
 const HeroSection = () => {
   const { t } = useTranslation();
-  
+
   const slides = [
     {
       image: '/h1.jpg',
@@ -331,7 +331,7 @@ const HeroSection = () => {
         }
         
         .gradient-text {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -362,14 +362,14 @@ const HeroSection = () => {
         </div>
 
         {/* Main Heading with text reveal */}
-        <AnimatedText 
+        <AnimatedText
           text={heading}
           className="text-5xl md:text-7xl font-extrabold leading-tight tracking-tight text-shadow mb-8"
           delay={0.2}
         />
-        
+
         {/* Subheading with staggered text reveal */}
-        <AnimatedText 
+        <AnimatedText
           text={subheading}
           className="text-xl md:text-2xl font-medium text-gray-200 text-shadow max-w-4xl leading-relaxed"
           delay={0.4}
@@ -380,27 +380,27 @@ const HeroSection = () => {
           {/* Main CTA */}
           <Link
             to="/role-selection"
-            className="group relative bg-gradient-to-r from-blue-600 to-purple-600 text-white px-12 py-6 rounded-full font-semibold text-lg shadow-2xl transform transition-all duration-500 hover:scale-110 overflow-hidden block text-center"
+            className="group relative gradient-ocean text-white px-12 py-6 rounded-full font-semibold text-lg shadow-2xl transform transition-all duration-500 hover:scale-110 overflow-hidden block text-center"
           >
             <span className="flex items-center justify-center relative z-10">
               {t('getStarted')}
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
             </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="absolute inset-0 gradient-accent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="absolute inset-0 bg-white/20 rounded-full scale-0 group-hover:scale-100 transition-transform duration-500"></div>
           </Link>
-          
-                        {/* Company Registration CTA */}
-              <Link
-                to="/company-registration"
-                className="group relative bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white px-8 py-4 rounded-full font-semibold text-base shadow-xl transform transition-all duration-500 hover:scale-105 hover:bg-white/20 overflow-hidden block text-center"
-              >
-                <span className="flex items-center justify-center relative z-10">
-                  <Building className="w-5 h-5 mr-2" />
-                  Register Your Company
-                </span>
-                <div className="absolute inset-0 bg-white/10 rounded-full scale-0 group-hover:scale-100 transition-transform duration-500"></div>
-              </Link>
+
+          {/* Company Registration CTA */}
+          <Link
+            to="/company-registration"
+            className="group relative bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white px-8 py-4 rounded-full font-semibold text-base shadow-xl transform transition-all duration-500 hover:scale-105 hover:bg-white/20 overflow-hidden block text-center"
+          >
+            <span className="flex items-center justify-center relative z-10">
+              <Building className="w-5 h-5 mr-2" />
+              Register Your Company
+            </span>
+            <div className="absolute inset-0 bg-white/10 rounded-full scale-0 group-hover:scale-100 transition-transform duration-500"></div>
+          </Link>
 
 
         </div>
@@ -444,11 +444,10 @@ const HeroSection = () => {
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-4 h-4 rounded-full transition-all duration-500 transform hover:scale-125 ${
-              index === currentSlide 
-                ? 'bg-gradient-to-r from-blue-400 to-purple-400 scale-125 shadow-lg' 
-                : 'bg-white/30 hover:bg-white/50'
-            }`}
+            className={`w-4 h-4 rounded-full transition-all duration-500 transform hover:scale-125 ${index === currentSlide
+              ? 'gradient-ocean scale-125 shadow-lg'
+              : 'bg-white/30 hover:bg-white/50'
+              }`}
             aria-label={`${t('goToSlide')} ${index + 1}`}
           />
         ))}

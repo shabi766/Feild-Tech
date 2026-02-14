@@ -17,7 +17,7 @@ const TechnicianNavbar = ({ user, setLogoutFlag }) => {
 
     const navItems = [
         { path: '/app/technician/browse', label: t('latestJobs'), icon: Briefcase },
-        { path: '/app/technician/Myjobs', label: t('myJobs'), icon: Clock }
+        { path: '/app/technician/my-jobs', label: t('myJobs'), icon: Clock }
     ];
 
     const fetchSuggestions = async (searchTerm) => {
@@ -56,7 +56,7 @@ const TechnicianNavbar = ({ user, setLogoutFlag }) => {
                 navigate(`/app/technician/browse`);
                 break;
             default:
-                console.error('Unknown suggestion type:', suggestion.type);
+                break;
         }
         setQuery('');
         setSuggestions();
@@ -75,7 +75,7 @@ const TechnicianNavbar = ({ user, setLogoutFlag }) => {
     }, []);
 
     return (
-        <NavbarBase 
+        <NavbarBase
             user={user}
             setLogoutFlag={setLogoutFlag}
             leftContent={
@@ -84,14 +84,13 @@ const TechnicianNavbar = ({ user, setLogoutFlag }) => {
                         const isActive = location.pathname === item.path;
                         const IconComponent = item.icon;
                         return (
-                            <Link 
+                            <Link
                                 key={item.path}
                                 to={item.path}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-300 group ${
-                                    isActive 
-                                        ? 'text-blue-600 bg-blue-50/80' 
-                                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50/60'
-                                }`}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-300 group ${isActive
+                                    ? 'text-blue-600 bg-blue-50/80'
+                                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50/60'
+                                    }`}
                             >
                                 <IconComponent size={16} className="transition-transform duration-300 group-hover:scale-110" />
                                 <span className="text-sm">{item.label}</span>
@@ -105,14 +104,14 @@ const TechnicianNavbar = ({ user, setLogoutFlag }) => {
                     <div className="relative w-full">
                         <input
                             type="text"
-                            className="w-full px-4 py-2 pl-10 pr-4 bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/60 focus:border-blue-500/60 transition-all duration-300 placeholder-gray-500 text-gray-700 shadow-sm hover:shadow-md text-sm"
+                            className="w-full px-4 py-2 pl-10 pr-4 bg-gray-50/80 border border-gray-200/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 focus:bg-white transition-all duration-300 placeholder-gray-400 text-gray-700 text-sm"
                             placeholder="Search jobs, clients, projects..."
                             value={query}
                             onChange={handleSearchChange}
                         />
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
                         {showSuggestions && suggestions && suggestions.length > 0 && (
-                            <div className="absolute mt-2 w-full bg-white/95 backdrop-blur-md border border-gray-200/60 rounded-xl shadow-xl max-h-64 overflow-auto z-50">
+                            <div className="absolute mt-2 w-full bg-white/95 backdrop-blur-md border border-gray-200/60 rounded-2xl shadow-2xl max-h-64 overflow-auto z-50">
                                 <ul className="py-2">
                                     {suggestions.map((suggestion, index) => (
                                         <li

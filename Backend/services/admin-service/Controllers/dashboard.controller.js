@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import { WorkorderServiceClient } from '../Services/workorder-client.service.js';
 import { AuthServiceClient } from '../Services/auth-client.service.js';
+import { ReviewServiceClient } from '../Services/review-client.service.js';
+import { ChatServiceClient } from '../Services/chat-client.service.js';
 import Company from '../Models/company.model.js';
 import Application from '../Models/application.model.js';
 
@@ -29,7 +31,7 @@ export const getCompanyDashboardStats = async (req, res) => {
         message: 'Company not found'
       });
     }
-    
+
     console.log('Company found:', company.name);
 
     // Get all jobs posted by this company from Workorder Service
@@ -38,7 +40,7 @@ export const getCompanyDashboardStats = async (req, res) => {
       token,
       { limit: 1000 }
     );
-    
+
     console.log('Jobs found for company:', jobs.length);
     console.log('Job statuses:', jobs.map(job => job.status));
 
@@ -46,7 +48,7 @@ export const getCompanyDashboardStats = async (req, res) => {
     const totalJobs = jobs.length;
     const activeJobs = jobs.filter(job => job.status === 'Active').length;
     const completedJobs = jobs.filter(job => job.status === 'Complete').length;
-    
+
     // Calculate total revenue (sum of all completed job salaries)
     const totalRevenue = jobs
       .filter(job => job.status === 'Complete')
@@ -63,15 +65,23 @@ export const getCompanyDashboardStats = async (req, res) => {
     });
 
     // Get active projects (jobs in progress)
-    const activeProjects = jobs.filter(job => 
+    const activeProjects = jobs.filter(job =>
       ['Active', 'In Progress', 'Assigned'].includes(job.status)
     ).length;
 
-    // Calculate average rating (placeholder for now)
-    const averageRating = 0; // TODO: Implement rating system
+    // Get company ratings from Review Service
+    let averageRating = 0;
+    let totalReviews = 0;
+    try {
+      const ratingData = await ReviewServiceClient.getEntityRating('company', companyId, token);
+      averageRating = Math.round(ratingData.averageRating * 10) / 10;
+      totalReviews = ratingData.totalRatings;
+    } catch (error) {
+      console.log('Could not fetch company ratings:', error.message);
+    }
 
     // Calculate project success rate
-    const projectSuccessRate = totalJobs > 0 
+    const projectSuccessRate = totalJobs > 0
       ? Math.round((completedJobs / totalJobs) * 100)
       : 0;
 
@@ -100,6 +110,7 @@ export const getCompanyDashboardStats = async (req, res) => {
       pendingApplications,
       activeProjects,
       averageRating,
+      totalReviews,
       projectSuccessRate
     };
 
@@ -144,7 +155,7 @@ export const getIndividualRecruiterDashboardStats = async (req, res) => {
     const totalJobs = jobs.length;
     const activeJobs = jobs.filter(job => job.status === 'Active').length;
     const completedJobs = jobs.filter(job => job.status === 'Complete').length;
-    
+
     // Calculate total earnings (sum of all completed job salaries)
     const totalEarnings = jobs
       .filter(job => job.status === 'Complete')
@@ -162,18 +173,31 @@ export const getIndividualRecruiterDashboardStats = async (req, res) => {
     });
 
     // Get unread messages (placeholder - would need chat system integration)
-    const unreadMessages = 0; // TODO: Implement when chat system is ready
+    let unreadMessages = 0;
+    try {
+      unreadMessages = await ChatServiceClient.getUnreadMessageCount(recruiterId, token);
+    } catch (error) {
+      console.log('Could not fetch unread messages:', error.message);
+    }
 
     // Get upcoming deadlines (jobs due within 7 days using startTime)
     const sevenDaysFromNow = new Date();
     sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
-    
-    const upcomingDeadlines = jobs.filter(job => 
+
+    const upcomingDeadlines = jobs.filter(job =>
       job.startTime && new Date(job.startTime) <= sevenDaysFromNow
     ).length;
 
-    // Calculate average rating (placeholder for now)
-    const averageRating = 0; // TODO: Implement rating system
+    // Get recruiter ratings from Review Service
+    let averageRating = 0;
+    let totalReviews = 0;
+    try {
+      const ratingData = await ReviewServiceClient.getEntityRating('company', recruiterId, token);
+      averageRating = Math.round(ratingData.averageRating * 10) / 10;
+      totalReviews = ratingData.totalRatings;
+    } catch (error) {
+      console.log('Could not fetch recruiter ratings:', error.message);
+    }
 
     // Total projects (same as total jobs for individual recruiters)
     const totalProjects = totalJobs;
@@ -202,7 +226,7 @@ export const getIndividualRecruiterDashboardStats = async (req, res) => {
     // Fetch applicant user data from Auth Service
     const applicantIds = recentApplicationsData.map(app => app.applicant);
     let applicants = [];
-    
+
     if (applicantIds.length > 0 && token) {
       try {
         applicants = await AuthServiceClient.getUsers(applicantIds, token);
@@ -213,10 +237,10 @@ export const getIndividualRecruiterDashboardStats = async (req, res) => {
 
     // Map applications with user data
     const recentApplications = recentApplicationsData.map(app => {
-      const applicant = applicants.find(u => 
+      const applicant = applicants.find(u =>
         (u._id || u.id)?.toString() === app.applicant?.toString()
       );
-      
+
       return {
         id: app._id,
         name: applicant?.fullname || 'Unknown',
@@ -238,6 +262,7 @@ export const getIndividualRecruiterDashboardStats = async (req, res) => {
       unreadMessages,
       upcomingDeadlines,
       averageRating,
+      totalReviews,
       totalProjects
     };
 

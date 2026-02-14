@@ -1,23 +1,23 @@
 import mongoose from "mongoose";
 
 const addressSchema = new mongoose.Schema(
-  {
-    addressLine1: { type: String },
-    addressLine2: { type: String },
-    city: { type: String },
-    state: { type: String },
-    country: { type: String },
-    postalCode: { type: String },
-  },
-  { _id: false }
+    {
+        addressLine1: { type: String },
+        addressLine2: { type: String },
+        city: { type: String },
+        state: { type: String },
+        country: { type: String },
+        postalCode: { type: String },
+    },
+    { _id: false }
 );
 
 const certificationSchema = new mongoose.Schema(
-  {
-    title: { type: String, required: true },
-    imageUrl: { type: String },
-  },
-  { _id: false }
+    {
+        title: { type: String, required: true },
+        imageUrl: { type: String },
+    },
+    { _id: false }
 );
 
 const userSchema = new mongoose.Schema(
@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema(
         },
         phoneNumber: {
             type: String,
-            required: true,
+            required: false,
         },
         password: {
             type: String,
@@ -41,10 +41,7 @@ const userSchema = new mongoose.Schema(
         },
         cnic: {
             type: String,
-            required: function() {
-                // CNIC is only required for individual users, not company recruiters or company owners
-                return this.role !== "Recruiter" && this.role !== "Company";
-            },
+            required: false,
         },
         role: {
             type: String,
@@ -91,7 +88,7 @@ const userSchema = new mongoose.Schema(
         achievements: [{ type: String }],
         certifications: [certificationSchema],
         courses: [{ type: String }],
-        
+
         // Social Links
         socialLinks: {
             linkedin: { type: String },
@@ -113,7 +110,7 @@ const userSchema = new mongoose.Schema(
         // Preferences
         darkMode: { type: Boolean, default: false },
         notifications: { type: Boolean, default: true },
-        
+
         // User Settings
         settings: {
             language: { type: String, enum: ['en', 'es', 'fr', 'de', 'it', 'pt', 'ar', 'zh', 'ja', 'ko', 'ur'], default: 'en' },
@@ -123,7 +120,7 @@ const userSchema = new mongoose.Schema(
             timeFormat: { type: String, enum: ['12h', '24h'], default: '12h' },
             weekStart: { type: String, enum: ['monday', 'sunday'], default: 'monday' }
         },
-        
+
         // Privacy Settings
         privacy: {
             profileVisibility: { type: String, enum: ['public', 'registered', 'private'], default: 'public' },
@@ -133,7 +130,7 @@ const userSchema = new mongoose.Schema(
             showOnlineStatus: { type: Boolean, default: true },
             showLastSeen: { type: Boolean, default: true }
         },
-        
+
         // Notification Preferences
         notificationPreferences: {
             emailNotifications: { type: Boolean, default: true },
@@ -145,7 +142,7 @@ const userSchema = new mongoose.Schema(
             projectUpdates: { type: Boolean, default: true },
             paymentNotifications: { type: Boolean, default: true }
         },
-        
+
         // Password Reset Fields
         resetPasswordOtp: { type: String },
         resetPasswordOtpExpiry: { type: Date },
@@ -159,7 +156,7 @@ const userSchema = new mongoose.Schema(
         },
         // Optional local wallet balance cache (authoritative balance is on Stripe)
         walletBalance: { type: Number, default: 0 },
-        
+
         // Rating and Review fields (for technicians)
         rating: {
             averageRating: { type: Number, default: 0, min: 0, max: 5 },
@@ -172,7 +169,7 @@ const userSchema = new mongoose.Schema(
                 oneStar: { type: Number, default: 0 }
             }
         },
-        
+
         // Performance metrics (for technicians)
         performance: {
             totalJobsCompleted: { type: Number, default: 0 },
@@ -183,7 +180,7 @@ const userSchema = new mongoose.Schema(
             cancelledJobs: { type: Number, default: 0 },
             averageResponseTime: { type: Number, default: 0 } // in minutes
         },
-        
+
         // Leaderboard ranking
         leaderboardRank: { type: Number, default: 0 },
         overallScore: { type: Number, default: 0 }

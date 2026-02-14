@@ -4,34 +4,23 @@ import cors from "cors";
 import dotenv from "dotenv";
 import http from "http";
 import { Server } from "socket.io";
-import walletRoute from "./Routes/wallet.route.js";
-import newWalletRoute from "./Routes/newWallet.route.js";
-import kycRoute from "./Routes/kyc.route.js";
-import walletPasscodeRoute from "./Routes/walletPasscode.route.js";
-import { stripeWebhook } from "./Controllers/wallet.controller.js";
 import connectDB from "./utils/db.js";
-import { User } from "./Models/user.model.js";
-import userRoute from "./Routes/user.route.js";
-import companyRoute from "./Routes/company.route.js";
-import companyRegistrationRoute from "./Routes/companyRegistration.route.js";
-import dashboardRoute from "./Routes/dashboard.route.js";
-import workorderRoute from "./Routes/workorder.route.js";
-import applicationRoute from "./Routes/application.route.js";
-import clientRoute from "./Routes/client.route.js";
-import projectRoute from "./Routes/project.route.js";
-import technicianRoute from "./Routes/technician.route.js";
-import searchRoute from "./Routes/search.route.js";
-import notificationRoute from "./Routes/notification.route.js";
-import chatRoute from "./Routes/chat.route.js";
-import administratorRoute from "./Routes/administrator.route.js";
-import auditRoute from "./Routes/audit.route.js";
-import reviewRoute from "./Routes/review.route.js";
-import leaderboardRoute from "./Routes/leaderboard.route.js";
-import teamRoute from "./Routes/team.route.js";
-import roleRoute from "./Routes/role.route.js";
-import companyUserRoute from "./Routes/companyUser.route.js";
-
+import { User } from "./services/auth-service/Models/user.model.js";
 import { auditMiddleware } from "./middleware/auditMiddleware.js";
+
+/**
+ * NOTE: This process now acts as the real‑time / Socket.io gateway only.
+ *
+ * All HTTP REST APIs are served by the dedicated microservices under
+ * `Backend/services/*` (auth, workorder, application, company, client, etc.)
+ * and are consumed via their own ports as configured in
+ * `Frontend/src/config/services.js` and `environment.js`.
+ *
+ * The legacy monolith HTTP routes that used to live in this file have been
+ * removed/commented out to avoid confusion. When adding new HTTP APIs,
+ * prefer creating or extending a microservice rather than mounting routes
+ * here.
+ */
 
 dotenv.config();
 
@@ -64,19 +53,23 @@ const io = new Server(server, {
 const onlineUsers = new Map();
 
 // Stripe webhook must be registered BEFORE express.json
-app.post("/api/v1/wallet/webhook", express.raw({ type: "application/json" }), stripeWebhook);
+// app.post("/api/v1/wallet/webhook", express.raw({ type: "application/json" }), stripeWebhook);
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors(corsOptions));
 
-// Apply audit middleware to all routes
-app.use(auditMiddleware);
+// Apply audit middleware to all routes (primarily for any health / status endpoints)
+// There are currently no REST routes mounted on this gateway; HTTP APIs live
+// in the individual microservices. This middleware remains ready for any
+// lightweight endpoints we may add in future.
+// app.use(auditMiddleware);
 
 // Connect to Database
 connectDB().catch(err => {
-    console.log('⚠️ Database connection failed, but server will continue running');
+  console.log('⚠️ Database connection failed, but server will continue running');
 });
 
 // Handle Socket.io Connections
@@ -114,7 +107,7 @@ io.on("connection", (socket) => {
   socket.on("audio_call_request", (data) => {
     const { recipientId, caller, recipient } = data;
     console.log(`📞 Audio call request from ${caller.fullname} to ${recipient.fullname}`);
-    
+
     // Emit to the recipient
     socket.to(recipientId).emit("audio_call_request", {
       caller,
@@ -126,7 +119,7 @@ io.on("connection", (socket) => {
   socket.on("audio_call_accepted", (data) => {
     const { callerId } = data;
     console.log(`✅ Audio call accepted by ${callerId}`);
-    
+
     // Emit to the caller
     socket.to(callerId).emit("audio_call_accepted", {
       caller: { _id: callerId }
@@ -136,7 +129,7 @@ io.on("connection", (socket) => {
   socket.on("audio_call_rejected", (data) => {
     const { callerId } = data;
     console.log(`❌ Audio call rejected by ${callerId}`);
-    
+
     // Emit to the caller
     socket.to(callerId).emit("audio_call_rejected", {
       caller: { _id: callerId }
@@ -146,7 +139,7 @@ io.on("connection", (socket) => {
   socket.on("audio_call_ended", (data) => {
     const { recipientId } = data;
     console.log(`📞 Audio call ended`);
-    
+
     // Emit to the recipient
     socket.to(recipientId).emit("audio_call_ended", {
       recipientId
@@ -156,7 +149,7 @@ io.on("connection", (socket) => {
   socket.on("audio_call_offer", (data) => {
     const { offer, recipientId } = data;
     console.log(`📤 Audio call offer sent to ${recipientId}`);
-    
+
     // Emit to the recipient
     socket.to(recipientId).emit("audio_call_offer", {
       offer,
@@ -167,7 +160,7 @@ io.on("connection", (socket) => {
   socket.on("audio_call_answer", (data) => {
     const { answer, recipientId } = data;
     console.log(`📤 Audio call answer sent to ${recipientId}`);
-    
+
     // Emit to the recipient
     socket.to(recipientId).emit("audio_call_answer", {
       answer,
@@ -178,7 +171,7 @@ io.on("connection", (socket) => {
   socket.on("audio_call_ice_candidate", (data) => {
     const { candidate, recipientId } = data;
     console.log(`🧊 ICE candidate sent to ${recipientId}`);
-    
+
     // Emit to the recipient
     socket.to(recipientId).emit("audio_call_ice_candidate", {
       candidate,
@@ -208,32 +201,6 @@ io.on("connection", (socket) => {
 
 // Make io accessible in routes
 app.set("io", io);
-
-// API Routes
-app.use("/api/v1/user", userRoute);
-app.use("/api/v1/company", companyRoute);
-app.use("/api/v1/company-registration", companyRegistrationRoute);
-app.use("/api/v1/dashboard", dashboardRoute);
-app.use("/api/v1/workorder", workorderRoute);
-app.use("/api/v1/application", applicationRoute);
-app.use("/api/v1/client", clientRoute);
-app.use("/api/v1/project", projectRoute);
-app.use("/api/v1/technician", technicianRoute);
-app.use("/api/v1/search", searchRoute);
-app.use("/api/v1/administration", administratorRoute);
-app.use("/api/v1/audit", auditRoute);
-app.use("/api/v1/notification", notificationRoute);
-app.use("/api/v1/chat", chatRoute);
-app.use("/api/v1/wallet", walletRoute);
-app.use("/api/v1/new-wallet", newWalletRoute);
-app.use("/api/v1/kyc", kycRoute);
-app.use("/api/v1/wallet-passcode", walletPasscodeRoute);
-app.use("/api/v1/review", reviewRoute);
-app.use("/api/v1/leaderboard", leaderboardRoute);
-app.use("/api/v1/teams", teamRoute);
-app.use("/api/v1/roles", roleRoute);
-app.use("/api/v1/company-users", companyUserRoute);
-
 
 // Export io for use in controllers
 export { io };

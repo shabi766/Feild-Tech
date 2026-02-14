@@ -2,6 +2,7 @@ import React, { createContext, useContext } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "@/redux/authSlice";
 import api from "@/lib/axios";
+import { API_ENDPOINTS } from "@/config/environment";
 
 export const UserContext = createContext();
 
@@ -12,11 +13,11 @@ export const UserProvider = ({ children }) => {
     // Function to validate if the current authentication is still valid
     const validateAuth = async () => {
         if (!user) return false;
-        
+
         try {
             // Use the same API endpoint as other components
-            const response = await api.get('/user/me');
-            
+            const response = await api.get(`${API_ENDPOINTS.USER}/me`);
+
             if (response.data.success) {
                 return true;
             } else {
@@ -35,7 +36,7 @@ export const UserProvider = ({ children }) => {
     const handleLogout = async () => {
         try {
             // Call backend logout endpoint to clear cookies
-            await api.get('/user/logout');
+            await api.get(`${API_ENDPOINTS.USER}/logout`);
         } catch (error) {
             console.error('Error calling logout endpoint:', error);
         } finally {

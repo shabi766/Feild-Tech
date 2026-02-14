@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_ENDPOINTS } from '@/config/environment';
 import PasscodeEntry from './PasscodeEntry';
-import { 
-    Wallet, 
-    CreditCard, 
-    ArrowUpDown, 
-    History, 
-    Plus, 
+import {
+    Wallet,
+    CreditCard,
+    ArrowUpDown,
+    History,
+    Plus,
     Minus,
     DollarSign,
     Building2,
@@ -34,7 +35,7 @@ const NewWalletDashboard = () => {
     const fetchWalletOverview = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('/api/v1/new-wallet/overview', {
+            const response = await axios.get(`${API_ENDPOINTS.WALLET}/admin/overview`, {
                 withCredentials: true
             });
             setWalletData(response.data.data);
@@ -54,7 +55,7 @@ const NewWalletDashboard = () => {
                 return;
             }
 
-            const response = await axios.post('/api/v1/new-wallet/topup', {
+            const response = await axios.post(`${API_ENDPOINTS.WALLET}/admin/topup`, {
                 walletId: selectedWallet,
                 amount: parseFloat(topUpAmount),
                 paymentMethod: 'ADMIN',
@@ -83,7 +84,7 @@ const NewWalletDashboard = () => {
                 return;
             }
 
-            const response = await axios.post('/api/v1/new-wallet/transfer', {
+            const response = await axios.post(`${API_ENDPOINTS.WALLET}/admin/transfer`, {
                 fromWalletId: selectedWallet,
                 toWalletId: targetWallet,
                 amount: parseFloat(transferAmount),
@@ -133,7 +134,7 @@ const NewWalletDashboard = () => {
     // If wallet access not granted, show passcode entry
     if (!walletAccessGranted) {
         return (
-            <PasscodeEntry 
+            <PasscodeEntry
                 onSuccess={() => setWalletAccessGranted(true)}
                 onCancel={() => setShowPasscodeModal(false)}
                 walletName="Digital Wallet"
@@ -244,10 +245,10 @@ const NewWalletDashboard = () => {
 
                     {/* Sub Wallet */}
                     {wallets.find(w => w.walletType === 'COMPANY_SUB') && (
-                        <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-purple-500">
+                        <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-primary">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center">
-                                    <Wallet className="h-8 w-8 text-purple-500 mr-3" />
+                                    <Wallet className="h-8 w-8 text-primary mr-3" />
                                     <div>
                                         <h3 className="text-lg font-semibold text-gray-900">
                                             Company Sub-Wallet
@@ -267,7 +268,7 @@ const NewWalletDashboard = () => {
                                         setSelectedWallet(wallets.find(w => w.walletType === 'COMPANY_SUB')?._id);
                                         setShowTransferModal(true);
                                     }}
-                                    className="flex-1 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors flex items-center justify-center"
+                                    className="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center"
                                 >
                                     <ArrowUpDown className="h-4 w-4 mr-2" />
                                     Transfer
@@ -297,10 +298,10 @@ const NewWalletDashboard = () => {
                         </button>
                         <button
                             onClick={fetchWalletOverview}
-                            className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-400 hover:bg-purple-50 transition-colors"
+                            className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-secondary transition-colors"
                         >
-                            <History className="h-6 w-6 text-purple-500 mr-2" />
-                            <span className="text-purple-600 font-medium">View History</span>
+                            <History className="h-6 w-6 text-primary mr-2" />
+                            <span className="text-primary font-medium">View History</span>
                         </button>
                     </div>
                 </div>
@@ -313,12 +314,11 @@ const NewWalletDashboard = () => {
                             {transactions.map((transaction) => (
                                 <div key={transaction._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                     <div className="flex items-center">
-                                        <div className={`w-3 h-3 rounded-full mr-3 ${
-                                            transaction.type === 'TOPUP' ? 'bg-green-500' :
-                                            transaction.type === 'TRANSFER' ? 'bg-blue-500' :
-                                            transaction.type === 'PAYMENT' ? 'bg-purple-500' :
-                                            'bg-gray-500'
-                                        }`} />
+                                        <div className={`w-3 h-3 rounded-full mr-3 ${transaction.type === 'TOPUP' ? 'bg-green-500' :
+                                                transaction.type === 'TRANSFER' ? 'bg-blue-500' :
+                                                    transaction.type === 'PAYMENT' ? 'bg-primary' :
+                                                        'bg-gray-500'
+                                            }`} />
                                         <div>
                                             <p className="font-medium text-gray-900">
                                                 {transaction.description || transaction.type}
@@ -329,9 +329,8 @@ const NewWalletDashboard = () => {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className={`font-semibold ${
-                                            transaction.type === 'TOPUP' ? 'text-green-600' : 'text-red-600'
-                                        }`}>
+                                        <p className={`font-semibold ${transaction.type === 'TOPUP' ? 'text-green-600' : 'text-red-600'
+                                            }`}>
                                             {transaction.type === 'TOPUP' ? '+' : '-'}${transaction.amount?.toFixed(2)}
                                         </p>
                                         <p className="text-sm text-gray-500 capitalize">

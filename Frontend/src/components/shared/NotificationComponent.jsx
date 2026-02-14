@@ -1,138 +1,122 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
-import { NOTIFICATION_API_END_POINT } from "../utils/constant";
-import useSocket from "../Hooks/useSocket";
-import { Card, CardHeader, CardContent } from "../ui/card";
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
-import { ScrollArea } from "../ui/scroll-area";
-import { motion } from "framer-motion";
-import { Bell, CheckCircle, XCircle, Eye, Info } from "lucide-react";
+import { NOTIFICATION_API_END_POINT } from "@/components/utils/constant";
+import useSocket from "@/components/Hooks/useSocket";
+import { motion, AnimatePresence } from "framer-motion";
+import { Check, Info, Bell, Trash2 } from "lucide-react";
 
 const NotificationComponent = () => {
   const [notifications, setNotifications, loading, error] = useSocket();
-  const [isOpen, setIsOpen] = useState(true);
-  const ref = useRef();
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (ref.current && !ref.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    console.log("Notifications state changed:", notifications);
-  }, [notifications]);
+    // Optional: log or handle updates
+    if (error) {
+      console.error("Socket error in NotificationComponent:", error);
+    }
+  }, [notifications, error]);
 
   const markAsRead = async (id) => {
     try {
       const res = await axios.patch(`${NOTIFICATION_API_END_POINT}/${id}/read`, {}, { withCredentials: true });
       if (res.data.success) {
-        setNotifications(prevNotifications =>
-          prevNotifications.map(notification =>
+        setNotifications(prev =>
+          prev.map(notification =>
             notification._id === id ? { ...notification, status: 'read' } : notification
           )
         );
-      } else {
-        console.error("Error marking as read:", res.data.message);
       }
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
   };
 
-  const clearNotifications = async () => {
+  const deleteNotification = async (id) => {
     try {
-      await axios.delete(`${NOTIFICATION_API_END_POINT}/clear`, { withCredentials: true });
-      setNotifications([]);
+      // optimistically update UI
+      setNotifications(prev => prev.filter(n => n._id !== id));
+      // You would typically call an API endpoint here to delete/dismiss
+      // await axios.delete(`${NOTIFICATION_API_END_POINT}/${id}`, ...);
     } catch (error) {
-      console.error("Error clearing notifications:", error);
+      console.error("Error deleting notification:", error);
     }
   };
 
-  const renderNotifications = useCallback(() => {
-    if (notifications === null) {
-      return <p className="text-center text-gray-500 animate-pulse py-4">Loading notifications...</p>;
-    }
-    if (notifications.length === 0) {
-      return <p className="text-center text-gray-500 py-4">No notifications available.</p>;
-    }
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mb-2"></div>
+        <p className="text-xs text-gray-500">Loading...</p>
+      </div>
+    );
+  }
 
-    return notifications.map(notification => (
-      <motion.li
-        key={notification._id}
-        initial={{ opacity: 0, y: 5 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-start p-3 hover:bg-indigo-50 transition duration-200 rounded-lg"
-      >
-        <div className="flex-1">
-          <p className={`text-sm ${notification.status === 'read' ? "text-gray-600" : "text-indigo-800 font-semibold"}`}>
-            {notification.message}
-          </p>
-          <small className="text-xs text-gray-500">{new Date(notification.timestamp).toLocaleString()}</small>
+  if (!notifications || notifications.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+        <div className="p-3 rounded-full bg-amber-50 mb-3 text-amber-500">
+          <Bell size={24} />
         </div>
-        <div className="ml-3 flex flex-col items-center space-y-2">
-          {notification.status !== 'read' && (
-            <Button
-              variant="ghost"
-              size="xs"
-              className="text-indigo-600 hover:bg-indigo-100 rounded-full p-1"
-              onClick={() => markAsRead(notification._id)}
-            >
-              <CheckCircle className="h-4 w-4" />
-            </Button>
-          )}
-          <Badge
-            variant={notification.status === 'read' ? "gray" : "indigo"}
-            size="xs"
-            className={`px-2 py-1 rounded-full ${notification.status === 'read' ? "bg-gray-200 text-gray-700" : "bg-indigo-200 text-indigo-800"}`}
-          >
-            {notification.status === 'read' ? <Eye className="h-3 w-3" /> : <Info className="h-3 w-3" />}
-          </Badge>
-        </div>
-      </motion.li>
-    ));
-  }, [notifications, markAsRead]);
-
-  if (!isOpen) return null;
+        <p className="text-gray-600 font-medium text-sm">No notifications</p>
+        <p className="text-gray-400 text-xs mt-1">We'll notify you when something happens.</p>
+      </div>
+    );
+  }
 
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      className="max-w-md mx-auto mt-8 p-4 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-lg rounded-lg border border-indigo-100 transition-all duration-300"
-    >
-      <Card className="rounded-lg overflow-hidden border-none">
-        <CardHeader className="flex justify-between items-center p-4 bg-indigo-100 border-b border-indigo-200">
-          <h2 className="text-lg font-semibold text-indigo-800 flex items-center gap-2">
-            <Bell className="h-5 w-5 text-indigo-800" /> Notifications
-          </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-gray-600 hover:text-indigo-800"
-            onClick={clearNotifications}
+    <ul className="space-y-1 p-2">
+      <AnimatePresence>
+        {notifications.map(notification => (
+          <motion.li
+            key={notification._id}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0, marginLeft: -20 }}
+            className={`relative group flex gap-3 p-3 rounded-xl transition-all duration-200 border-b border-gray-100 last:border-0 ${notification.status !== 'read' ? 'bg-blue-50/40 hover:bg-blue-50/80' : 'hover:bg-gray-50'
+              }`}
           >
-            Clear All
-          </Button>
-        </CardHeader>
+            {/* Icon Indicator */}
+            <div className={`mt-0.5 min-w-[32px] h-8 rounded-full flex items-center justify-center shrink-0 ${notification.status !== 'read' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
+              }`}>
+              <Info size={16} />
+            </div>
 
-        <CardContent className="p-0">
-          <ScrollArea className="h-64">
-            <ul className="space-y-2 p-2">
-              {renderNotifications()}
-            </ul>
-          </ScrollArea>
-        </CardContent>
-      </Card>
-    </motion.div>
+            <div className="flex-1 min-w-0">
+              <p className={`text-sm leading-snug ${notification.status !== 'read' ? 'font-semibold text-gray-900' : 'text-gray-600'}`}>
+                {notification.message}
+              </p>
+              <span className="text-[10px] text-gray-400 mt-1 block">
+                {new Date(notification.timestamp).toLocaleString()}
+              </span>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              {notification.status !== 'read' && (
+                <button
+                  onClick={() => markAsRead(notification._id)}
+                  className="p-1.5 rounded-full hover:bg-blue-100 text-blue-500 transition-colors"
+                  title="Mark as read"
+                >
+                  <Check size={14} />
+                </button>
+              )}
+              <button
+                onClick={() => deleteNotification(notification._id)}
+                className="p-1.5 rounded-full hover:bg-red-100 text-red-500 transition-colors"
+                title="Dismiss"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+
+            {/* Unread Dot */}
+            {notification.status !== 'read' && (
+              <div className="absolute top-4 right-2 w-2 h-2 bg-blue-500 rounded-full group-hover:opacity-0 transition-opacity"></div>
+            )}
+          </motion.li>
+        ))}
+      </AnimatePresence>
+    </ul>
   );
 };
 

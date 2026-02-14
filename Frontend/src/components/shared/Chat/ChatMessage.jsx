@@ -8,9 +8,9 @@ const ChatMessage = ({ message, isCurrentUser, recipient, onDelete }) => {
     const [showActions, setShowActions] = useState(false);
 
     const formatTime = (timestamp) => {
-        return new Date(timestamp).toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit' 
+        return new Date(timestamp).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
         });
     };
 
@@ -19,7 +19,7 @@ const ChatMessage = ({ message, isCurrentUser, recipient, onDelete }) => {
         const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
         const videoTypes = ['mp4', 'avi', 'mov', 'wmv'];
         const audioTypes = ['mp3', 'wav', 'ogg'];
-        
+
         if (imageTypes.includes(extension)) return 'image';
         if (videoTypes.includes(extension)) return 'video';
         if (audioTypes.includes(extension)) return 'audio';
@@ -29,14 +29,14 @@ const ChatMessage = ({ message, isCurrentUser, recipient, onDelete }) => {
     const renderMessageContent = () => {
         if (message.type === "file" && message.fileUrl) {
             const fileType = getFileType(message.fileUrl);
-            
+
             switch (fileType) {
                 case 'image':
                     return (
                         <div className="space-y-2">
-                            <img 
-                                src={message.fileUrl} 
-                                alt="Shared image" 
+                            <img
+                                src={message.fileUrl}
+                                alt="Shared image"
                                 className="max-w-full max-h-64 rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                                 onClick={() => window.open(message.fileUrl, '_blank')}
                             />
@@ -48,8 +48,8 @@ const ChatMessage = ({ message, isCurrentUser, recipient, onDelete }) => {
                 case 'video':
                     return (
                         <div className="space-y-2">
-                            <video 
-                                controls 
+                            <video
+                                controls
                                 className="max-w-full max-h-64 rounded-lg"
                                 src={message.fileUrl}
                             />
@@ -94,7 +94,7 @@ const ChatMessage = ({ message, isCurrentUser, recipient, onDelete }) => {
                     );
             }
         }
-        
+
         return <p className="break-words text-sm leading-relaxed">{message.content}</p>;
     };
 
@@ -113,23 +113,21 @@ const ChatMessage = ({ message, isCurrentUser, recipient, onDelete }) => {
                     </AvatarFallback>
                 </Avatar>
             )}
-            
+
             {/* Spacer for current user messages */}
             {isCurrentUser && <div className="w-8"></div>}
-            
+
             {/* Message bubble */}
             <div className={`group relative max-w-[70%] ${isCurrentUser ? 'order-2' : 'order-1'}`}>
-                <div className={`relative p-3 rounded-2xl ${
-                    isCurrentUser 
-                        ? 'bg-indigo-500 text-white rounded-br-md' 
+                <div className={`relative p-3 rounded-2xl ${isCurrentUser
+                        ? 'bg-primary text-white rounded-br-md'
                         : 'bg-white text-gray-900 rounded-bl-md shadow-sm border border-gray-200'
-                }`}>
-                    {renderMessageContent()}
-                    
-                    {/* Message time and status */}
-                    <div className={`flex items-center justify-end gap-1 mt-2 ${
-                        isCurrentUser ? 'text-indigo-100' : 'text-gray-400'
                     }`}>
+                    {renderMessageContent()}
+
+                    {/* Message time and status */}
+                    <div className={`flex items-center justify-end gap-1 mt-2 ${isCurrentUser ? 'text-primary-light' : 'text-gray-400'
+                        }`}>
                         <span className="text-xs">
                             {formatTime(message.createdAt)}
                         </span>
@@ -144,7 +142,7 @@ const ChatMessage = ({ message, isCurrentUser, recipient, onDelete }) => {
                         )}
                     </div>
                 </div>
-                
+
                 {/* Action buttons on hover */}
                 {isCurrentUser && showActions && (
                     <Button
@@ -160,7 +158,7 @@ const ChatMessage = ({ message, isCurrentUser, recipient, onDelete }) => {
                     </Button>
                 )}
             </div>
-            
+
             {/* Spacer for other user messages */}
             {!isCurrentUser && <div className="w-8"></div>}
         </div>

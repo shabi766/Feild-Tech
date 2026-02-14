@@ -1,4 +1,4 @@
-import AuditLog from '../Models/auditLog.model.js';
+import AuditLog from '../services/admin-service/Models/auditLog.model.js';
 
 class AuditService {
     /**
@@ -23,7 +23,7 @@ class AuditService {
             if (!data.userEmail) {
                 data.userEmail = data.isAnonymous ? 'anonymous@alphaplatform.com' : 'unknown@email.com';
             }
-            
+
             if (!data.userRole) {
                 data.userRole = data.isAnonymous ? 'anonymous' : 'unknown';
             }
@@ -32,7 +32,7 @@ class AuditService {
             if (!data.userIp) {
                 data.userIp = '127.0.0.1';
             }
-            
+
             if (!data.userAgent) {
                 data.userAgent = 'Unknown';
             }

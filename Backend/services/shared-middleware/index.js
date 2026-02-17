@@ -1,32 +1,31 @@
 import jwt from "jsonwebtoken";
 
 export const createAuthMiddleware = (options = {}) => {
-    const secretKey = options.secretKey || process.env.SECRET_KEY || "fallback_secret_key_for_dev_only";
-
-    if (!secretKey) {
-        throw new Error('SECRET_KEY is required for authentication middleware. Please set it in your environment variables.');
-    }
-
+    // Don't capture process.env.SECRET_KEY here because it might not be loaded yet due to ESM import hoisting
+    const explicitSecret = options.secretKey;
     const getUserById = options.getUserById; // Optional: for services that have User model
 
     return async (req, res, next) => {
         try {
+            // Resolve secret key at runtime to ensure dotenv has loaded
+            const secretKey = explicitSecret || process.env.SECRET_KEY || "fallback_secret_key_for_dev_only";
+
+            if (!process.env.SECRET_KEY && !explicitSecret) {
+                // Only warn once or in dev if needed, typically we just fallback
+                // console.warn('Warning: SECRET_KEY not found in env, using fallback.');
+            }
+
             // Check for token in cookies first, then in Authorization header
             let token = req.cookies?.token;
 
             if (!token) {
-                console.log(`[AuthMiddleware] No token in cookies. Cookies keys: ${Object.keys(req.cookies || {}).join(', ')}`);
                 const authHeader = req.headers.authorization;
                 if (authHeader && authHeader.startsWith('Bearer ')) {
                     token = authHeader.substring(7);
-                    console.log("[AuthMiddleware] Token found in Authorization header");
                 }
-            } else {
-                // console.log("[AuthMiddleware] Token found in cookies");
             }
 
             if (!token) {
-                console.log("[AuthMiddleware] User not authenticated - No token found");
                 return res.status(401).json({
                     message: "User not authenticated",
                     success: false
@@ -37,7 +36,6 @@ export const createAuthMiddleware = (options = {}) => {
             try {
                 decoded = jwt.verify(token, secretKey);
             } catch (jwtError) {
-                console.log(`[AuthMiddleware] Token verification failed: ${jwtError.message}`);
                 return res.status(401).json({
                     message: "Invalid or expired token",
                     success: false
@@ -49,7 +47,6 @@ export const createAuthMiddleware = (options = {}) => {
             if (getUserById) {
                 const user = await getUserById(decoded.userId);
                 if (!user) {
-                    console.log("[AuthMiddleware] User not found in DB");
                     return res.status(401).json({
                         message: "User not found",
                         success: false

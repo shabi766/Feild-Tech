@@ -32,8 +32,8 @@ app.use(cors(corsOptions));
 
 // Health check endpoint
 app.get("/health", (req, res) => {
-  res.status(200).json({ 
-    status: "healthy", 
+  res.status(200).json({
+    status: "healthy",
     service: "client-service",
     timestamp: new Date().toISOString()
   });
@@ -41,7 +41,7 @@ app.get("/health", (req, res) => {
 
 // Connect to Database
 connectDB().catch(err => {
-    console.log('⚠️ Database connection failed, but server will continue running');
+  console.log('⚠️ Database connection failed, but server will continue running');
 });
 
 // API Routes
@@ -52,3 +52,5 @@ app.use("/api/v1/project", projectRoute);
 app.listen(CLIENT_SERVICE_PORT, () => {
   console.log(`🏢 Client Service running at port ${CLIENT_SERVICE_PORT}`);
 });
+
+// Force restart for bucket update

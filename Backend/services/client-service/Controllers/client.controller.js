@@ -42,6 +42,13 @@ export const registerClient = async (req, res) => {
         }
     } catch (error) {
         console.error("Error registering client:", error);
+        if (error.code === 11000) {
+            return res.status(400).json({
+                message: "Client with this name already exists.",
+                success: false,
+                error: error.message,
+            });
+        }
         return res.status(500).json({
             message: "An error occurred while registering the client.",
             success: false,
@@ -54,14 +61,14 @@ export const getClient = async (req, res) => {
     try {
         const userId = req.user.userId || req.user._id;
         const clients = await Client.find({ userId });
-        
+
         if (!clients || clients.length === 0) {
             return res.status(404).json({
                 message: "Clients not found.",
                 success: false,
             });
         }
-        
+
         return res.status(200).json({
             clients,
             success: true,
@@ -115,7 +122,7 @@ export const updateClient = async (req, res) => {
         const file = req.file;
 
         const updateData = { name, description, website, location };
-        
+
         if (file) {
             updateData.logo = await uploadToS3(file, 'clients');
         }
@@ -128,7 +135,7 @@ export const updateClient = async (req, res) => {
                 success: false,
             });
         }
-        
+
         return res.status(200).json({
             message: "Client information updated.",
             client,
@@ -136,6 +143,13 @@ export const updateClient = async (req, res) => {
         });
     } catch (error) {
         console.error("Error updating client:", error);
+        if (error.code === 11000) {
+            return res.status(400).json({
+                message: "Client with this name already exists.",
+                success: false,
+                error: error.message,
+            });
+        }
         return res.status(500).json({
             message: "An error occurred while updating the client.",
             success: false,

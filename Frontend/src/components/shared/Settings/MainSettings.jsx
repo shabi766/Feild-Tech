@@ -1,38 +1,17 @@
 import React, { useState } from 'react';
 import { useSettings } from '@/context/SettingsContext';
 import { useSelector } from 'react-redux';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-  Settings,
-  Palette,
-  Globe,
-  Bell,
-  Shield,
-  User,
-  Lock,
-  Smartphone,
-  Mail,
-  Monitor,
-  Clock,
-  Calendar,
-  DollarSign,
-  Languages,
-  Sun,
-  Moon,
-  Trash2,
-  RotateCcw,
-  CheckCircle,
-  AlertCircle
+  Settings, User, Shield, Palette, Lock, Bell, MoreHorizontal,
+  RotateCcw, CheckCircle, AlertCircle, Moon, LogOut
 } from 'lucide-react';
-import { toast } from 'sonner';
-import { getAvailableLanguages, getAvailableCurrencies, getAvailableTimezones } from '@/utils/i18n';
 import { useTranslation } from '@/Hooks/useTranslation';
 
-// Import individual settings components
+// Individual components
 import ProfileSettings from './ProfileSettings';
 import AccountSettings from './AccountSettings';
 import PreferencesSettings from './PreferencesSettings';
@@ -40,35 +19,37 @@ import PrivacySettings from './PrivacySettings';
 import NotificationsSettings from './NotificationsSettings';
 import AdditionalSettings from './AdditionalSettings';
 
+const NAV_ITEMS = [
+  { id: 'profile', label: 'Profile', icon: User },
+  { id: 'account', label: 'Account', icon: Shield },
+  { id: 'preferences', label: 'Preferences', icon: Palette },
+  { id: 'privacy', label: 'Privacy', icon: Lock },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
+  { id: 'additional', label: 'More', icon: MoreHorizontal },
+];
+
 const MainSettings = () => {
   const { user } = useSelector((state) => state.auth);
   const settingsContext = useSettings();
   const { t, currentLanguage } = useTranslation();
+  
   const [activeTab, setActiveTab] = useState('profile');
   const [saveStatus, setSaveStatus] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [showPasswords, setShowPasswords] = useState({
-    password: false,
-    confirmPassword: false
-  });
+  const [showPasswords, setShowPasswords] = useState({ password: false, confirmPassword: false });
 
-  // Destructure with fallbacks to prevent errors
+  // Destructure safely
   const {
     settings = {},
-    updateSetting = () => { },
-    updateMultipleSettings = () => { },
-    resetToDefaults = () => { },
+    updateSetting = () => {},
+    resetToDefaults = () => {},
     isLoading = false
   } = settingsContext || {};
 
-  // Show loading if context is not yet available
   if (!settingsContext) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{t('loadingSettings', currentLanguage)}</p>
-        </div>
+      <div className="flex items-center justify-center min-h-[500px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -86,15 +67,6 @@ const MainSettings = () => {
     }
   };
 
-  const getInitials = (name) => {
-    return name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     updateSetting(name, type === "checkbox" ? checked : value);
@@ -104,10 +76,9 @@ const MainSettings = () => {
     e.preventDefault();
     setIsSaving(true);
     try {
-      // Handle form submission logic here
       setSaveStatus({ type: 'success', message: t('settingsUpdated', currentLanguage) });
       setTimeout(() => setSaveStatus(null), 3000);
-    } catch (error) {
+    } catch {
       setSaveStatus({ type: 'error', message: t('settingsUpdateFailed', currentLanguage) });
       setTimeout(() => setSaveStatus(null), 5000);
     } finally {
@@ -115,259 +86,130 @@ const MainSettings = () => {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (window.confirm('Are you sure you want to delete your account? This action is irreversible!')) {
-      try {
-        // Handle account deletion logic here
-        toast.success('Account deleted successfully!');
-      } catch (error) {
-        toast.error('Error deleting account.');
-      }
+  const getInitials = (name) => name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?';
+
+  // Helper renderers for active tab content
+  const renderContent = () => {
+    switch(activeTab) {
+      case 'profile':
+        return <ProfileSettings user={user} settings={settings} updateSetting={updateSetting} isLoading={isLoading} setSaveStatus={setSaveStatus} />;
+      case 'account':
+        return <AccountSettings user={user} settings={settings} showPasswords={showPasswords} handleChange={handleChange} handleSubmit={handleSubmit} handleDeleteAccount={()=>{}} togglePasswordVisibility={(field) => setShowPasswords(prev => ({...prev, [field]: !prev[field]}))} isSaving={isSaving} />;
+      case 'preferences':
+        return <PreferencesSettings settings={settings} updateSetting={updateSetting} isLoading={isLoading} setSaveStatus={setSaveStatus} />;
+      case 'privacy':
+        return <PrivacySettings settings={settings} handleSubmit={handleSubmit} handleNestedChange={handleChange} isSaving={isSaving} />;
+      case 'notifications':
+        return <NotificationsSettings settings={settings} handleSubmit={handleSubmit} handleNestedChange={handleChange} isSaving={isSaving} />;
+      case 'additional':
+        return <AdditionalSettings settings={settings} handleSubmit={handleSubmit} handleNestedChange={handleChange} isSaving={isSaving} />;
+      default:
+        return null;
     }
   };
 
-  const togglePasswordVisibility = (field) => {
-    setShowPasswords(prev => ({
-      ...prev,
-      [field]: !prev[field]
-    }));
-  };
-
-  const handleAddCertification = () => {
-    const newCertifications = [...(settings.certifications || []), ''];
-    updateSetting('certifications', newCertifications);
-  };
-
-  const handleRemoveCertification = (index) => {
-    const newCertifications = (settings.certifications || []).filter((_, i) => i !== index);
-    updateSetting('certifications', newCertifications);
-  };
-
-  const handleCertificationChange = (e, index) => {
-    const newCertifications = [...(settings.certifications || [])];
-    newCertifications[index] = e.target.value;
-    updateSetting('certifications', newCertifications);
-  };
-
-  const handleAddCourse = () => {
-    const newCourses = [...(settings.courses || []), ''];
-    updateSetting('courses', newCourses);
-  };
-
-  const handleRemoveCourse = (index) => {
-    const newCourses = (settings.courses || []).filter((_, i) => i !== index);
-    updateSetting('courses', newCourses);
-  };
-
-  const handleCourseChange = (e, index) => {
-    const newCourses = [...(settings.courses || [])];
-    newCourses[index] = e.target.value;
-    updateSetting('courses', newCourses);
-  };
-
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-3">
-          <div className="p-3 gradient-accent rounded-full">
-            <Settings className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-            {t('accountSettings', currentLanguage)}
-          </h1>
-        </div>
-        <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-          {t('accountSettingsDesc', currentLanguage)}
-        </p>
+    <div className="max-w-6xl mx-auto p-4 md:p-8 animate-fade-in w-full">
+      {/* Header section */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('accountSettings', currentLanguage) || 'Settings'}</h1>
+        <p className="text-muted-foreground mt-1 text-sm">Manage your account settings and preferences.</p>
       </div>
 
-      {/* Status Messages */}
+      {/* Global Status Toast (inline) */}
       {saveStatus && (
-        <div className={`p-4 rounded-xl flex items-center gap-3 shadow-lg ${saveStatus.type === 'success'
-            ? 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-800 border border-green-200'
-            : 'bg-gradient-to-r from-red-50 to-pink-50 text-red-800 border border-red-200'
-          }`}>
-          {saveStatus.type === 'success' ? (
-            <CheckCircle className="w-6 h-6 text-green-600" />
-          ) : (
-            <AlertCircle className="w-6 h-6 text-red-600" />
-          )}
-          <span className="font-medium text-lg">{saveStatus.message}</span>
-        </div>
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`mb-6 p-4 rounded-xl flex items-center gap-3 border ${
+            saveStatus.type === 'success' 
+              ? 'bg-green-50/50 text-green-800 border-green-200 dark:bg-green-900/20 dark:border-green-900 dark:text-green-300' 
+              : 'bg-red-50/50 text-red-800 border-red-200 dark:bg-red-900/20 dark:border-red-900 dark:text-red-300'
+          }`}
+        >
+          {saveStatus.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+          <span className="font-medium text-sm">{saveStatus.message}</span>
+        </motion.div>
       )}
 
-      {/* User Profile Summary */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-0 shadow-lg">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-6">
-            <Avatar className="w-20 h-20 ring-4 ring-white shadow-lg">
-              <AvatarImage src={user?.profile?.profilePhoto || '/default-avatar.png'} alt="Profile" />
-              <AvatarFallback className="text-2xl font-bold gradient-accent text-white">
-                {getInitials(user?.fullname || 'User')}
+      {/* Layout Grid: Sidebar Nav + Content */}
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
+        
+        {/* Left Sidebar (Nav & Mini Profile) */}
+        <div className="w-full lg:w-64 flex-shrink-0 space-y-6">
+          
+          {/* Mini Profile Card */}
+          <div className="card-elevated p-5 flex flex-col items-center text-center space-y-3">
+            <Avatar className="w-20 h-20 ring-4 ring-background shadow-sm">
+              <AvatarImage src={user?.profile?.profilePhoto} />
+              <AvatarFallback className="bg-primary/10 text-primary font-bold text-xl">
+                {getInitials(user?.fullname)}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">{user?.fullname}</h2>
-              <p className="text-gray-600 mb-3">{user?.email}</p>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                  {user?.role}
-                </Badge>
-                <Badge variant="outline" className="border-gray-300">
-                  {t ? t(settings.language, settings.language) : settings.language}
-                </Badge>
-                <Badge variant="outline" className="border-gray-300">
-                  {settings.currency}
-                </Badge>
-                {settings.darkMode && (
-                  <Badge variant="outline" className="border-gray-300">
-                    <Moon className="w-3 h-3 mr-1" />
-                    Dark Mode
-                  </Badge>
-                )}
-              </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <Button
-                onClick={handleResetSettings}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2 hover:bg-red-50 hover:text-red-600 hover:border-red-300"
-              >
-                <RotateCcw className="w-4 h-4" />
-                {t('resetAll', currentLanguage)}
-              </Button>
+            <div>
+              <h3 className="font-semibold text-foreground">{user?.fullname}</h3>
+              <p className="text-xs text-muted-foreground">{user?.email}</p>
+              <Badge variant="secondary" className="mt-2 text-[10px] uppercase font-semibold">{user?.role}</Badge>
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Settings Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 h-16 bg-gray-50 p-1 rounded-xl">
-          <TabsTrigger
-            value="profile"
-            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200"
+          {/* Navigation Links */}
+          <nav className="flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 scrollbar-thin">
+            {NAV_ITEMS.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`
+                    flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap
+                    ${isActive 
+                      ? 'bg-primary/10 text-primary' 
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    }
+                  `}
+                >
+                  <Icon size={18} className={isActive ? 'text-primary' : 'text-muted-foreground'} />
+                  {item.label}
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Reset Action */}
+          <div className="pt-2 border-t border-border hidden lg:block">
+            <button
+              onClick={handleResetSettings}
+              className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-destructive/80 hover:text-destructive hover:bg-destructive/10 rounded-xl transition-colors w-full"
+            >
+              <RotateCcw size={16} />
+              Reset to Defaults
+            </button>
+          </div>
+        </div>
+
+        {/* Right Content Area */}
+        <div className="flex-1 w-full min-w-0">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+            className="w-full space-y-6"
           >
-            <User className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('profile', currentLanguage)}</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="account"
-            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200"
-          >
-            <Shield className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('account', currentLanguage)}</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="preferences"
-            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200"
-          >
-            <Palette className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('preferences', currentLanguage)}</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="privacy"
-            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200"
-          >
-            <Lock className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('privacy', currentLanguage)}</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="notifications"
-            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200"
-          >
-            <Bell className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('notifications', currentLanguage)}</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="additional"
-            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200"
-          >
-            <Settings className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('more', currentLanguage)}</span>
-          </TabsTrigger>
-        </TabsList>
+            {renderContent()}
+          </motion.div>
+        </div>
+      </div>
 
-        {/* Profile Tab */}
-        <TabsContent value="profile" className="space-y-6">
-          <ProfileSettings
-            user={user}
-            settings={settings}
-            updateSetting={updateSetting}
-            isLoading={isLoading}
-            setSaveStatus={setSaveStatus}
-          />
-        </TabsContent>
-
-        {/* Account Tab */}
-        <TabsContent value="account" className="space-y-6">
-          <AccountSettings
-            user={user}
-            settings={settings}
-            showPasswords={showPasswords}
-            handleChange={handleChange}
-            handleSubmit={handleSubmit}
-            handleDeleteAccount={handleDeleteAccount}
-            togglePasswordVisibility={togglePasswordVisibility}
-            isSaving={isSaving}
-          />
-        </TabsContent>
-
-        {/* Preferences Tab */}
-        <TabsContent value="preferences" className="space-y-6">
-          <PreferencesSettings
-            settings={settings}
-            updateSetting={updateSetting}
-            isLoading={isLoading}
-            setSaveStatus={setSaveStatus}
-          />
-        </TabsContent>
-
-        {/* Privacy Tab */}
-        <TabsContent value="privacy" className="space-y-6">
-          <PrivacySettings
-            settings={settings}
-            handleSubmit={handleSubmit}
-            handleNestedChange={handleChange}
-            isSaving={isSaving}
-          />
-        </TabsContent>
-
-        {/* Notifications Tab */}
-        <TabsContent value="notifications" className="space-y-6">
-          <NotificationsSettings
-            settings={settings}
-            handleSubmit={handleSubmit}
-            handleNestedChange={handleChange}
-            isSaving={isSaving}
-          />
-        </TabsContent>
-
-        {/* Additional Tab */}
-        <TabsContent value="additional" className="space-y-6">
-          <AdditionalSettings
-            settings={settings}
-            handleSubmit={handleSubmit}
-            handleNestedChange={handleChange}
-            handleAddCertification={handleAddCertification}
-            handleRemoveCertification={handleRemoveCertification}
-            handleCertificationChange={handleCertificationChange}
-            handleAddCourse={handleAddCourse}
-            handleRemoveCourse={handleRemoveCourse}
-            handleCourseChange={handleCourseChange}
-            isSaving={isSaving}
-          />
-        </TabsContent>
-      </Tabs>
-
-      {/* Loading Overlay */}
+      {/* Full Screen Loading Overlay */}
       {isLoading && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-8 shadow-2xl flex flex-col items-center gap-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <p className="text-gray-600 font-medium">{t('updatingSettings', currentLanguage)}</p>
+        <div className="fixed inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-card border border-border rounded-xl p-6 shadow-xl flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <p className="text-foreground text-sm font-medium">{t('updatingSettings', currentLanguage) || 'Saving...'}</p>
           </div>
         </div>
       )}

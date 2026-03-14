@@ -21,7 +21,23 @@ export const updateSettings = async (req, res) => {
             notifications,
             privacy,
             notificationPreferences,
-            profilePhoto
+            profilePhoto,
+            // Individual privacy fields (if flattened)
+            profileVisibility,
+            showEmail,
+            showPhone,
+            allowMessages,
+            showOnlineStatus,
+            showLastSeen,
+            // Individual notification fields (if flattened)
+            emailNotifications,
+            pushNotifications,
+            smsNotifications,
+            marketingEmails,
+            jobAlerts,
+            messageAlerts,
+            projectUpdates,
+            paymentNotifications
         } = req.body;
 
         // Update basic settings
@@ -40,13 +56,32 @@ export const updateSettings = async (req, res) => {
         }
 
         // Update privacy settings
-        if (privacy) {
-            updateData.privacy = privacy;
+        if (privacy || profileVisibility || showEmail !== undefined || showPhone !== undefined || 
+            allowMessages !== undefined || showOnlineStatus !== undefined || showLastSeen !== undefined) {
+            
+            updateData.privacy = privacy || {};
+            if (profileVisibility) updateData.privacy.profileVisibility = profileVisibility;
+            if (showEmail !== undefined) updateData.privacy.showEmail = showEmail;
+            if (showPhone !== undefined) updateData.privacy.showPhone = showPhone;
+            if (allowMessages !== undefined) updateData.privacy.allowMessages = allowMessages;
+            if (showOnlineStatus !== undefined) updateData.privacy.showOnlineStatus = showOnlineStatus;
+            if (showLastSeen !== undefined) updateData.privacy.showLastSeen = showLastSeen;
         }
 
         // Update notification preferences
-        if (notificationPreferences) {
-            updateData.notificationPreferences = notificationPreferences;
+        if (notificationPreferences || emailNotifications !== undefined || pushNotifications !== undefined || 
+            smsNotifications !== undefined || marketingEmails !== undefined || jobAlerts !== undefined || 
+            messageAlerts !== undefined || projectUpdates !== undefined || paymentNotifications !== undefined) {
+            
+            updateData.notificationPreferences = notificationPreferences || {};
+            if (emailNotifications !== undefined) updateData.notificationPreferences.emailNotifications = emailNotifications;
+            if (pushNotifications !== undefined) updateData.notificationPreferences.pushNotifications = pushNotifications;
+            if (smsNotifications !== undefined) updateData.notificationPreferences.smsNotifications = smsNotifications;
+            if (marketingEmails !== undefined) updateData.notificationPreferences.marketingEmails = marketingEmails;
+            if (jobAlerts !== undefined) updateData.notificationPreferences.jobAlerts = jobAlerts;
+            if (messageAlerts !== undefined) updateData.notificationPreferences.messageAlerts = messageAlerts;
+            if (projectUpdates !== undefined) updateData.notificationPreferences.projectUpdates = projectUpdates;
+            if (paymentNotifications !== undefined) updateData.notificationPreferences.paymentNotifications = paymentNotifications;
         }
 
         // Update profile photo if provided

@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { USER_API_END_POINT } from '@/components/utils/constant';
 import { toast } from 'sonner';
+import { useTheme } from './ThemeContext';
 
 const SettingsContext = createContext();
 
@@ -99,14 +100,16 @@ export const SettingsProvider = ({ children }) => {
     }
   }, [user]);
 
-  // Apply dark mode to document
+  const { setDarkMode } = useTheme();
+
+  // Note: Document dark mode styling is managed entirely by ThemeContext.jsx 
+  // to avoid conflicts with local user preferences vs system preferences.
+  // We synchronize the settings dark mode with the theme context here.
   useEffect(() => {
-    if (settings.darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    if (user && settings.darkMode !== undefined) {
+      setDarkMode(settings.darkMode);
     }
-  }, [settings.darkMode]);
+  }, [settings.darkMode, setDarkMode, user]);
 
   // Handle language persistence and document updates
   useEffect(() => {

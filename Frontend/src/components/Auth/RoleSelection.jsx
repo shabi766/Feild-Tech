@@ -3,12 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { Users, Wrench, ArrowLeft, Building, User } from 'lucide-react';
+import posthog from 'posthog-js';
 
 const RoleSelection = () => {
   const navigate = useNavigate();
   const [showRecruiterOptions, setShowRecruiterOptions] = useState(false);
 
   const handleRoleSelect = (role, recruiterType = null) => {
+    posthog.capture('role_selection_click', { role, recruiterType });
     if (role === 'Recruiter' && !recruiterType) {
       setShowRecruiterOptions(true);
     } else {
@@ -22,6 +24,7 @@ const RoleSelection = () => {
   };
 
   const handleRecruiterTypeSelect = (recruiterType) => {
+    posthog.capture('recruiter_type_select', { recruiterType });
     navigate('/signup', { 
       state: { 
         selectedRole: 'Recruiter', 

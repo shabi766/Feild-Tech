@@ -74,6 +74,12 @@ import ServiceCoverage from "./components/LandingPage/info/ServiceCoverage";
 import Resources from "./components/LandingPage/info/Resources";
 import About from "./components/LandingPage/info/About";
 import UpdateProfilePage from "./components/user/UpdateProfilePage";
+import { usePageTracking } from "./hooks/usePageTracking";
+
+const PageTracker = () => {
+  usePageTracking();
+  return null;
+};
 
 // Initialize Stripe
 const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -182,6 +188,7 @@ const AuthenticatedLanding = () => {
 function App() {
   return (
     <BrowserRouter>
+      <PageTracker />
       <ErrorBoundary>
         <UserProvider>
           <ChatProvider>
@@ -278,6 +285,7 @@ function App() {
                       <Route index element={<AdministratorPanel />} />
                       <Route path="profile" element={<Profile />} />
                       <Route path="profile/update" element={<UpdateProfilePage />} />
+                      <Route path="settings" element={<MainSettings />} />
                     </Route>
 
                     {/* Legacy routes - redirect to appropriate role-based routes */}

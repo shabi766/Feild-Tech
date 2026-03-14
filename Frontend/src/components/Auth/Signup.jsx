@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { useDispatch, useSelector } from 'react-redux';
 import { setLoading } from '@/redux/authSlice';
 import { Loader2, Eye, EyeOff, User, Mail, Phone, CreditCard, Lock, ArrowLeft, Users, Wrench, AlertCircle } from 'lucide-react';
+import posthog from 'posthog-js';
 
 const Signup = () => {
     const [input, setInput] = useState({
@@ -116,6 +117,10 @@ const Signup = () => {
                 withCredentials: true,
             });
             if (res.data.success) {
+                posthog.capture('user_signed_up', { 
+                    role: input.role, 
+                    recruiterType: input.recruiterType 
+                });
                 navigate("/login");
                 toast.success(res.data.message);
             }

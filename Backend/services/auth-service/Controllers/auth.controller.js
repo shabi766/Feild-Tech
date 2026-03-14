@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { uploadToS3 } from "../utils/s3Upload.js";
 import nodemailer from 'nodemailer';
 import { getKafkaProducer, UserCreatedEvent, TOPICS } from '../../shared-kafka/index.js';
+import { captureEvent } from '../../../utils/posthog.js';
 
 export const register = async (req, res) => {
     try {
@@ -96,6 +97,13 @@ export const register = async (req, res) => {
             console.error('⚠️ Failed to publish user.created event:', kafkaError);
         }
 
+        // Track user registration in PostHog
+        captureEvent(newUser._id.toString(), 'user_registered', {
+            role: newUser.role,
+            recruiterType: newUser.recruiterType,
+            companyId: newUser.companyId
+        });
+
         return res.status(201).json({
             message: "Account created successfully.",
             success: true,
@@ -163,6 +171,12 @@ export const login = async (req, res) => {
             companyId: user.companyId, // Include company ID for company recruiters
             profile: user.profile,
         };
+
+        // Track user login in PostHog
+        captureEvent(user._id.toString(), 'user_logged_in', {
+            role: user.role,
+            recruiterType: user.recruiterType
+        });
 
         return res.status(200)
             .cookie("token", token, {

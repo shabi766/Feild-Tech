@@ -118,242 +118,167 @@ const ProfileSettings = ({ user, settings, updateSetting, isLoading, setSaveStat
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-4xl animate-fade-in">
+      
       {/* Profile Photo Section */}
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-accent/5">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3 text-xl">
-            <div className="p-2 gradient-accent rounded-lg">
-              <Camera className="w-5 h-5 text-white" />
-            </div>
-            Profile Photo
-          </CardTitle>
-          <CardDescription>
-            Update your profile picture to help others recognize you
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center gap-6">
-            <div className="relative">
-              <Avatar className="w-24 h-24 ring-4 ring-white shadow-lg">
-                <AvatarImage src={previewImage} alt="Profile" />
-                <AvatarFallback className="text-2xl font-bold gradient-accent text-white">
-                  {getInitials(profileData.fullname)}
-                </AvatarFallback>
-              </Avatar>
-              {profilePhoto && (
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  className="absolute -top-2 -right-2 w-6 h-6 p-0 rounded-full"
-                  onClick={removeProfilePhoto}
-                >
-                  <X className="w-3 h-3" />
-                </Button>
-              )}
-            </div>
-            <div className="flex-1 space-y-4">
-              <div>
-                <Label htmlFor="photo-upload" className="text-sm font-medium">
-                  Choose a new photo
-                </Label>
-                <div className="mt-2 flex items-center gap-3">
-                  <Input
-                    id="photo-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleProfilePhotoChange}
-                    className="flex-1"
+      <section>
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+            <Camera className="w-5 h-5 text-primary" /> Profile Photo
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">Update your profile picture to help others recognize you.</p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-6 card-glass rounded-2xl">
+          <div className="relative">
+            <Avatar className="w-24 h-24 ring-4 ring-background shadow-md">
+              <AvatarImage src={previewImage} alt="Profile" className="object-cover" />
+              <AvatarFallback className="text-2xl font-bold bg-primary/10 text-primary">
+                {getInitials(profileData.fullname)}
+              </AvatarFallback>
+            </Avatar>
+            {profilePhoto && (
+              <Button
+                size="icon"
+                variant="destructive"
+                className="absolute -top-2 -right-2 w-7 h-7 rounded-full shadow-lg"
+                onClick={removeProfilePhoto}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
+          
+          <div className="flex-1 w-full space-y-4">
+            <div>
+              <Label htmlFor="photo-upload" className="font-medium">Choose a new photo</Label>
+              <div className="mt-2 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <Input
+                  id="photo-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfilePhotoChange}
+                  className="w-full sm:max-w-[250px] cursor-pointer"
+                  disabled={isUploading}
+                />
+                {profilePhoto && (
+                  <Button
+                    onClick={handlePhotoUpload}
                     disabled={isUploading}
-                  />
-                  {profilePhoto && (
-                    <Button
-                      onClick={handlePhotoUpload}
-                      disabled={isUploading}
-                      className="bg-accent hover:bg-accent/90"
-                    >
-                      {isUploading ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      ) : (
-                        <Upload className="w-4 h-4" />
-                      )}
-                      Upload
-                    </Button>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Recommended: Square image, at least 200x200 pixels, max 5MB
-                </p>
+                    className="w-full sm:w-auto"
+                  >
+                    {isUploading ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                    ) : (
+                      <Upload className="w-4 h-4 mr-2" />
+                    )}
+                    Upload Photo
+                  </Button>
+                )}
               </div>
+              <p className="text-xs text-muted-foreground mt-2">Recommended: Square image, at least 200x200px, max 5MB</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
+
+      <Separator className="bg-border" />
 
       {/* Personal Information */}
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-blue-50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3 text-xl">
-            <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg">
-              <User className="w-5 h-5 text-white" />
-            </div>
-            Personal Information
-          </CardTitle>
-          <CardDescription>
-            Update your basic personal information
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <section>
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+            <User className="w-5 h-5 text-primary" /> Personal Information
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">Update your basic personal information.</p>
+        </div>
+
+        <div className="space-y-6 max-w-3xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="fullname" className="text-sm font-medium flex items-center gap-2">
-                <User className="w-4 h-4 text-gray-500" />
-                Full Name
-              </Label>
+              <Label htmlFor="fullname">Full Name</Label>
               <Input
                 id="fullname"
                 name="fullname"
                 value={profileData.fullname}
                 onChange={handleInputChange}
-                placeholder="Enter your full name"
-                className="w-full"
+                className="rounded-xl border-border bg-background focus-visible:ring-primary/20"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2">
-                <Mail className="w-4 h-4 text-gray-500" />
-                Email Address
-              </Label>
+              <Label htmlFor="email">Email Address</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
                 value={profileData.email}
                 onChange={handleInputChange}
-                placeholder="Enter your email"
-                className="w-full"
+                className="rounded-xl border-border bg-background focus-visible:ring-primary/20"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-sm font-medium flex items-center gap-2">
-                <Phone className="w-4 h-4 text-gray-500" />
-                Phone Number
-              </Label>
+              <Label htmlFor="phone">Phone Number</Label>
               <Input
                 id="phone"
                 name="phone"
                 value={profileData.phone}
                 onChange={handleInputChange}
-                placeholder="Enter your phone number"
-                className="w-full"
+                className="rounded-xl border-border bg-background focus-visible:ring-primary/20"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location" className="text-sm font-medium flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-gray-500" />
-                Location
-              </Label>
+              <Label htmlFor="location">Location</Label>
               <Input
                 id="location"
                 name="location"
                 value={profileData.location}
                 onChange={handleInputChange}
-                placeholder="Enter your location"
-                className="w-full"
+                className="rounded-xl border-border bg-background focus-visible:ring-primary/20"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="website" className="text-sm font-medium flex items-center gap-2">
-              <Globe className="w-4 h-4 text-gray-500" />
-              Website
-            </Label>
+            <Label htmlFor="website">Website</Label>
             <Input
               id="website"
               name="website"
               value={profileData.website}
               onChange={handleInputChange}
-              placeholder="Enter your website URL"
-              className="w-full"
+              className="rounded-xl border-border bg-background focus-visible:ring-primary/20"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="bio" className="text-sm font-medium">
-              Bio
-            </Label>
+            <Label htmlFor="bio">Bio</Label>
             <Textarea
               id="bio"
               name="bio"
               value={profileData.bio}
               onChange={handleInputChange}
-              placeholder="Tell us about yourself..."
               rows={4}
-              className="w-full"
+              className="rounded-xl border-border bg-background focus-visible:ring-primary/20 resize-none"
             />
-            <p className="text-xs text-gray-500">
-              Brief description about yourself, your skills, or what you're looking for
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Brief description about yourself, your skills, or what you're looking for.</p>
           </div>
 
-          <Separator />
-
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-4">
             <Button
               onClick={handleProfileUpdate}
               disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700 px-6"
+              size="lg"
+              className="px-8 rounded-xl shadow-md"
             >
               <Save className="w-4 h-4 mr-2" />
               Save Changes
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      {/* Current Profile Summary */}
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-green-50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3 text-xl">
-            <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-white" />
-            </div>
-            Current Profile Status
-          </CardTitle>
-          <CardDescription>
-            Overview of your current profile information
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-600">Profile Completion</Label>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min(100, (Object.values(profileData).filter(Boolean).length / Object.keys(profileData).length) * 100)}%` }}
-                  ></div>
-                </div>
-                <span className="text-sm font-medium text-gray-700">
-                  {Math.round((Object.values(profileData).filter(Boolean).length / Object.keys(profileData).length) * 100)}%
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-600">Profile Visibility</Label>
-              <Badge variant="outline" className="border-blue-300 text-blue-700">
-                {settings.privacy?.profileVisibility || 'Public'}
-              </Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

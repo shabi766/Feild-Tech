@@ -126,11 +126,13 @@ const NavbarBase = ({ children, leftContent, centerContent, user, setLogoutFlag 
         : '?';
 
     return (
-        <div className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
-                ? 'bg-white/90 backdrop-blur-md shadow-lg border-b border-gray-200/60'
-                : 'bg-white/95 backdrop-blur-sm shadow-sm'
-            }`}>
-            <div className='flex items-center justify-between h-16 w-full px-4 lg:px-6'>
+        <div className={`sticky top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
+                ? 'bg-white/92 backdrop-blur-md border-b border-gray-200/70'
+                : 'bg-white/96 backdrop-blur-sm border-b border-transparent'
+            }`}
+            style={{ boxShadow: isScrolled ? 'var(--shadow-navbar)' : 'none' }}
+        >
+            <div className='flex items-center justify-between h-14 w-full px-4 lg:px-6'>
                 {/* Left side - Logo and Navigation */}
                 <div className="flex items-center gap-4 lg:gap-6">
                     <Link to="/" className="flex items-center gap-2 group">
@@ -158,12 +160,12 @@ const NavbarBase = ({ children, leftContent, centerContent, user, setLogoutFlag 
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <button
-                                        className="relative p-2.5 rounded-xl transition-all duration-300 hover:bg-blue-50 group"
+                                        className="relative p-2 rounded-lg transition-all duration-200 hover:bg-muted group"
                                         title={t('unreadMessages')}
                                     >
                                         <MessageCircleMore
-                                            size={20}
-                                            className="text-gray-500 group-hover:text-blue-600 transition-colors duration-300"
+                                            size={19}
+                                            className="text-muted-foreground group-hover:text-foreground transition-colors duration-200"
                                             strokeWidth={1.8}
                                         />
                                         {unreadMessages.length > 0 && (
@@ -247,12 +249,12 @@ const NavbarBase = ({ children, leftContent, centerContent, user, setLogoutFlag 
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <button
-                                        className="relative p-2.5 rounded-xl transition-all duration-300 hover:bg-amber-50 group"
+                                        className="relative p-2 rounded-lg transition-all duration-200 hover:bg-muted group"
                                         title={t('notifications') || 'Notifications'}
                                     >
                                         <BellRing
-                                            size={20}
-                                            className="text-gray-500 group-hover:text-amber-600 transition-colors duration-300"
+                                            size={19}
+                                            className="text-muted-foreground group-hover:text-foreground transition-colors duration-200"
                                             strokeWidth={1.8}
                                         />
                                     </button>
@@ -356,9 +358,8 @@ const NavbarBase = ({ children, leftContent, centerContent, user, setLogoutFlag 
                                 {/* Menu items */}
                                 <div className='p-2'>
                                     <Link
-                                        to={user.role === 'Recruiter' ?
-                                            (user.recruiterType === 'Individual' || !user.companyId ?
-                                                '/app/recruiter/profile' : '/app/recruiter/profile') :
+                                        to={(user.role === 'Recruiter' || user.role === 'Company') ?
+                                            '/app/recruiter/profile' :
                                             user.role === 'Technician' ? '/app/technician/profile' :
                                                 user.role === 'Admin' ? '/app/administrator/profile' : '/profile'}
                                         className='flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-gray-50 transition-all duration-200 text-gray-700 hover:text-blue-600 group/item'
@@ -372,9 +373,8 @@ const NavbarBase = ({ children, leftContent, centerContent, user, setLogoutFlag 
                                         </div>
                                     </Link>
                                     <Link
-                                        to={user.role === 'Recruiter' ?
-                                            (user.recruiterType === 'Individual' || !user.companyId ?
-                                                '/app/recruiter/settings' : '/app/recruiter/settings') :
+                                        to={(user.role === 'Recruiter' || user.role === 'Company') ?
+                                            '/app/recruiter/settings' :
                                             user.role === 'Technician' ? '/app/technician/settings' :
                                                 user.role === 'Admin' ? '/app/administrator/settings' : '/settings'}
                                         className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-gray-50 transition-all duration-200 text-gray-700 hover:text-blue-600 group/item"

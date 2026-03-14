@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { useDispatch, useSelector } from 'react-redux';
 import { setLoading, setUser, setToken, setError } from '@/redux/authSlice';
 import { Loader2, Eye, EyeOff, Mail, Lock, ArrowLeft, AlertCircle } from 'lucide-react';
+import posthog from 'posthog-js';
 
 const Login = () => {
     const [input, setInput] = useState({
@@ -70,7 +71,12 @@ const Login = () => {
                 dispatch(setUser(res.data.user));
                 dispatch(setToken(res.data.token || res.data.user.token));
 
-
+                // Identify user in PostHog
+                posthog.identify(res.data.user._id, {
+                    email: res.data.user.email,
+                    role: res.data.user.role,
+                    fullname: res.data.user.fullname
+                });
 
                 // Add a small delay to ensure state is properly set
                 setTimeout(() => {

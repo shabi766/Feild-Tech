@@ -27,22 +27,24 @@ const AccountSettings = ({
     }));
   };
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            {t('securitySettings', currentLanguage)}
-          </CardTitle>
-          <CardDescription>
-            {t('securitySettingsDesc', currentLanguage)}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-8 max-w-4xl text-left animate-fade-in">
+      
+      {/* Security Settings */}
+      <section>
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+            <Shield className="w-5 h-5 text-primary" /> {t('securitySettings', currentLanguage) || 'Security'}
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {t('securitySettingsDesc', currentLanguage) || 'Update your password and secure your account.'}
+          </p>
+        </div>
+
+        <div className="card-elevated p-6 rounded-2xl max-w-2xl">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('newPassword', currentLanguage)}
+              <label className="block text-sm font-medium text-foreground mb-2">
+                {t('newPassword', currentLanguage) || 'New Password'}
               </label>
               <div className="relative">
                 <input
@@ -50,26 +52,22 @@ const AccountSettings = ({
                   name="password"
                   value={passwordData.password}
                   onChange={handlePasswordChange}
-                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder={t('enterNewPassword', currentLanguage)}
+                  className="w-full px-4 py-2.5 pr-10 border border-border bg-background rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  placeholder={t('enterNewPassword', currentLanguage) || 'Enter new password'}
                 />
                 <button
                   type="button"
                   onClick={() => togglePasswordVisibility('password')}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {showPasswords.password ? (
-                    <EyeOff className="h-4 w-4 text-gray-400" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-400" />
-                  )}
+                  {showPasswords.password ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('confirmNewPassword', currentLanguage)}
+              <label className="block text-sm font-medium text-foreground mb-2">
+                {t('confirmNewPassword', currentLanguage) || 'Confirm New Password'}
               </label>
               <div className="relative">
                 <input
@@ -77,128 +75,65 @@ const AccountSettings = ({
                   name="confirmPassword"
                   value={passwordData.confirmPassword}
                   onChange={handlePasswordChange}
-                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder={t('confirmNewPasswordPlaceholder', currentLanguage)}
+                  className="w-full px-4 py-2.5 pr-10 border border-border bg-background rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  placeholder={t('confirmNewPasswordPlaceholder', currentLanguage) || 'Confirm new password'}
                 />
                 <button
                   type="button"
                   onClick={() => togglePasswordVisibility('confirmPassword')}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {showPasswords.confirmPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-400" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-400" />
-                  )}
+                  {showPasswords.confirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
-            <Button type="submit" disabled={isSaving} className="w-full">
+            <Button type="submit" disabled={isSaving} className="rounded-xl px-6 w-auto">
               {isSaving ? (
                 <>
                   <Save className="w-4 h-4 mr-2 animate-spin" />
-                  {t('updating', currentLanguage)}
+                  {t('updating', currentLanguage) || 'Updating...'}
                 </>
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  {t('saveChanges', currentLanguage)}
+                  {t('saveChanges', currentLanguage) || 'Update Password'}
                 </>
               )}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="w-5 h-5" />
-            {t('regionalSettings', currentLanguage)}
-          </CardTitle>
-          <CardDescription>
-            {t('regionalSettingsDesc', currentLanguage)}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('language', currentLanguage)}
-                </label>
-                <select
-                  name="language"
-                  value={settings.language}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="en">English</option>
-                  <option value="es">Spanish</option>
-                  <option value="fr">French</option>
-                  <option value="ur">اردو (Urdu)</option>
-                  <option value="de">German</option>
-                  <option value="it">Italian</option>
-                  <option value="pt">Portuguese</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('timezone', currentLanguage)}
-                </label>
-                <select
-                  name="timezone"
-                  value={settings.timezone}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="UTC">UTC</option>
-                  <option value="America/New_York">Eastern Time</option>
-                  <option value="America/Chicago">Central Time</option>
-                  <option value="America/Denver">Mountain Time</option>
-                  <option value="America/Los_Angeles">Pacific Time</option>
-                  <option value="Europe/London">London</option>
-                  <option value="Europe/Paris">Paris</option>
-                  <option value="Asia/Tokyo">Tokyo</option>
-                </select>
-              </div>
-            </div>
+      {/* Danger Zone */}
+      <section>
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold text-destructive flex items-center gap-2">
+            <Trash2 className="w-5 h-5 text-destructive" /> {t('dangerZone', currentLanguage) || 'Danger Zone'}
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {t('dangerZoneDesc', currentLanguage) || 'Irreversible and destructive actions.'}
+          </p>
+        </div>
 
-            <Button type="submit" disabled={isSaving} className="w-full">
-              {t('saveRegionalSettings', currentLanguage)}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+        <div className="p-5 border border-destructive/20 rounded-2xl bg-destructive/5 max-w-2xl">
+          <h4 className="font-semibold text-destructive mb-2">
+            {t('deleteAccountTitle', currentLanguage) || 'Delete Account'}
+          </h4>
+          <p className="text-sm text-destructive/80 mb-5 leading-relaxed">
+            {t('deleteAccountWarning', currentLanguage) || 'Once you delete your account, there is no going back. Please be certain.'}
+          </p>
+          <Button
+            onClick={handleDeleteAccount}
+            variant="destructive"
+            className="rounded-xl"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            {t('deleteAccountButton', currentLanguage) || 'I understand, delete my account'}
+          </Button>
+        </div>
+      </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-red-600">
-            <Trash2 className="w-5 h-5" />
-            {t('dangerZone', currentLanguage)}
-          </CardTitle>
-          <CardDescription>
-            {t('dangerZoneDesc', currentLanguage)}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="p-4 border border-red-200 rounded-lg bg-red-50">
-            <h4 className="font-medium text-red-800 mb-2">{t('deleteAccountTitle', currentLanguage)}</h4>
-            <p className="text-sm text-red-600 mb-4">
-              {t('deleteAccountWarning', currentLanguage)}
-            </p>
-            <Button
-              onClick={handleDeleteAccount}
-              variant="destructive"
-              className="bg-red-600 hover:bg-red-700"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              {t('deleteAccountButton', currentLanguage)}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

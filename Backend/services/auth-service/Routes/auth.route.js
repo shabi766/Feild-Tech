@@ -47,6 +47,14 @@ router.route("/refresh-token").post(refreshToken);
 // User Profile & Settings
 router.route("/profile").put(isAuthenticated, validate(updateUserSchema), updateProfile);
 router.route("/profile/update").put(isAuthenticated, validate(updateUserSchema), updateProfile);
+router.route("/update-profile").put(isAuthenticated, validate(updateUserSchema), updateProfile);
+router.route("/update/:id").put(isAuthenticated, updateSettings);
+router.route("/update-settings").put(isAuthenticated, updateSettings);
+router.route("/settings").get(isAuthenticated, getUserSettings);
+router.route("/settings/reset").post(isAuthenticated, resetSettings);
+router.route("/update-profile-photo").put(isAuthenticated, singleUpload, updateProfilePhoto);
+router.route("/delete-account").delete(isAuthenticated, deleteUser);
+router.route("/delete-account/:id").delete(isAuthenticated, deleteUser);
 
 // Admin routes
 router.route("/users").get(isAuthenticated, getAllUsers);
